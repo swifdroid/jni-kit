@@ -1,42 +1,30 @@
 //
 //  JEnvironment.swift
-//  DroidFoundation
+//  JNIKit
 //
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
-import Foundation
-import CDroidJNI
+import Android
 
-public class JNI {
-    public let environment: JEnvironment
-    public let instance: JNINativeInterface
-    
-    public init (_ environment: JEnvironment, _ instance: JNINativeInterface) {
-        self.environment = environment
-        self.instance = instance
+/// A safe and ergonomic wrapper around `JNIEnv*` for use in Swift 6.1+
+///
+/// This wrapper hides unsafe pointer access and provides convenience methods for
+/// working with Java classes, methods, fields, strings, and objects.
+public struct JNI: @unchecked Sendable {
+    /// The raw JNI environment pointer (thread-local)
+    public let env: UnsafeMutablePointer<JNIEnv?>
+
+    public init(_ env: UnsafeMutablePointer<JNIEnv?>) {
+        self.env = env
     }
-    
-    public func getObjectClass(_ object: jobject?) -> jclass? {
-        instance.GetObjectClass(environment.pointer, object)
+
+    public init?(_ env: UnsafeMutablePointer<JNIEnv?>?) {
+        guard let env else { return nil }
+        self.env = env
     }
 }
 
-public class JEnvironment {
-    public let pointer: UnsafeMutablePointer<JNIEnv?>
-    private(set) lazy var jni: JNI = .init(self, pointer.pointee!.pointee)
-    
-    public init (_ pointer: UnsafeMutablePointer<JNIEnv?>) {
-        self.pointer = pointer
-    }
-    
-    public func findClass(_ classPath: String) -> JClassReference? {
-        let group = DispatchGroup()
-        group.enter()
-        var _classReference: jclass?
-        classPath.withCString { cClassPath -> Void in
-            _classReference = self.findClass(cClassPath)
-            group.leave()
         }
         group.wait()
         guard let classRef = _classReference else { return nil }
