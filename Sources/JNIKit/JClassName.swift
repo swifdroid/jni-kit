@@ -1,5 +1,5 @@
 //
-//  AndroidClassName.swift
+//  JClassName.swift
 //  JNIKit
 //
 //  Created by Mihael Isaev on 13.01.2022.
@@ -8,9 +8,9 @@
 /// A model for constructing Java class names in JNI-compatible format.
 ///
 /// Supports slash-separated (`/`) names for packages and dollar-separated (`$`) inner classes.
-public class AndroidClassName: @unchecked Sendable, ExpressibleByStringLiteral {
+public class JClassName: @unchecked Sendable, ExpressibleByStringLiteral {
     /// Parent class or package (can be nil for root)
-    public let parent: AndroidClassName?
+    public let parent: JClassName?
 
     /// Current class segment (e.g. `"Build"` or `"LinearLayout"`)
     public let name: String
@@ -30,7 +30,7 @@ public class AndroidClassName: @unchecked Sendable, ExpressibleByStringLiteral {
     }
 
     /// Initialize from a parent and class segment, specifying whether it's an inner class.
-    public init(parent: AndroidClassName, name: String, isInnerClass: Bool = false) {
+    public init(parent: JClassName, name: String, isInnerClass: Bool = false) {
         self.parent = parent
         self.name = name
         self.isInnerClass = isInnerClass
@@ -39,12 +39,12 @@ public class AndroidClassName: @unchecked Sendable, ExpressibleByStringLiteral {
     }
 }
 
-extension AndroidClassName: Hashable, Equatable {
+extension JClassName: Hashable, Equatable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(path)
     }
 
-    public static func == (lhs: AndroidClassName, rhs: AndroidClassName) -> Bool {
+    public static func == (lhs: JClassName, rhs: JClassName) -> Bool {
         return lhs.path == rhs.path
     }
 }
