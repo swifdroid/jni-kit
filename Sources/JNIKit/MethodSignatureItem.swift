@@ -1,72 +1,67 @@
 //
 //  MethodSignatureItem.swift
-//  DroidFoundation
+//  JNIKit
 //
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
-import CDroidJNI
+/// Represents a single type within a JNI method signature, such as `I`, `Ljava/lang/String;`, or `[D`.
+public struct MethodSignatureItem: Sendable {
+    /// The JNI type code prefix, such as `I`, `L`, `[L`, etc.
+    private let typeCode: TypeCode
 
-public class MethodSignatureItem {
-    private let key: String
-    private let names: [AndroidClassName]
+    /// The full class name path for object types, slash-separated.
     public let className: String
-    private let semicolon: Bool
+
+    /// Full signature fragment (e.g., `I`, `Ljava/lang/String;`, `[I`)
     public let signature: String
-    
-    required public init (_ key: String, _ names: [AndroidClassName], semicolon: Bool = false) {
-        self.key = key
-        self.names = names
-        if names.count > 0 {
-            self.className = names.path + (semicolon ? ";" : "")
-        } else {
-            self.className = ""
-        }
-        self.semicolon = semicolon
-        self.signature = key +  className
+
+    /// Initialize a custom signature item.
+    /// - Parameters:
+    ///   - typeCode: Type prefix, e.g. `"L"` for object, `"[I"` for array of ints, `"I"` for int.
+    ///   - names: For object types, the full `JClassName` path.
+    ///   - semicolon: Whether to end the object type with `;`
+    public init(_ typeCode: TypeCode, _ name: JClassName? = nil) {
+        let needsSemicolon = typeCode == .object || typeCode == .objects
+        self.typeCode = typeCode
+        self.className = (name?.path ?? "") + (needsSemicolon ? ";" : "")
+        self.signature = typeCode.rawValue + self.className
     }
 
-    public static func boolean(array: Bool = false) -> Self {
-        .init("\(array ? "[" : "")Z", [])
-    }
+    // MARK: - Primitive Types
 
-    public static func byte(array: Bool = false) -> Self {
-        .init("\(array ? "[" : "")B", [])
-    }
+    /// Represents JNI type `V` (void)
+    public static var void: Self { .init(.void) }
 
-    public static func char(array: Bool = false) -> Self {
-        .init("\(array ? "[" : "")C", [])
-    }
+    /// JNI primitives
+    public static var boolean: Self { .init(.boolean) }
+    public static var byte: Self    { .init(.byte) }
+    public static var char: Self    { .init(.char) }
+    public static var short: Self   { .init(.short) }
+    public static var int: Self     { .init(.int) }
+    public static var long: Self    { .init(.long) }
+    public static var float: Self   { .init(.float) }
+    public static var double: Self  { .init(.double) }
 
-    public static func short(array: Bool = false) -> Self {
-        .init("\(array ? "[" : "")S", [])
-    }
+    // MARK: - Primitive Arrays
 
-    public static func int(array: Bool = false) -> Self {
-        .init("\(array ? "[" : "")I", [])
-    }
+    /// Arrays of primitives
+    public static var booleans: Self { .init(.booleans) }
+    public static var bytes: Self    { .init(.bytes) }
+    public static var chars: Self    { .init(.chars) }
+    public static var shorts: Self   { .init(.shorts) }
+    public static var ints: Self     { .init(.ints) }
+    public static var longs: Self    { .init(.longs) }
+    public static var floats: Self   { .init(.floats) }
+    public static var doubles: Self  { .init(.doubles) }
 
-    public static func long(array: Bool = false) -> Self {
-        .init("\(array ? "[" : "")J", [])
-    }
+    // MARK: - Object types
 
-    public static func float(array: Bool = false) -> Self {
-        .init("\(array ? "[" : "")F", [])
-    }
-
-    public static func double(array: Bool = false) -> Self {
-        .init("\(array ? "[" : "")D", [])
-    }
-
-    public static func void() -> Self {
-        .init("V", [])
-    }
-
-    public static func object(array: Bool = false, _ classes: AndroidClassName...) -> Self {
-        .init("\(array ? "[" : "")L", classes, semicolon: true)
-    }
-    
-    public static func object(array: Bool = false, _ classes: [AndroidClassName]) -> Self {
-        .init("\(array ? "[" : "")L", classes, semicolon: true)
+    /// Create a signature for an object (class) type.
+    /// - Parameters:
+    ///   - array: Whether this is an array of objects
+    ///   - classes: One or more `JClassName` parts forming the full name
+    public static func object(array: Bool = false, _ clazz: JClassName) -> Self {
+        .init(array ? .objects : .object, clazz)
     }
 }
