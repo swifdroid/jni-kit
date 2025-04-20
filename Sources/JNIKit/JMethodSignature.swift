@@ -23,4 +23,16 @@ public struct JMethodSignature: Sendable {
     public init(_ args: JSignatureItem..., returning: JSignatureItem) {
         self.init(args, returning: returning)
     }
+
+    // MARK: - Returning conveniences
+
+    /// Convenience if method have no arguments
+    public static func returning(_ item: JSignatureItem) -> Self {
+        .init(returning: item)
+    }
+
+    /// Convenience if method have no arguments
+    public static func returning(_ typeCode: TypeCode, _ name: JClassName? = nil) -> Self {
+        .init(returning: JSignatureItem(typeCode, name))
+    }
 }
