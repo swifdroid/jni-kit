@@ -1,5 +1,5 @@
 //
-//  MethodSignature.swift
+//  JMethodSignature.swift
 //  JNIKit
 //
 //  Created by Mihael Isaev on 13.01.2022.
@@ -7,7 +7,7 @@
 
 /// Represents a full JNI method signature, such as `(Ljava/lang/String;)I`.
 /// Built from a list of parameter types and a return type using `JSignatureItem`.
-public struct MethodSignature: Sendable {
+public struct JMethodSignature: Sendable {
     /// The complete JNI signature string (e.g., `(I)V`)
     public let signature: String
 
@@ -22,6 +22,5 @@ public struct MethodSignature: Sendable {
     /// Variadic version of init
     public init(_ args: JSignatureItem..., returning: JSignatureItem) {
         self.init(args, returning: returning)
-    }
     }
 }
