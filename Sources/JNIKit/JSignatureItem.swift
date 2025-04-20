@@ -65,3 +65,24 @@ public struct JSignatureItem: Sendable {
         .init(array ? .objects : .object, clazz)
     }
 }
+
+extension JSignatureItem: JTypeSignature {
+    /// Indicates whether the signature item represents an object or object array type.
+    ///
+    /// This returns `true` if the `typeCode` corresponds to either:
+    /// - `.object` → a single object reference (e.g., `Ljava/lang/String;`)
+    /// - `.objects` → an array of objects (e.g., `[Ljava/lang/String;`)
+    ///
+    /// This is useful for logic that must distinguish between primitive types and reference types,
+    /// such as deciding whether a trailing `;` is required or whether class names apply.
+    ///
+    /// Example:
+    /// ```swift
+    /// if item.isObject {
+    ///     print("This is a reference type")
+    /// }
+    /// ```
+    public var isObject: Bool {
+        [.object, .objects].contains(typeCode)
+    }
+}
