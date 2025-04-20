@@ -5,22 +5,36 @@
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
-/// Represents a single type within a JNI method signature, such as `I`, `Ljava/lang/String;`, or `[D`.
+/// Represents a single type fragment within a JNI method or field signature,
+/// such as `"I"`, `"Ljava/lang/String;"`, or `"[D"`.
+///
+/// This structure enables type-safe construction of JNI signatures used with
+/// `GetMethodID`, `GetFieldID`, or any method signature-based JNI call.
+///
+/// Example usage:
+/// ```swift
+/// let returnType: JSignatureItem = .object("java/lang/String")
+/// let paramType: JSignatureItem = .int
+/// let sig = MethodSignature([paramType], returning: returnType) // => "(I)Ljava/lang/String;"
+/// ```
 public struct JSignatureItem: Sendable {
-    /// The JNI type code prefix, such as `I`, `L`, `[L`, etc.
+    /// The raw JNI type code prefix, such as `"I"` for `int`, `"L"` for object, or `"[I"` for array of ints.
     private let typeCode: TypeCode
 
-    /// The full class name path for object types, slash-separated.
+    /// The class name for object types, in slash-separated format (e.g., `"java/lang/String"`),
+    /// or empty for primitive types.
     public let className: String
 
-    /// Full signature fragment (e.g., `I`, `Ljava/lang/String;`, `[I`)
+    /// The full signature string for this item, e.g. `"I"`, `"Ljava/lang/String;"`, or `"[F"`.
     public let signature: String
 
-    /// Initialize a custom signature item.
+    // MARK: - Init
+
+    /// Initializes a new `JSignatureItem` based on a `TypeCode` and an optional class name.
+    ///
     /// - Parameters:
-    ///   - typeCode: Type prefix, e.g. `"L"` for object, `"[I"` for array of ints, `"I"` for int.
-    ///   - names: For object types, the full `JClassName` path.
-    ///   - semicolon: Whether to end the object type with `;`
+    ///   - typeCode: The JNI type prefix, such as `.object`, `.int`, or `.booleans`.
+    ///   - name: A `JClassName` used for object types (e.g., `java/lang/String`). Ignored for primitives.
     public init(_ typeCode: TypeCode, _ name: JClassName? = nil) {
         let needsSemicolon = typeCode == .object || typeCode == .objects
         self.typeCode = typeCode
@@ -55,12 +69,14 @@ public struct JSignatureItem: Sendable {
     public static var floats: Self   { .init(.floats) }
     public static var doubles: Self  { .init(.doubles) }
 
-    // MARK: - Object types
+    // MARK: - Object Types
 
-    /// Create a signature for an object (class) type.
+    /// Construct a signature item representing a reference type (`L...;`) or object array (`[L...;`).
+    ///
     /// - Parameters:
-    ///   - array: Whether this is an array of objects
-    ///   - classes: One or more `JClassName` parts forming the full name
+    ///   - array: Whether this is an array of the object type
+    ///   - clazz: The class name wrapped as `JClassName` (e.g., `java/lang/String`)
+    /// - Returns: A valid signature item like `"Ljava/lang/String;"` or `"[Ljava/lang/String;"`
     public static func object(array: Bool = false, _ clazz: JClassName) -> Self {
         .init(array ? .objects : .object, clazz)
     }
