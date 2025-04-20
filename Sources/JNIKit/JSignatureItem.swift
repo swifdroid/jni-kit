@@ -1,12 +1,12 @@
 //
-//  MethodSignatureItem.swift
+//  JSignatureItem.swift
 //  JNIKit
 //
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
 /// Represents a single type within a JNI method signature, such as `I`, `Ljava/lang/String;`, or `[D`.
-public struct MethodSignatureItem: Sendable {
+public struct JSignatureItem: Sendable {
     /// The JNI type code prefix, such as `I`, `L`, `[L`, etc.
     private let typeCode: TypeCode
 
