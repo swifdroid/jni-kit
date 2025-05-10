@@ -7,13 +7,14 @@ let package = Package(
     products: [
         .library(name: "JNIKit", targets: ["JNIKit"]),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-log", from: "1.6.2")
+    ],
     targets: [
-        .systemLibrary(name: "CAndroidLog"),
         .target(name: "CDroidJNI"),
         .target(name: "JNIKit", dependencies: [
-            "CAndroidLog",
             .target(name: "CDroidJNI"),
+            .product(name: "Logging", package: "swift-log")
         ]),
         .testTarget(name: "JNIKitTests", dependencies: ["JNIKit"]),
     ]
