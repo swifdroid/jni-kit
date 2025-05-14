@@ -25,3 +25,12 @@ public struct JEnv: @unchecked Sendable {
     }
 }
 
+extension JEnv {
+    /// Convenience helper to get `JNIEnvWrapper` for the current thread using the stored `JavaVM`.
+    ///
+    /// This safely attaches the current thread to the JVM and returns a wrapped `JNIEnv` pointer.
+    public static func current() async -> JEnv? {
+        guard let vm = await JNIKit.shared.vm else { return nil }
+        return vm.attachCurrentThread()
+    }
+}
