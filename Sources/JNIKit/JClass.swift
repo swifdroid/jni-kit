@@ -74,7 +74,7 @@ public struct JClass: @unchecked Sendable {
     ///   - name: Method name (e.g. `"toString"`)
     ///   - signature: Method signature (e.g. `"()Ljava/lang/String;"`)
     /// - Returns: The method ID, or `nil` if not found.
-    public func methodId(name: String, signature: JMethodSignature) async -> JMethodIdRefWrapper? {
+    public func methodId(name: String, signature: JMethodSignature) async -> JMethodId? {
         await JNICache.shared.getMethodId(className: self.name, methodName: name, signature: signature)
     }
 
@@ -96,7 +96,7 @@ public struct JClass: @unchecked Sendable {
     ///   - name: Static method name (e.g. `"currentTimeMillis"`)
     ///   - signature: Method signature (e.g. `"()J"`)
     /// - Returns: The static method ID, or `nil` if not found.
-    public func staticMethodId(name: String, signature: JMethodSignature) async -> JMethodIdRefWrapper? {
+    public func staticMethodId(name: String, signature: JMethodSignature) async -> JMethodId? {
         await JNICache.shared.getStaticMethodId(className: self.name, methodName: name, signature: signature)
     }
 }
