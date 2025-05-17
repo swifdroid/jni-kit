@@ -109,7 +109,7 @@ extension JObjectBox {
         var value: jvalue!
         guard
             let nameObj = env.env.pointee?.pointee.CallObjectMethodA?(env.env, classClass, getNameId, &value),
-            let javaString = await JStringRefWrapper(from: nameObj),
+            let javaString = await JString(from: nameObj),
             let name = await javaString.toSwiftString()
         else { return nil }
         return .init(self.object, .init(classClass, .init(stringLiteral: name)))
