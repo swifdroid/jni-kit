@@ -67,8 +67,8 @@ extension JEnv {
     }
 
     /// Convert a Java `Field` object to a native field Id.
-    public func fromReflectedField(_ field: JObject) -> JFieldIdRefWrapper? {
-        JFieldIdRefWrapper(env.pointee!.pointee.FromReflectedField!(env, field.ref))
+    public func fromReflectedField(_ field: JObject) -> JFieldId? {
+        JFieldId(env.pointee!.pointee.FromReflectedField!(env, field.ref))
     }
 
     /// Convert a native method Id to a Java `Method` or `Constructor` object.
@@ -92,7 +92,7 @@ extension JEnv {
     }
 
     /// Convert a native field Id to a Java `Field` object.
-    public func toReflectedField(clazz: JClass, fieldId: JFieldIdRefWrapper, isStatic: Bool) -> JObject? {
+    public func toReflectedField(clazz: JClass, fieldId: JFieldId, isStatic: Bool) -> JObject? {
         JObject(env.pointee!.pointee.ToReflectedField!(env, clazz.ref, fieldId.id, isStatic.jboolean), clazz)
     }
 
@@ -486,92 +486,92 @@ extension JEnv {
     ///   - clazz: The class that declares the field
     ///   - name: Field name
     ///   - sig: JNI signature (e.g. `"I"` for `int`)
-    /// - Returns: A `JFieldIdRefWrapper`, or `nil` if not found
+    /// - Returns: A `JFieldId`, or `nil` if not found
     public func getFieldId(
         clazz: JClass,
         name: String,
         sig: JSignatureItem
-    ) -> JFieldIdRefWrapper? {
+    ) -> JFieldId? {
         name.withCString { cname in
             sig.signature.withCString { csig in
-                JFieldIdRefWrapper(env.pointee!.pointee.GetFieldID!(env, clazz.ref, cname, csig))
+                JFieldId(env.pointee!.pointee.GetFieldID!(env, clazz.ref, cname, csig))
             }
         }
     }
 
     // MARK: - Get Instance Fields
 
-    public func getObjectField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> JObject? {
+    public func getObjectField(_ object: JObject, _ fieldId: JFieldId) -> JObject? {
         JObject(env.pointee!.pointee.GetObjectField!(env, object.ref, fieldId.id), object.clazz)
     }
 
-    public func getBooleanField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Bool {
+    public func getBooleanField(_ object: JObject, _ fieldId: JFieldId) -> Bool {
         env.pointee!.pointee.GetBooleanField!(env, object.ref, fieldId.id).value
     }
 
-    public func getByteField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Int8 {
+    public func getByteField(_ object: JObject, _ fieldId: JFieldId) -> Int8 {
         env.pointee!.pointee.GetByteField!(env, object.ref, fieldId.id)
     }
 
-    public func getCharField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> UInt16 {
+    public func getCharField(_ object: JObject, _ fieldId: JFieldId) -> UInt16 {
         env.pointee!.pointee.GetCharField!(env, object.ref, fieldId.id)
     }
 
-    public func getShortField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Int16 {
+    public func getShortField(_ object: JObject, _ fieldId: JFieldId) -> Int16 {
         env.pointee!.pointee.GetShortField!(env, object.ref, fieldId.id)
     }
 
-    public func getIntField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Int32 {
+    public func getIntField(_ object: JObject, _ fieldId: JFieldId) -> Int32 {
         env.pointee!.pointee.GetIntField!(env, object.ref, fieldId.id)
     }
 
-    public func getLongField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Int64 {
+    public func getLongField(_ object: JObject, _ fieldId: JFieldId) -> Int64 {
         env.pointee!.pointee.GetLongField!(env, object.ref, fieldId.id)
     }
 
-    public func getFloatField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Float {
+    public func getFloatField(_ object: JObject, _ fieldId: JFieldId) -> Float {
         env.pointee!.pointee.GetFloatField!(env, object.ref, fieldId.id)
     }
 
-    public func getDoubleField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Double {
+    public func getDoubleField(_ object: JObject, _ fieldId: JFieldId) -> Double {
         env.pointee!.pointee.GetDoubleField!(env, object.ref, fieldId.id)
     }
 
     // MARK: - Set Instance Fields
 
-    public func setObjectField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: JObject?) {
+    public func setObjectField(_ object: JObject, _ fieldId: JFieldId, _ value: JObject?) {
         env.pointee!.pointee.SetObjectField!(env, object.ref, fieldId.id, value?.ref)
     }
 
-    public func setBooleanField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jboolean) {
+    public func setBooleanField(_ object: JObject, _ fieldId: JFieldId, _ value: jboolean) {
         env.pointee!.pointee.SetBooleanField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setByteField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jbyte) {
+    public func setByteField(_ object: JObject, _ fieldId: JFieldId, _ value: jbyte) {
         env.pointee!.pointee.SetByteField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setCharField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jchar) {
+    public func setCharField(_ object: JObject, _ fieldId: JFieldId, _ value: jchar) {
         env.pointee!.pointee.SetCharField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setShortField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jshort) {
+    public func setShortField(_ object: JObject, _ fieldId: JFieldId, _ value: jshort) {
         env.pointee!.pointee.SetShortField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setIntField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jint) {
+    public func setIntField(_ object: JObject, _ fieldId: JFieldId, _ value: jint) {
         env.pointee!.pointee.SetIntField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setLongField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: Int64) {
+    public func setLongField(_ object: JObject, _ fieldId: JFieldId, _ value: Int64) {
         env.pointee!.pointee.SetLongField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setFloatField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: Float) {
+    public func setFloatField(_ object: JObject, _ fieldId: JFieldId, _ value: Float) {
         env.pointee!.pointee.SetFloatField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setDoubleField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: Double) {
+    public func setDoubleField(_ object: JObject, _ fieldId: JFieldId, _ value: Double) {
         env.pointee!.pointee.SetDoubleField!(env, object.ref, fieldId.id, value)
     }
 
@@ -706,87 +706,87 @@ extension JEnv {
         clazz: JClass,
         name: String,
         sig: JSignatureItem
-    ) -> JFieldIdRefWrapper? {
+    ) -> JFieldId? {
         name.withCString { cname in
             sig.signature.withCString { csig in
-                JFieldIdRefWrapper(env.pointee!.pointee.GetStaticFieldID!(env, clazz.ref, cname, csig))
+                JFieldId(env.pointee!.pointee.GetStaticFieldID!(env, clazz.ref, cname, csig))
             }
         }
     }
 
     // MARK: - Get Static Fields
 
-    public func getStaticObjectField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> JObject? {
+    public func getStaticObjectField(_ clazz: JClass, _ fieldId: JFieldId) -> JObject? {
         JObject(env.pointee!.pointee.GetStaticObjectField!(env, clazz.ref, fieldId.id), clazz)
     }
 
-    public func getStaticBooleanField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Bool {
+    public func getStaticBooleanField(_ clazz: JClass, _ fieldId: JFieldId) -> Bool {
         env.pointee!.pointee.GetStaticBooleanField!(env, clazz.ref, fieldId.id).value
     }
 
-    public func getStaticByteField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Int8 {
+    public func getStaticByteField(_ clazz: JClass, _ fieldId: JFieldId) -> Int8 {
         env.pointee!.pointee.GetStaticByteField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticCharField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> UInt16 {
+    public func getStaticCharField(_ clazz: JClass, _ fieldId: JFieldId) -> UInt16 {
         env.pointee!.pointee.GetStaticCharField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticShortField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Int16 {
+    public func getStaticShortField(_ clazz: JClass, _ fieldId: JFieldId) -> Int16 {
         env.pointee!.pointee.GetStaticShortField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticIntField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Int32 {
+    public func getStaticIntField(_ clazz: JClass, _ fieldId: JFieldId) -> Int32 {
         env.pointee!.pointee.GetStaticIntField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticLongField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Int64 {
+    public func getStaticLongField(_ clazz: JClass, _ fieldId: JFieldId) -> Int64 {
         env.pointee!.pointee.GetStaticLongField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticFloatField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Float {
+    public func getStaticFloatField(_ clazz: JClass, _ fieldId: JFieldId) -> Float {
         env.pointee!.pointee.GetStaticFloatField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticDoubleField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Double {
+    public func getStaticDoubleField(_ clazz: JClass, _ fieldId: JFieldId) -> Double {
         env.pointee!.pointee.GetStaticDoubleField!(env, clazz.ref, fieldId.id)
     }
 
     // MARK: - Set Static Fields
 
-    public func setStaticObjectField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: JObject?) {
+    public func setStaticObjectField(_ clazz: JClass, _ fieldId: JFieldId, _ value: JObject?) {
         env.pointee!.pointee.SetStaticObjectField!(env, clazz.ref, fieldId.id, value?.ref)
     }
 
-    public func setStaticBooleanField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jboolean) {
+    public func setStaticBooleanField(_ clazz: JClass, _ fieldId: JFieldId, _ value: jboolean) {
         env.pointee!.pointee.SetStaticBooleanField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticByteField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jbyte) {
+    public func setStaticByteField(_ clazz: JClass, _ fieldId: JFieldId, _ value: jbyte) {
         env.pointee!.pointee.SetStaticByteField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticCharField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jchar) {
+    public func setStaticCharField(_ clazz: JClass, _ fieldId: JFieldId, _ value: jchar) {
         env.pointee!.pointee.SetStaticCharField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticShortField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jshort) {
+    public func setStaticShortField(_ clazz: JClass, _ fieldId: JFieldId, _ value: jshort) {
         env.pointee!.pointee.SetStaticShortField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticIntField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jint) {
+    public func setStaticIntField(_ clazz: JClass, _ fieldId: JFieldId, _ value: jint) {
         env.pointee!.pointee.SetStaticIntField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticLongField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jlong) {
+    public func setStaticLongField(_ clazz: JClass, _ fieldId: JFieldId, _ value: jlong) {
         env.pointee!.pointee.SetStaticLongField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticFloatField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jfloat) {
+    public func setStaticFloatField(_ clazz: JClass, _ fieldId: JFieldId, _ value: jfloat) {
         env.pointee!.pointee.SetStaticFloatField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticDoubleField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jdouble) {
+    public func setStaticDoubleField(_ clazz: JClass, _ fieldId: JFieldId, _ value: jdouble) {
         env.pointee!.pointee.SetStaticDoubleField!(env, clazz.ref, fieldId.id, value)
     }
 
