@@ -62,8 +62,8 @@ extension JEnv {
     }
 
     /// Convert a Java `Method` object to a native method Id.
-    public func fromReflectedMethod(_ method: JObject) -> JMethodIdRefWrapper? {
-        JMethodIdRefWrapper(env.pointee!.pointee.FromReflectedMethod!(env, method.ref))
+    public func fromReflectedMethod(_ method: JObject) -> JMethodId? {
+        JMethodId(env.pointee!.pointee.FromReflectedMethod!(env, method.ref))
     }
 
     /// Convert a Java `Field` object to a native field Id.
@@ -77,7 +77,7 @@ extension JEnv {
     ///   - clazz: The declaring class
     ///   - methodId: The native method Id
     ///   - isStatic: Whether it's a static method
-    public func toReflectedMethod(clazz: JClass, methodId: JMethodIdRefWrapper, isStatic: Bool) -> JObject? {
+    public func toReflectedMethod(clazz: JClass, methodId: JMethodId, isStatic: Bool) -> JObject? {
         JObject(env.pointee!.pointee.ToReflectedMethod!(env, clazz.ref, methodId.id, isStatic.jboolean), clazz)
     }
 
@@ -209,7 +209,7 @@ extension JEnv {
     /// Create a new Java object using a constructor (jvalue array).
     public func newObject(
         clazz: JClass,
-        constructor: JMethodIdRefWrapper,
+        constructor: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> JObject? {
         guard let obj = env.pointee!.pointee.NewObjectA!(env, clazz.ref, constructor.id, args) else { return nil }
@@ -240,10 +240,10 @@ extension JEnv {
         clazz: JClass,
         name: String,
         sig: JMethodSignature
-    ) -> JMethodIdRefWrapper? {
+    ) -> JMethodId? {
         name.withCString { cname in
             sig.signature.withCString { csig in
-                JMethodIdRefWrapper(env.pointee!.pointee.GetMethodID!(env, clazz.ref, cname, csig))
+                JMethodId(env.pointee!.pointee.GetMethodID!(env, clazz.ref, cname, csig))
             }
         }
     }
@@ -253,7 +253,7 @@ extension JEnv {
     /// Call a Java method returning `Object` (jvalue array).
     public func callObjectMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> JObject? {
         JObject(env.pointee!.pointee.CallObjectMethodA!(env, object.ref, methodId.id, args), object.clazz)
@@ -264,7 +264,7 @@ extension JEnv {
     /// Call a Java method returning `boolean` (jvalue array).
     public func callBooleanMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Bool {
         env.pointee!.pointee.CallBooleanMethodA!(env, object.ref, methodId.id, args).value
@@ -275,7 +275,7 @@ extension JEnv {
     /// Call a Java method returning `byte` (jvalue array).
     public func callByteMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int8 {
         env.pointee!.pointee.CallByteMethodA!(env, object.ref, methodId.id, args)
@@ -286,7 +286,7 @@ extension JEnv {
     /// Call a Java method returning `char` (jvalue array).
     public func callCharMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> UInt16 {
         env.pointee!.pointee.CallCharMethodA!(env, object.ref, methodId.id, args)
@@ -297,7 +297,7 @@ extension JEnv {
     /// Call a Java method returning `short` (jvalue array).
     public func callShortMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int16 {
         env.pointee!.pointee.CallShortMethodA!(env, object.ref, methodId.id, args)
@@ -308,7 +308,7 @@ extension JEnv {
     /// Call a Java method returning `int` (jvalue array).
     public func callIntMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int32 {
         env.pointee!.pointee.CallIntMethodA!(env, object.ref, methodId.id, args)
@@ -319,7 +319,7 @@ extension JEnv {
     /// Call a Java method returning `long` (jvalue array).
     public func callLongMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int64 {
         env.pointee!.pointee.CallLongMethodA!(env, object.ref, methodId.id, args)
@@ -330,7 +330,7 @@ extension JEnv {
     /// Call a Java method returning `float` (jvalue array).
     public func callFloatMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Float {
         env.pointee!.pointee.CallFloatMethodA!(env, object.ref, methodId.id, args)
@@ -341,7 +341,7 @@ extension JEnv {
     /// Call a Java method returning `double` (jvalue array).
     public func callDoubleMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Double {
         env.pointee!.pointee.CallDoubleMethodA!(env, object.ref, methodId.id, args)
@@ -352,7 +352,7 @@ extension JEnv {
     /// Call a Java method returning `void` (jvalue array).
     public func callVoidMethod(
         object: JObject,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) {
         env.pointee!.pointee.CallVoidMethodA!(env, object.ref, methodId.id, args)
@@ -364,7 +364,7 @@ extension JEnv {
     public func callNonvirtualObjectMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> JObject? {
         JObject(env.pointee!.pointee.CallNonvirtualObjectMethodA!(env, object.ref, clazz.ref, methodId.id, args), clazz)
@@ -376,7 +376,7 @@ extension JEnv {
     public func callNonvirtualBooleanMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Bool {
         env.pointee!.pointee.CallNonvirtualBooleanMethodA!(env, object.ref, clazz.ref, methodId.id, args).value
@@ -388,7 +388,7 @@ extension JEnv {
     public func callNonvirtualByteMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int8 {
         env.pointee!.pointee.CallNonvirtualByteMethodA!(env, object.ref, clazz.ref, methodId.id, args)
@@ -400,7 +400,7 @@ extension JEnv {
     public func callNonvirtualCharMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> UInt16 {
         env.pointee!.pointee.CallNonvirtualCharMethodA!(env, object.ref, clazz.ref, methodId.id, args)
@@ -412,7 +412,7 @@ extension JEnv {
     public func callNonvirtualShortMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int16 {
         env.pointee!.pointee.CallNonvirtualShortMethodA!(env, object.ref, clazz.ref, methodId.id, args)
@@ -424,7 +424,7 @@ extension JEnv {
     public func callNonvirtualIntMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int32 {
         env.pointee!.pointee.CallNonvirtualIntMethodA!(env, object.ref, clazz.ref, methodId.id, args)
@@ -436,7 +436,7 @@ extension JEnv {
     public func callNonvirtualLongMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int64 {
         env.pointee!.pointee.CallNonvirtualLongMethodA!(env, object.ref, clazz.ref, methodId.id, args)
@@ -448,7 +448,7 @@ extension JEnv {
     public func callNonvirtualFloatMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Float {
         env.pointee!.pointee.CallNonvirtualFloatMethodA!(env, object.ref, clazz.ref, methodId.id, args)
@@ -460,7 +460,7 @@ extension JEnv {
     public func callNonvirtualDoubleMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Double {
         env.pointee!.pointee.CallNonvirtualDoubleMethodA!(env, object.ref, clazz.ref, methodId.id, args)
@@ -472,7 +472,7 @@ extension JEnv {
     public func callNonvirtualVoidMethod(
         object: JObject,
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) {
         env.pointee!.pointee.CallNonvirtualVoidMethodA!(env, object.ref, clazz.ref, methodId.id, args)
@@ -589,10 +589,10 @@ extension JEnv {
         clazz: JClass,
         name: String,
         sig: JMethodSignature
-    ) -> JMethodIdRefWrapper? {
+    ) -> JMethodId? {
         name.withCString { cname in
             sig.signature.withCString { csig in
-                JMethodIdRefWrapper(env.pointee!.pointee.GetStaticMethodID!(env, clazz.ref, cname, csig))
+                JMethodId(env.pointee!.pointee.GetStaticMethodID!(env, clazz.ref, cname, csig))
             }
         }
     }
@@ -602,7 +602,7 @@ extension JEnv {
     /// Call a static method returning `Object` (jvalue array).
     public func callStaticObjectMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> JObject? {
         JObject(env.pointee!.pointee.CallStaticObjectMethodA!(env, clazz.ref, methodId.id, args), clazz)
@@ -612,7 +612,7 @@ extension JEnv {
 
     public func callStaticBooleanMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Bool {
         env.pointee!.pointee.CallStaticBooleanMethodA!(env, clazz.ref, methodId.id, args).value
@@ -622,7 +622,7 @@ extension JEnv {
 
     public func callStaticByteMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int8 {
         env.pointee!.pointee.CallStaticByteMethodA!(env, clazz.ref, methodId.id, args)
@@ -632,7 +632,7 @@ extension JEnv {
 
     public func callStaticCharMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> UInt16 {
         env.pointee!.pointee.CallStaticCharMethodA!(env, clazz.ref, methodId.id, args)
@@ -642,7 +642,7 @@ extension JEnv {
 
     public func callStaticShortMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int16 {
         env.pointee!.pointee.CallStaticShortMethodA!(env, clazz.ref, methodId.id, args)
@@ -652,7 +652,7 @@ extension JEnv {
 
     public func callStaticIntMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int32 {
         env.pointee!.pointee.CallStaticIntMethodA!(env, clazz.ref, methodId.id, args)
@@ -662,7 +662,7 @@ extension JEnv {
 
     public func callStaticLongMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int64 {
         env.pointee!.pointee.CallStaticLongMethodA!(env, clazz.ref, methodId.id, args)
@@ -672,7 +672,7 @@ extension JEnv {
 
     public func callStaticFloatMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Float {
         env.pointee!.pointee.CallStaticFloatMethodA!(env, clazz.ref, methodId.id, args)
@@ -682,7 +682,7 @@ extension JEnv {
 
     public func callStaticDoubleMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Double {
         env.pointee!.pointee.CallStaticDoubleMethodA!(env, clazz.ref, methodId.id, args)
@@ -693,7 +693,7 @@ extension JEnv {
     /// Call a static method returning `void` (jvalue array).
     public func callStaticVoidMethod(
         clazz: JClass,
-        methodId: JMethodIdRefWrapper,
+        methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) {
         env.pointee!.pointee.CallStaticVoidMethodA!(env, clazz.ref, methodId.id, args)
