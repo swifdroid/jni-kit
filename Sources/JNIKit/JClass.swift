@@ -84,7 +84,7 @@ public struct JClass: @unchecked Sendable {
     ///   - name: Field name (e.g. `"mFlags"`)
     ///   - signature: Field signature (e.g. `"I"`)
     /// - Returns: The field ID, or `nil` if not found.
-    public func fieldId(name: String, signature: JSignatureItem) async -> JFieldIdRefWrapper? {
+    public func fieldId(name: String, signature: JSignatureItem) async -> JFieldId? {
         await JNICache.shared.getFieldId(className: self.name, fieldName: name, signature: signature)
     }
 
