@@ -1,23 +1,46 @@
 //
 //  String+CString.swift
-//  DroidFoundation
+//  JNIKit
 //
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
-import Foundation
-import CDroidJNI
+import Android
 
 extension String {
-    public var cString: UnsafePointer<Int8> {
-        var pointer: UnsafePointer<Int8>!
-        let group = DispatchGroup()
-        group.enter()
-        withCString {
-            pointer = $0
-            group.leave()
+    public var cString: RetainedCString {
+        RetainedCString(self)
+    }
+}
+
+/// A C-String wrapper like NSString, it creates a copy of String and retains its pointer.
+public final class RetainedCString {
+    private var rawPointer: UnsafeMutablePointer<CChar>?
+
+    public init(_ string: String) {
+        guard let ptr = strdup(string) else {
+            fatalError("💣 Failed to allocate retained C string.")
         }
-        group.wait()
-        return pointer
+        self.rawPointer = ptr
+    }
+
+    /// Accessor for the C string. Returns `nil` if memory is already freed.
+    public var pointer: UnsafePointer<CChar>? {
+        guard let ptr = rawPointer else {
+            return nil
+        }
+        return UnsafePointer(ptr)
+    }
+
+    /// Frees the allocated C string if it hasn’t been freed already.
+    public func free() {
+        if let rawPointer {
+            Android.free(rawPointer)
+            self.rawPointer = nil
+        }
+    }
+
+    deinit {
+        free()
     }
 }
