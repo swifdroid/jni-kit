@@ -109,10 +109,10 @@ extension JEnv {
     }
 
     /// Check if an exception is pending.
-    public func exceptionOccurred() async -> JThrowableRefWrapper? {
+    public func exceptionOccurred() async -> JThrowable? {
         guard let throwable = env.pointee!.pointee.ExceptionOccurred!(env) else { return nil }
         guard let clazz = await JClass.load("java/lang/Throwable") else { return nil }
-        return await JThrowableRefWrapper(throwable, clazz)
+        return await JThrowable(throwable, clazz)
     }
 
     /// Print the stack trace of a pending exception to stderr.
@@ -146,9 +146,9 @@ extension JEnv {
     ///
     /// Equivalent to calling `(*env)->Throw(env, throwable)` in JNI.
     ///
-    /// - Parameter throwable: A `JThrowableRefWrapper` which contains `jthrowable` that is a subclass of `java.lang.Throwable`
+    /// - Parameter throwable: A `JThrowable` which contains `jthrowable` that is a subclass of `java.lang.Throwable`
     /// - Returns: JNI status code (`JNI_OK`, `JNI_ERR`, etc.)
-    public func throwObject(_ throwable: JThrowableRefWrapper) -> JNIStatus {
+    public func throwObject(_ throwable: JThrowable) -> JNIStatus {
         JNIStatus.init(fromRawValue: env.pointee!.pointee.Throw!(env, throwable.ref))
     }
 
