@@ -48,26 +48,26 @@ extension JEnv {
     ///   - loader: A class loader object (may be `nil`)
     ///   - buf: Pointer to class bytecode
     ///   - size: Length of bytecode buffer
-    public func defineClass(name: JClassName, loader: JObjectRefWrapper?, buf: UnsafePointer<jbyte>, size: jint) -> JClassRefWrapper? {
+    public func defineClass(name: JClassName, loader: JObject?, buf: UnsafePointer<jbyte>, size: jint) -> JClass? {
         name.path.withCString {
-            JClassRefWrapper(env.pointee!.pointee.DefineClass!(env, $0, loader?.ref, buf, size), name)
+            JClass(env.pointee!.pointee.DefineClass!(env, $0, loader?.ref, buf, size), name)
         }
     }
 
     /// Find a class by name using the current class loader.
-    public func findClass(_ name: JClassName) -> JClassRefWrapper? {
+    public func findClass(_ name: JClassName) -> JClass? {
         name.path.withCString {
-            JClassRefWrapper(env.pointee!.pointee.FindClass!(env, $0), name)
+            JClass(env.pointee!.pointee.FindClass!(env, $0), name)
         }
     }
 
     /// Convert a Java `Method` object to a native method Id.
-    public func fromReflectedMethod(_ method: JObjectRefWrapper) -> JMethodIdRefWrapper? {
+    public func fromReflectedMethod(_ method: JObject) -> JMethodIdRefWrapper? {
         JMethodIdRefWrapper(env.pointee!.pointee.FromReflectedMethod!(env, method.ref))
     }
 
     /// Convert a Java `Field` object to a native field Id.
-    public func fromReflectedField(_ field: JObjectRefWrapper) -> JFieldIdRefWrapper? {
+    public func fromReflectedField(_ field: JObject) -> JFieldIdRefWrapper? {
         JFieldIdRefWrapper(env.pointee!.pointee.FromReflectedField!(env, field.ref))
     }
 
@@ -77,23 +77,23 @@ extension JEnv {
     ///   - clazz: The declaring class
     ///   - methodId: The native method Id
     ///   - isStatic: Whether it's a static method
-    public func toReflectedMethod(clazz: JClassRefWrapper, methodId: JMethodIdRefWrapper, isStatic: Bool) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.ToReflectedMethod!(env, clazz.ref, methodId.id, isStatic.jboolean), clazz)
+    public func toReflectedMethod(clazz: JClass, methodId: JMethodIdRefWrapper, isStatic: Bool) -> JObject? {
+        JObject(env.pointee!.pointee.ToReflectedMethod!(env, clazz.ref, methodId.id, isStatic.jboolean), clazz)
     }
 
     /// Get the superclass of a class.
-    public func getSuperclass(of clazz: JClassRefWrapper) -> JClassRefWrapper? {
-        JClassRefWrapper(env.pointee!.pointee.GetSuperclass!(env, clazz.ref), clazz.name)
+    public func getSuperclass(of clazz: JClass) -> JClass? {
+        JClass(env.pointee!.pointee.GetSuperclass!(env, clazz.ref), clazz.name)
     }
 
     /// Check if a class is assignable from another.
-    public func isAssignable(from clazz1: JClassRefWrapper, to clazz2: JClassRefWrapper) -> Bool {
+    public func isAssignable(from clazz1: JClass, to clazz2: JClass) -> Bool {
         env.pointee!.pointee.IsAssignableFrom!(env, clazz1.ref, clazz2.ref).value
     }
 
     /// Convert a native field Id to a Java `Field` object.
-    public func toReflectedField(clazz: JClassRefWrapper, fieldId: JFieldIdRefWrapper, isStatic: Bool) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.ToReflectedField!(env, clazz.ref, fieldId.id, isStatic.jboolean), clazz)
+    public func toReflectedField(clazz: JClass, fieldId: JFieldIdRefWrapper, isStatic: Bool) -> JObject? {
+        JObject(env.pointee!.pointee.ToReflectedField!(env, clazz.ref, fieldId.id, isStatic.jboolean), clazz)
     }
 
     /// Throw an existing Java exception object.
@@ -102,7 +102,7 @@ extension JEnv {
     }
 
     /// Throw a new Java exception by class and message.
-    public func throwNew(clazz: JClassRefWrapper, message: String) -> Int32 {
+    public func throwNew(clazz: JClass, message: String) -> Int32 {
         message.withCString {
             env.pointee!.pointee.ThrowNew!(env, clazz.ref, $0)
         }
@@ -111,7 +111,7 @@ extension JEnv {
     /// Check if an exception is pending.
     public func exceptionOccurred() async -> JThrowableRefWrapper? {
         guard let throwable = env.pointee!.pointee.ExceptionOccurred!(env) else { return nil }
-        guard let clazz = await JClassRefWrapper.load("java/lang/Throwable") else { return nil }
+        guard let clazz = await JClass.load("java/lang/Throwable") else { return nil }
         return await JThrowableRefWrapper(throwable, clazz)
     }
 
@@ -163,33 +163,33 @@ extension JEnv {
     ///
     /// - Parameter result: Local reference to retain when popping
     /// - Returns: A new reference to `result` or `nil`
-    public func popLocalFrame(result: JObjectRefWrapper?) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.PopLocalFrame!(env, result?.ref), result?.clazz)
+    public func popLocalFrame(result: JObject?) -> JObject? {
+        JObject(env.pointee!.pointee.PopLocalFrame!(env, result?.ref), result?.clazz)
     }
 
     /// Create a new global reference from a local reference.
-    public func newGlobalRef(_ obj: JObjectRefWrapper) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.NewGlobalRef!(env, obj.ref), obj.clazz)
+    public func newGlobalRef(_ obj: JObject) -> JObject? {
+        JObject(env.pointee!.pointee.NewGlobalRef!(env, obj.ref), obj.clazz)
     }
 
     /// Delete a previously created global reference.
-    public func deleteGlobalRef(_ globalRef: JObjectRefWrapper) {
+    public func deleteGlobalRef(_ globalRef: JObject) {
         env.pointee!.pointee.DeleteGlobalRef!(env, globalRef.ref)
     }
 
     /// Delete a local reference.
-    public func deleteLocalRef(_ localRef: JObjectRefWrapper) {
+    public func deleteLocalRef(_ localRef: JObject) {
         env.pointee!.pointee.DeleteLocalRef!(env, localRef.ref)
     }
 
     /// Check if two references refer to the same Java object.
-    public func isSameObject(_ obj1: JObjectRefWrapper, _ obj2: JObjectRefWrapper) -> Bool {
+    public func isSameObject(_ obj1: JObject, _ obj2: JObject) -> Bool {
         env.pointee!.pointee.IsSameObject!(env, obj1.ref, obj2.ref).value
     }
 
     /// Create a new local reference to an existing object.
-    public func newLocalRef(_ obj: JObjectRefWrapper) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.NewLocalRef!(env, obj.ref), obj.clazz)
+    public func newLocalRef(_ obj: JObject) -> JObject? {
+        JObject(env.pointee!.pointee.NewLocalRef!(env, obj.ref), obj.clazz)
     }
 
     /// Ensure space for a given number of local references.
@@ -200,31 +200,31 @@ extension JEnv {
     }
 
     /// Allocate a new instance of a Java class without calling a constructor.
-    public func allocObject(_ clazz: JClassRefWrapper) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.AllocObject!(env, clazz.ref), clazz)
+    public func allocObject(_ clazz: JClass) -> JObject? {
+        JObject(env.pointee!.pointee.AllocObject!(env, clazz.ref), clazz)
     }
 
     // MARK: - Object Creation
 
     /// Create a new Java object using a constructor (jvalue array).
     public func newObject(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         constructor: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
-    ) -> JObjectRefWrapper? {
+    ) -> JObject? {
         guard let obj = env.pointee!.pointee.NewObjectA!(env, clazz.ref, constructor.id, args) else { return nil }
-        return JObjectRefWrapper(obj, clazz)
+        return JObject(obj, clazz)
     }
 
     // MARK: - Object Info
 
     /// Get the class of a Java object.
-    public func getObjectClass(_ object: JObjectRefWrapper) -> JClassRefWrapper? {
-        JClassRefWrapper(env.pointee!.pointee.GetObjectClass!(env, object.ref), object.className)
+    public func getObjectClass(_ object: JObject) -> JClass? {
+        JClass(env.pointee!.pointee.GetObjectClass!(env, object.ref), object.className)
     }
 
     /// Check if a Java object is an instance of a specific class.
-    public func isInstanceOf(_ object: JObjectRefWrapper, _ clazz: JClassRefWrapper) -> Bool {
+    public func isInstanceOf(_ object: JObject, _ clazz: JClass) -> Bool {
         env.pointee!.pointee.IsInstanceOf!(env, object.ref, clazz.ref) == UInt8(JNI_TRUE)
     }
 
@@ -237,7 +237,7 @@ extension JEnv {
     ///   - name: Method name
     ///   - sig: JNI method signature
     public func getMethodId(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         name: String,
         sig: JMethodSignature
     ) -> JMethodIdRefWrapper? {
@@ -252,18 +252,18 @@ extension JEnv {
 
     /// Call a Java method returning `Object` (jvalue array).
     public func callObjectMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
-    ) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.CallObjectMethodA!(env, object.ref, methodId.id, args), object.clazz)
+    ) -> JObject? {
+        JObject(env.pointee!.pointee.CallObjectMethodA!(env, object.ref, methodId.id, args), object.clazz)
     }
 
     // MARK: - CallBooleanMethod
 
     /// Call a Java method returning `boolean` (jvalue array).
     public func callBooleanMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Bool {
@@ -274,7 +274,7 @@ extension JEnv {
 
     /// Call a Java method returning `byte` (jvalue array).
     public func callByteMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int8 {
@@ -285,7 +285,7 @@ extension JEnv {
 
     /// Call a Java method returning `char` (jvalue array).
     public func callCharMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> UInt16 {
@@ -296,7 +296,7 @@ extension JEnv {
 
     /// Call a Java method returning `short` (jvalue array).
     public func callShortMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int16 {
@@ -307,7 +307,7 @@ extension JEnv {
 
     /// Call a Java method returning `int` (jvalue array).
     public func callIntMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int32 {
@@ -318,7 +318,7 @@ extension JEnv {
 
     /// Call a Java method returning `long` (jvalue array).
     public func callLongMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int64 {
@@ -329,7 +329,7 @@ extension JEnv {
 
     /// Call a Java method returning `float` (jvalue array).
     public func callFloatMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Float {
@@ -340,7 +340,7 @@ extension JEnv {
 
     /// Call a Java method returning `double` (jvalue array).
     public func callDoubleMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Double {
@@ -351,7 +351,7 @@ extension JEnv {
 
     /// Call a Java method returning `void` (jvalue array).
     public func callVoidMethod(
-        object: JObjectRefWrapper,
+        object: JObject,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) {
@@ -362,20 +362,20 @@ extension JEnv {
 
     /// Call a nonvirtual method returning `Object` (jvalue array).
     public func callNonvirtualObjectMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
-    ) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.CallNonvirtualObjectMethodA!(env, object.ref, clazz.ref, methodId.id, args), clazz)
+    ) -> JObject? {
+        JObject(env.pointee!.pointee.CallNonvirtualObjectMethodA!(env, object.ref, clazz.ref, methodId.id, args), clazz)
     }
 
     // MARK: - CallNonvirtualBooleanMethod
 
     /// Call a nonvirtual method returning `boolean` (jvalue array).
     public func callNonvirtualBooleanMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Bool {
@@ -386,8 +386,8 @@ extension JEnv {
 
     /// Call a nonvirtual method returning `byte` (jvalue array).
     public func callNonvirtualByteMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int8 {
@@ -398,8 +398,8 @@ extension JEnv {
 
     /// Call a nonvirtual method returning `char` (jvalue array).
     public func callNonvirtualCharMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> UInt16 {
@@ -410,8 +410,8 @@ extension JEnv {
 
     /// Call a nonvirtual method returning `short` (jvalue array).
     public func callNonvirtualShortMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int16 {
@@ -422,8 +422,8 @@ extension JEnv {
 
     /// Call a nonvirtual method returning `int` (jvalue array).
     public func callNonvirtualIntMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int32 {
@@ -434,8 +434,8 @@ extension JEnv {
 
     /// Call a nonvirtual method returning `long` (jvalue array).
     public func callNonvirtualLongMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int64 {
@@ -446,8 +446,8 @@ extension JEnv {
 
     /// Call a nonvirtual method returning `float` (jvalue array).
     public func callNonvirtualFloatMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Float {
@@ -458,8 +458,8 @@ extension JEnv {
 
     /// Call a nonvirtual method returning `double` (jvalue array).
     public func callNonvirtualDoubleMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Double {
@@ -470,8 +470,8 @@ extension JEnv {
 
     /// Call a nonvirtual method returning `void` (jvalue array).
     public func callNonvirtualVoidMethod(
-        object: JObjectRefWrapper,
-        clazz: JClassRefWrapper,
+        object: JObject,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) {
@@ -488,7 +488,7 @@ extension JEnv {
     ///   - sig: JNI signature (e.g. `"I"` for `int`)
     /// - Returns: A `JFieldIdRefWrapper`, or `nil` if not found
     public func getFieldId(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         name: String,
         sig: JSignatureItem
     ) -> JFieldIdRefWrapper? {
@@ -501,77 +501,77 @@ extension JEnv {
 
     // MARK: - Get Instance Fields
 
-    public func getObjectField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.GetObjectField!(env, object.ref, fieldId.id), object.clazz)
+    public func getObjectField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> JObject? {
+        JObject(env.pointee!.pointee.GetObjectField!(env, object.ref, fieldId.id), object.clazz)
     }
 
-    public func getBooleanField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Bool {
+    public func getBooleanField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Bool {
         env.pointee!.pointee.GetBooleanField!(env, object.ref, fieldId.id).value
     }
 
-    public func getByteField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Int8 {
+    public func getByteField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Int8 {
         env.pointee!.pointee.GetByteField!(env, object.ref, fieldId.id)
     }
 
-    public func getCharField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper) -> UInt16 {
+    public func getCharField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> UInt16 {
         env.pointee!.pointee.GetCharField!(env, object.ref, fieldId.id)
     }
 
-    public func getShortField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Int16 {
+    public func getShortField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Int16 {
         env.pointee!.pointee.GetShortField!(env, object.ref, fieldId.id)
     }
 
-    public func getIntField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Int32 {
+    public func getIntField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Int32 {
         env.pointee!.pointee.GetIntField!(env, object.ref, fieldId.id)
     }
 
-    public func getLongField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Int64 {
+    public func getLongField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Int64 {
         env.pointee!.pointee.GetLongField!(env, object.ref, fieldId.id)
     }
 
-    public func getFloatField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Float {
+    public func getFloatField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Float {
         env.pointee!.pointee.GetFloatField!(env, object.ref, fieldId.id)
     }
 
-    public func getDoubleField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Double {
+    public func getDoubleField(_ object: JObject, _ fieldId: JFieldIdRefWrapper) -> Double {
         env.pointee!.pointee.GetDoubleField!(env, object.ref, fieldId.id)
     }
 
     // MARK: - Set Instance Fields
 
-    public func setObjectField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: JObjectRefWrapper?) {
+    public func setObjectField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: JObject?) {
         env.pointee!.pointee.SetObjectField!(env, object.ref, fieldId.id, value?.ref)
     }
 
-    public func setBooleanField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jboolean) {
+    public func setBooleanField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jboolean) {
         env.pointee!.pointee.SetBooleanField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setByteField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jbyte) {
+    public func setByteField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jbyte) {
         env.pointee!.pointee.SetByteField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setCharField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jchar) {
+    public func setCharField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jchar) {
         env.pointee!.pointee.SetCharField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setShortField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jshort) {
+    public func setShortField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jshort) {
         env.pointee!.pointee.SetShortField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setIntField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jint) {
+    public func setIntField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: jint) {
         env.pointee!.pointee.SetIntField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setLongField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: Int64) {
+    public func setLongField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: Int64) {
         env.pointee!.pointee.SetLongField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setFloatField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: Float) {
+    public func setFloatField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: Float) {
         env.pointee!.pointee.SetFloatField!(env, object.ref, fieldId.id, value)
     }
 
-    public func setDoubleField(_ object: JObjectRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: Double) {
+    public func setDoubleField(_ object: JObject, _ fieldId: JFieldIdRefWrapper, _ value: Double) {
         env.pointee!.pointee.SetDoubleField!(env, object.ref, fieldId.id, value)
     }
 
@@ -586,7 +586,7 @@ extension JEnv {
     ///                             `()V` -> `.returning(.void)`
     ///                             `(Ljava/lang/String;)I` -> `.returning(.int, "java/lang/String")`
     public func getStaticMethodId(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         name: String,
         sig: JMethodSignature
     ) -> JMethodIdRefWrapper? {
@@ -601,17 +601,17 @@ extension JEnv {
 
     /// Call a static method returning `Object` (jvalue array).
     public func callStaticObjectMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
-    ) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.CallStaticObjectMethodA!(env, clazz.ref, methodId.id, args), clazz)
+    ) -> JObject? {
+        JObject(env.pointee!.pointee.CallStaticObjectMethodA!(env, clazz.ref, methodId.id, args), clazz)
     }
 
     // MARK: - CallStaticBooleanMethod
 
     public func callStaticBooleanMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Bool {
@@ -621,7 +621,7 @@ extension JEnv {
     // MARK: - CallStaticByteMethod
 
     public func callStaticByteMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int8 {
@@ -631,7 +631,7 @@ extension JEnv {
     // MARK: - CallStaticCharMethod
 
     public func callStaticCharMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> UInt16 {
@@ -641,7 +641,7 @@ extension JEnv {
     // MARK: - CallStaticShortMethod
 
     public func callStaticShortMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int16 {
@@ -651,7 +651,7 @@ extension JEnv {
     // MARK: - CallStaticIntMethod
 
     public func callStaticIntMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int32 {
@@ -661,7 +661,7 @@ extension JEnv {
     // MARK: - CallStaticLongMethod
 
     public func callStaticLongMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Int64 {
@@ -671,7 +671,7 @@ extension JEnv {
     // MARK: - CallStaticFloatMethod
 
     public func callStaticFloatMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Float {
@@ -681,7 +681,7 @@ extension JEnv {
     // MARK: - CallStaticDoubleMethod
 
     public func callStaticDoubleMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) -> Double {
@@ -692,7 +692,7 @@ extension JEnv {
 
     /// Call a static method returning `void` (jvalue array).
     public func callStaticVoidMethod(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         methodId: JMethodIdRefWrapper,
         args: UnsafePointer<jvalue>?
     ) {
@@ -703,7 +703,7 @@ extension JEnv {
 
     /// Look up a static field Id.
     public func getStaticFieldId(
-        clazz: JClassRefWrapper,
+        clazz: JClass,
         name: String,
         sig: JSignatureItem
     ) -> JFieldIdRefWrapper? {
@@ -716,77 +716,77 @@ extension JEnv {
 
     // MARK: - Get Static Fields
 
-    public func getStaticObjectField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.GetStaticObjectField!(env, clazz.ref, fieldId.id), clazz)
+    public func getStaticObjectField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> JObject? {
+        JObject(env.pointee!.pointee.GetStaticObjectField!(env, clazz.ref, fieldId.id), clazz)
     }
 
-    public func getStaticBooleanField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Bool {
+    public func getStaticBooleanField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Bool {
         env.pointee!.pointee.GetStaticBooleanField!(env, clazz.ref, fieldId.id).value
     }
 
-    public func getStaticByteField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Int8 {
+    public func getStaticByteField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Int8 {
         env.pointee!.pointee.GetStaticByteField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticCharField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper) -> UInt16 {
+    public func getStaticCharField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> UInt16 {
         env.pointee!.pointee.GetStaticCharField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticShortField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Int16 {
+    public func getStaticShortField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Int16 {
         env.pointee!.pointee.GetStaticShortField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticIntField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Int32 {
+    public func getStaticIntField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Int32 {
         env.pointee!.pointee.GetStaticIntField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticLongField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Int64 {
+    public func getStaticLongField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Int64 {
         env.pointee!.pointee.GetStaticLongField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticFloatField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Float {
+    public func getStaticFloatField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Float {
         env.pointee!.pointee.GetStaticFloatField!(env, clazz.ref, fieldId.id)
     }
 
-    public func getStaticDoubleField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper) -> Double {
+    public func getStaticDoubleField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper) -> Double {
         env.pointee!.pointee.GetStaticDoubleField!(env, clazz.ref, fieldId.id)
     }
 
     // MARK: - Set Static Fields
 
-    public func setStaticObjectField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: JObjectRefWrapper?) {
+    public func setStaticObjectField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: JObject?) {
         env.pointee!.pointee.SetStaticObjectField!(env, clazz.ref, fieldId.id, value?.ref)
     }
 
-    public func setStaticBooleanField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jboolean) {
+    public func setStaticBooleanField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jboolean) {
         env.pointee!.pointee.SetStaticBooleanField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticByteField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jbyte) {
+    public func setStaticByteField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jbyte) {
         env.pointee!.pointee.SetStaticByteField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticCharField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jchar) {
+    public func setStaticCharField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jchar) {
         env.pointee!.pointee.SetStaticCharField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticShortField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jshort) {
+    public func setStaticShortField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jshort) {
         env.pointee!.pointee.SetStaticShortField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticIntField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jint) {
+    public func setStaticIntField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jint) {
         env.pointee!.pointee.SetStaticIntField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticLongField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jlong) {
+    public func setStaticLongField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jlong) {
         env.pointee!.pointee.SetStaticLongField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticFloatField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jfloat) {
+    public func setStaticFloatField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jfloat) {
         env.pointee!.pointee.SetStaticFloatField!(env, clazz.ref, fieldId.id, value)
     }
 
-    public func setStaticDoubleField(_ clazz: JClassRefWrapper, _ fieldId: JFieldIdRefWrapper, _ value: jdouble) {
+    public func setStaticDoubleField(_ clazz: JClass, _ fieldId: JFieldIdRefWrapper, _ value: jdouble) {
         env.pointee!.pointee.SetStaticDoubleField!(env, clazz.ref, fieldId.id, value)
     }
 
@@ -848,18 +848,18 @@ extension JEnv {
     // MARK: - Object Arrays
 
     /// Create a new object array of the given length and element class.
-    public func newObjectArray(length: jint, clazz: JClassRefWrapper, initialElement: JObjectRefWrapper? = nil) async -> JObjectRefWrapperArray? {
+    public func newObjectArray(length: jint, clazz: JClass, initialElement: JObject? = nil) async -> JObjectArray? {
         guard let obj = env.pointee!.pointee.NewObjectArray!(env, length, clazz.ref, initialElement?.ref) else { return nil }
-        return await JObjectRefWrapperArray(obj, clazz)
+        return await JObjectArray(obj, clazz)
     }
 
     /// Get an element from an object array.
-    public func getObjectArrayElement(_ array: JObjectRefWrapperArray, index: jint) -> JObjectRefWrapper? {
-        JObjectRefWrapper(env.pointee!.pointee.GetObjectArrayElement!(env, array.ref.assumingMemoryBound(to: jobjectArray.self).pointee, index), array.clazz)
+    public func getObjectArrayElement(_ array: JObjectArray, index: jint) -> JObject? {
+        JObject(env.pointee!.pointee.GetObjectArrayElement!(env, array.ref.assumingMemoryBound(to: jobjectArray.self).pointee, index), array.clazz)
     }
 
     /// Set an element in an object array.
-    public func setObjectArrayElement(_ array: JObjectRefWrapperArray, index: jint, value: JObjectRefWrapper?) {
+    public func setObjectArrayElement(_ array: JObjectArray, index: jint, value: JObject?) {
         env.pointee!.pointee.SetObjectArrayElement!(env, array.ref, index, value?.ref)
     }
 
@@ -1093,21 +1093,21 @@ extension JEnv {
 
     // MARK: - Native Method Registration
 
-    public func registerNatives(clazz: JClassRefWrapper, methods: UnsafePointer<JNINativeMethod>, count: jint) -> Int32 {
+    public func registerNatives(clazz: JClass, methods: UnsafePointer<JNINativeMethod>, count: jint) -> Int32 {
         env.pointee!.pointee.RegisterNatives!(env, clazz.ref, methods, count)
     }
 
-    public func unregisterNatives(clazz: JClassRefWrapper) -> Int32 {
+    public func unregisterNatives(clazz: JClass) -> Int32 {
         env.pointee!.pointee.UnregisterNatives!(env, clazz.ref)
     }
 
     // MARK: - Monitor (synchronized) Helpers
 
-    public func monitorEnter(_ object: JObjectRefWrapper) -> Int32 {
+    public func monitorEnter(_ object: JObject) -> Int32 {
         env.pointee!.pointee.MonitorEnter!(env, object.ref)
     }
 
-    public func monitorExit(_ object: JObjectRefWrapper) -> Int32 {
+    public func monitorExit(_ object: JObject) -> Int32 {
         env.pointee!.pointee.MonitorExit!(env, object.ref)
     }
 
@@ -1151,7 +1151,7 @@ extension JEnv {
 
     // MARK: - Weak Global Refs
 
-    public func newWeakGlobalRef(_ obj: JObjectRefWrapper) -> jweak? {
+    public func newWeakGlobalRef(_ obj: JObject) -> jweak? {
         env.pointee!.pointee.NewWeakGlobalRef!(env, obj.ref)
     }
 
@@ -1171,17 +1171,17 @@ extension JEnv {
         env.pointee!.pointee.NewDirectByteBuffer!(env, address, capacity)
     }
 
-    public func getDirectBufferAddress(_ buffer: JObjectRefWrapper) -> UnsafeMutableRawPointer? {
+    public func getDirectBufferAddress(_ buffer: JObject) -> UnsafeMutableRawPointer? {
         env.pointee!.pointee.GetDirectBufferAddress!(env, buffer.ref)
     }
 
-    public func getDirectBufferCapacity(_ buffer: JObjectRefWrapper) -> Int64 {
+    public func getDirectBufferCapacity(_ buffer: JObject) -> Int64 {
         env.pointee!.pointee.GetDirectBufferCapacity!(env, buffer.ref)
     }
 
     // MARK: - Reference Type Inspection
 
-    public func getObjectRefType(_ obj: JObjectRefWrapper) -> JObjectRefWrapperRefType {
-        JObjectRefWrapperRefType(env.pointee!.pointee.GetObjectRefType!(env, obj.ref))
+    public func getObjectRefType(_ obj: JObject) -> JObjectRefType {
+        JObjectRefType(env.pointee!.pointee.GetObjectRefType!(env, obj.ref))
     }
 }
