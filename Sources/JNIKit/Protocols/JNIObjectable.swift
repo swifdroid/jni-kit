@@ -1,11 +1,11 @@
 //
 //  JNIObjectable.swift
-//  DroidFoundation
+//  JNIKit
 //
 //  Created by Mihael Isaev on 23.10.2021.
 //
 
-import CDroidJNI
+import Android
 
 public protocol JNIObjectable {
     var object: jobject { get }
