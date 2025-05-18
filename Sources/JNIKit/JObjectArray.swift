@@ -10,7 +10,7 @@ import Android
 /// A Swift wrapper for a Java object array (`jobjectArray`).
 ///
 /// Retains a global reference and provides access to individual `JObject`s.
-public struct JObjectArray: @unchecked Sendable, JavaDescribable {
+public struct JObjectArray: @unchecked Sendable, JDescribable {
     public let ref: jobject // jobjectArray
     public let clazz: JClass
     public let length: Int

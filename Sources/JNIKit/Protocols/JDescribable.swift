@@ -1,5 +1,5 @@
 //
-//  JavaDescribable.swift
+//  JDescribable.swift
 //  JNIKit
 //
 //  Created by Mihael Isaev on 20.04.2025.
@@ -10,7 +10,7 @@ import Android
 /// A protocol for Java objects that can produce a Swift-readable string via Java's `toString()` method.
 ///
 /// Commonly used with wrapped `Throwable`, `Object`, or any subclass that overrides `toString()`.
-public protocol JavaDescribable: Sendable {
+public protocol JDescribable: Sendable {
     /// The underlying `jobject` reference.
     var ref: jobject { get }
 
@@ -23,7 +23,7 @@ public protocol JavaDescribable: Sendable {
     func toString() async -> String?
 }
 
-extension JavaDescribable {
+extension JDescribable {
     public func toString() async -> String? {
         guard
             let env = await JEnv.current(),

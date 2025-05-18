@@ -17,7 +17,7 @@ import Android
 /// - Wrapping a thrown Java exception from `ExceptionOccurred()`
 /// - Passing Java exceptions back to Swift for logging or message extraction
 /// - Re-throwing Java exceptions from Swift via `Throw()` or `ThrowNew()`
-public struct JThrowable: @unchecked Sendable, JavaDescribable {
+public struct JThrowable: @unchecked Sendable, JDescribable {
     /// The globally retained reference to the `Throwable` object.
     ///
     /// This is a `jobject` pointing to a `java.lang.Throwable` or subclass.
