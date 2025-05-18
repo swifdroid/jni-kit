@@ -16,9 +16,6 @@ public struct JObject: @unchecked Sendable, JObjectable {
     /// The globally retained reference to the Java object.
     public let ref: jobject
 
-    /// The class name of the Java object (e.g. `"java/lang/String"`).
-    public var className: JClassName { clazz.name }
-
     /// The resolved `JClass` of this object.
     public let clazz: JClass
 
