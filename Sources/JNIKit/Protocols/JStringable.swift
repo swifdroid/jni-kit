@@ -55,7 +55,7 @@ extension JStringable {
             let env = await JEnv.current(),
             let methodId = await clazz.methodId(
                 name: "toString",
-                signature: .returning(.object(JClassName("java/lang/String")))
+                signature: .returning("java/lang/String")
             ),
             let jstr = env.callObjectMethod(
                 object: .init(ref, clazz),

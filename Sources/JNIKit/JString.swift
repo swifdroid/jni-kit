@@ -102,17 +102,17 @@ extension JString {
 
     /// Calls Java's `String.toLowerCase()`
     public func toLowerCase() async -> JString? {
-        await callReturningString("toLowerCase", signature: .returning(.object("java/lang/String")))
+        await callReturningString("toLowerCase", signature: .returning("java/lang/String"))
     }
 
     /// Calls Java's `String.toUpperCase()`
     public func toUpperCase() async -> JString? {
-        await callReturningString("toUpperCase", signature: .returning(.object("java/lang/String")))
+        await callReturningString("toUpperCase", signature: .returning("java/lang/String"))
     }
 
     /// Calls Java's `String.trim()`
     public func trim() async -> JString? {
-        await callReturningString("trim", signature: .returning(.object("java/lang/String")))
+        await callReturningString("trim", signature: .returning("java/lang/String"))
     }
 
     /// Calls Java's `String.concat(String)`
