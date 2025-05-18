@@ -8,19 +8,30 @@
 import Android
 
 /// A Swift wrapper around a Java `java.lang.String` object.
+///
+/// This type provides safe and ergonomic access to Java strings from Swift.
+/// It manages JNI references, converts between Swift and Java strings, and supports common string operations.
 public struct JString: @unchecked Sendable, JavaDescribable {
-    /// The underlying global `jstring` reference.
+    // MARK: - Properties
+
+    /// The globally retained JNI reference to the Java string.
     public let ref: jstring
 
-    /// The `JClass` representing `java.lang.String`.
+    /// The JNI class name for `java.lang.String`.
     public static let className: JClassName = "java/lang/String"
 
-    /// Internal cached class reference.
+    /// The loaded `JClass` representing `java.lang.String`.
     public let clazz: JClass
 
     // MARK: - Initializers
 
-    /// Construct from a Swift `String`, creating a new Java string.
+    /// Create a new Java string from a Swift `String`.
+    ///
+    /// This performs a JNI call to construct a new UTF-8 encoded `java.lang.String`,
+    /// retains a global reference to it, and stores the associated class metadata.
+    ///
+    /// - Parameter swiftString: The Swift string to convert into a Java string.
+    /// - Returns: `nil` if JNI operations fail or JVM is unavailable.
     public init?(from swiftString: String) async {
         guard
             let env = await JEnv.current(),
@@ -32,7 +43,12 @@ public struct JString: @unchecked Sendable, JavaDescribable {
         self.clazz = clazz
     }
 
-    /// Wrap an existing `jstring` and globalize it.
+    /// Wrap an existing `jstring` from JNI and promote it to a global reference.
+    ///
+    /// This is useful when receiving a string from Java code and you want to safely retain it.
+    ///
+    /// - Parameter existing: The JNI `jstring` reference to wrap.
+    /// - Returns: `nil` if JVM is unavailable or the reference cannot be globalized.
     public init?(from existing: jstring) async {
         guard
             let env = await JEnv.current(),
@@ -45,7 +61,12 @@ public struct JString: @unchecked Sendable, JavaDescribable {
 
     // MARK: - Conversion
 
-    /// Convert Java string to Swift `String`.
+    /// Convert this Java string to a Swift `String`.
+    ///
+    /// This performs a JNI `GetStringUTFChars` operation and safely converts the result to Swift.
+    /// The JNI memory is released automatically after conversion.
+    ///
+    /// - Returns: A native Swift string or `nil` if conversion fails.
     public func toSwiftString() async -> String? {
         guard
             let env = await JEnv.current(),
@@ -56,6 +77,7 @@ public struct JString: @unchecked Sendable, JavaDescribable {
         }
         return String(cString: cstr)
     }
+}
 
     // MARK: - Instance Methods
 
