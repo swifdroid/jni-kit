@@ -77,8 +77,24 @@ extension JEnv {
     }
 }
 
+/// Represents a parsed JNI version, like 1.8 or 1.6.
+public struct JNIVersion: Equatable, Hashable, Sendable, CustomStringConvertible {
+    public let major: Int
+    public let minor: Int
+
+    public init(major: Int, minor: Int) {
+        self.major = major
+        self.minor = minor
+    }
+
+    /// A string representation like "1.8"
+    public var description: String {
+        "\(major).\(minor)"
+    }
+}
+
 extension JEnv {
-    // MARK: - Version and Class Definition
+    // MARK: - Version
 
     /// Returns the version of the JNI environment provided by the JVM.
     ///
@@ -86,6 +102,21 @@ extension JEnv {
     public func getVersion() -> Int32 {
         env.pointee!.pointee.GetVersion(env)
     }
+
+    /// Returns the JNI version parsed into a `JNIVersion` struct.
+    public func getVersionStruct() -> JNIVersion {
+        let raw = getVersion()
+        let major = Int((raw >> 16) & 0xFFFF)
+        let minor = Int(raw & 0xFFFF)
+        return JNIVersion(major: major, minor: minor)
+    }
+
+    /// Returns the JNI version as a human-readable string (e.g. `"1.8"`).
+    public func getVersionString() -> String {
+        getVersionStruct().description
+    }
+
+    // MARK: - Class Definition
 
     /// Defines a new Java class dynamically from raw bytecode.
     ///
