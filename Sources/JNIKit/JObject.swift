@@ -6,6 +6,7 @@
 //
 
 import Android
+import FoundationEssentials
 
 /// A Swift wrapper around a global `jobject`, retained safely across threads and JNI calls.
 ///
@@ -84,34 +85,62 @@ public struct JObject: @unchecked Sendable, JavaDescribable {
     }
 }
 
+/// A lightweight wrapper for a raw `jobject`, allowing type-safe conversions and introspection.
+///
+/// Use `JObjectBox` when you have an opaque `jobject` pointer (e.g., from callbacks or native code)
+/// and want to convert it into a proper `JObject` using runtime reflection.
 public struct JObjectBox: @unchecked Sendable {
+    /// The raw JNI object reference (local or global).
     public let object: jobject
 
+    /// Initialize a box from a `jobject` reference.
+    /// - Parameter object: A valid JNI object pointer.
     public init(_ object: jobject) {
         self.object = object
     }
 }
 
 extension jobject {
+    /// Wrap this `jobject` in a `JObjectBox` for conversion or inspection.
+    /// - Returns: A `JObjectBox` containing this reference.
     public func box() -> JObjectBox {
         JObjectBox(self)
     }
 }
 
 extension JObjectBox {
-    /// Wrapping `jobject` into `JObject`, uses reflection to get its class
+    /// Convert the boxed `jobject` into a fully typed `JObject` by inspecting its runtime class.
+    ///
+    /// This method calls `GetObjectClass` and then uses reflection to invoke `getName()`,
+    /// obtaining the full class name of the object.
+    ///
+    /// - Returns: A `JObject` with resolved `JClass`, or `nil` if reflection fails.
     public func object() async -> JObject? {
+        // Attach current thread to get JNIEnv*
         guard
             let env = await JNIKit.shared.attachCurrentThread(),
             let classClass = env.env.pointee?.pointee.GetObjectClass?(env.env, self.object),
-            let getNameId = env.env.pointee?.pointee.GetMethodID?(env.env, classClass, "getName", "()Ljava/lang/String;")
+            let getNameId = env.env.pointee?.pointee.GetMethodID?(
+                env.env,
+                classClass,
+                "getName",
+                "()Ljava/lang/String;"
+            )
         else { return nil }
-        var value: jvalue!
+        var value: jvalue! = nil
+        // Call getName() on the java.lang.Class object to get the internal name
         guard
-            let nameObj = env.env.pointee?.pointee.CallObjectMethodA?(env.env, classClass, getNameId, &value),
+            let nameObj = env.env.pointee?.pointee.CallObjectMethodA?(
+                env.env,
+                classClass,
+                getNameId,
+                &value
+            ),
             let javaString = await JString(from: nameObj),
             let name = await javaString.toSwiftString()
         else { return nil }
-        return .init(self.object, .init(classClass, .init(stringLiteral: name)))
+        // Convert dot-style name to slash format if needed (e.g., java.lang.String → java/lang/String)
+        let className = JClassName(stringLiteral: name.components(separatedBy: ".").joined(separator: "/"))
+        return JObject(self.object, .init(classClass, className))
     }
 }
