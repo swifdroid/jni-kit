@@ -12,7 +12,7 @@ import FoundationEssentials
 ///
 /// Use `JObject` to represent any Java object passed from or constructed in Swift.
 /// It retains a global reference automatically to prevent premature GC.
-public struct JObject: @unchecked Sendable, JDescribable {
+public struct JObject: @unchecked Sendable, JObjectable {
     /// The globally retained reference to the Java object.
     public let ref: jobject
 

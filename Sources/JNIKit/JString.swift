@@ -11,7 +11,7 @@ import Android
 ///
 /// This type provides safe and ergonomic access to Java strings from Swift.
 /// It manages JNI references, converts between Swift and Java strings, and supports common string operations.
-public struct JString: @unchecked Sendable, JDescribable {
+public struct JString: @unchecked Sendable, JObjectable {
     // MARK: - Properties
 
     /// The globally retained JNI reference to the Java string.
