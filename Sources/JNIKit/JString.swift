@@ -79,26 +79,95 @@ public struct JString: @unchecked Sendable, JavaDescribable {
     }
 }
 
-    // MARK: - Instance Methods
+// MARK: - Instance Methods
 
-    /// Call `length()` on the Java string.
+extension JString {
+    /// Calls Java's `String.isEmpty()`
+    public func isEmpty() async -> Bool {
+        guard let env = await JEnv.current(),
+              let methodId = await clazz.methodId(name: "isEmpty", signature: .returning(.boolean)) else {
+            return false
+        }
+        return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: [])
+    }
+
+    /// Calls Java's `String.length()`
     public func length() async -> Int {
-        guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(name: "length", signature: .returning(.int))
-        else { return 0 }
+        guard let env = await JEnv.current(),
+              let methodId = await clazz.methodId(name: "length", signature: .returning(.int)) else {
+            return 0
+        }
         return Int(env.callIntMethod(object: .init(ref, clazz), methodId: methodId, args: []))
     }
 
-    /// Call `toUpperCase()` on the Java string.
-    public func toUpperCase() async -> JString? {
-        guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(name: "toUpperCase", signature: .returning(.init(.object, "java/lang/String"))),
-            let result = env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, args: [])
-        else { return nil }
-        return await JString(from: result.ref.assumingMemoryBound(to: jstring.self))
+    /// Calls Java's `String.toLowerCase()`
+    public func toLowerCase() async -> JString? {
+        await callReturningString("toLowerCase", signature: .returning(.object("java/lang/String")))
     }
 
-    // TODO: more methods
+    /// Calls Java's `String.toUpperCase()`
+    public func toUpperCase() async -> JString? {
+        await callReturningString("toUpperCase", signature: .returning(.object("java/lang/String")))
+    }
+
+    /// Calls Java's `String.trim()`
+    public func trim() async -> JString? {
+        await callReturningString("trim", signature: .returning(.object("java/lang/String")))
+    }
+
+    /// Calls Java's `String.concat(String)`
+    public func concat(_ other: JString) async -> JString? {
+        await callReturningString("concat", signature: .init(.object("java/lang/String"), returning: .object("java/lang/String")), args: [other])
+    }
+
+    /// Calls Java's `String.startsWith(String)`
+    public func startsWith(_ prefix: JString) async -> Bool {
+        await callBoolean("startsWith", signature: .init(.object("java/lang/String"), returning: .boolean), args: [prefix])
+    }
+
+    /// Calls Java's `String.endsWith(String)`
+    public func endsWith(_ suffix: JString) async -> Bool {
+        await callBoolean("endsWith", signature: .init(.object("java/lang/String"), returning: .boolean), args: [suffix])
+    }
+
+    /// Calls Java's `String.equals(Object)`
+    public func equals(_ other: JString) async -> Bool {
+        await callBoolean("equals", signature: .init(.object("java/lang/Object"), returning: .boolean), args: [other])
+    }
+
+    /// Calls Java's `String.contains(CharSequence)`
+    public func contains(_ sequence: JString) async -> Bool {
+        await callBoolean("contains", signature: .init(.object("java/lang/CharSequence"), returning: .boolean), args: [sequence])
+    }
+
+    /// Calls Java's `String.replace(CharSequence, CharSequence)`
+    public func replace(old: JString, with new: JString) async -> JString? {
+        await callReturningString("replace", signature: .init(.object("java/lang/CharSequence"), .object("java/lang/CharSequence"), returning: .object("java/lang/String")), args: [old, new])
+    }
+
+    /// Calls Java's `String.equalsIgnoreCase(String)`
+    public func equalsIgnoreCase(_ other: JString) async -> Bool {
+        await callBoolean("equalsIgnoreCase", signature: .init(.object("java/lang/String"), returning: .boolean), args: [other])
+    }
+
+    // MARK: - Helpers
+
+    private func callReturningString(_ name: String, signature: JMethodSignature, args: [JString] = []) async -> JString? {
+        guard
+            let env = await JEnv.current(),
+            let methodId = await clazz.methodId(name: name, signature: signature)
+        else { return nil }
+        let jvalues = args.map { $0.jValue }
+        guard let object = env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, args: jvalues) else { return nil }
+        return await JString(from: object.ref.assumingMemoryBound(to: jstring.self))
+    }
+
+    private func callBoolean(_ name: String, signature: JMethodSignature, args: [JString]) async -> Bool {
+        guard
+            let env = await JEnv.current(),
+            let methodId = await clazz.methodId(name: name, signature: signature)
+        else { return false }
+        let jvalues = args.map { $0.jValue }
+        return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: jvalues)
+    }
 }
