@@ -38,15 +38,11 @@ public final class JNIKit: @unchecked Sendable {
 
     /// Private initializer to enforce singleton usage.
     private init() {
-        var attr = pthread_mutexattr_t()
-        pthread_mutexattr_init(&attr)
-        pthread_mutexattr_settype(&attr, Int32(PTHREAD_MUTEX_RECURSIVE))
-        pthread_mutex_init(&jvmMutex, &attr)
-        pthread_mutexattr_destroy(&attr)
+        jvmMutex.activate(recursive: true)
     }
 
     deinit {
-        pthread_mutex_destroy(&jvmMutex)
+        jvmMutex.destroy()
     }
 
     /// Initialize the JNI context with the `JavaVM` pointer.
@@ -56,8 +52,8 @@ public final class JNIKit: @unchecked Sendable {
     ///
     /// - Parameter vm: The `JavaVM` pointer provided by the JNI environment.
     public func initialize(with vm: JVM) {
-        pthread_mutex_lock(&jvmMutex)
-        defer { pthread_mutex_unlock(&jvmMutex) }
+        jvmMutex.lock()
+        defer { jvmMutex.unlock() }
         guard !isInitialized else { return }
         self.vm = vm
     }
