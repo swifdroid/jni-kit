@@ -6,6 +6,7 @@
 //
 
 import Android
+import Logging
 
 /// A globally accessible singleton that manages the JVM and thread attachment for JNI operations.
 ///
@@ -30,6 +31,8 @@ public final class JNIKit: @unchecked Sendable {
     private var isInitialized = false
 
     private var jvmMutex = pthread_mutex_t()
+
+    public var logger = Logger(label: "")
 
     /// Private initializer to enforce singleton usage.
     private init() {
