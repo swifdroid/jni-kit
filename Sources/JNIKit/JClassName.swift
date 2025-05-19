@@ -21,12 +21,16 @@ public class JClassName: @unchecked Sendable, ExpressibleByStringLiteral {
     /// Full JNI-compatible class path (e.g. `"android/os/Build$VERSION"`)
     public let path: String
 
+    /// Fully qualified name with dots, e.g. "java.lang.String"
+    public let fullName: String
+
     /// Initialize from a root name (e.g. `"java"`, `"android"`)
     required public init(stringLiteral: String) {
         self.parent = nil
         self.name = stringLiteral
         self.isInnerClass = false
         self.path = name
+        self.fullName = name.components(separatedBy: "/").joined(separator: ".")
     }
 
     /// Initialize from a parent and class segment, specifying whether it's an inner class.
@@ -35,7 +39,9 @@ public class JClassName: @unchecked Sendable, ExpressibleByStringLiteral {
         self.name = name
         self.isInnerClass = isInnerClass
         let separator = isInnerClass ? "$" : "/"
-        self.path = parent.path + separator + name
+        let path = parent.path + separator + name
+        self.path = path
+        self.fullName = path.components(separatedBy: "/").joined(separator: ".")
     }
 }
 
