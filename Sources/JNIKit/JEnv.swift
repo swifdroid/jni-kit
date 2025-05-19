@@ -267,14 +267,29 @@ extension JEnv {
         JObject(env.pointee!.pointee.NewGlobalRef!(env, obj.ref), obj.clazz)
     }
 
+    /// Promotes a local reference to a global one (GC-safe).
+    public func newGlobalRef(_ ref: jobject) -> jobject? {
+        env.pointee!.pointee.NewGlobalRef!(env, ref)
+    }
+
     /// Deletes a global reference previously promoted.
     public func deleteGlobalRef(_ globalRef: JObject) {
         env.pointee!.pointee.DeleteGlobalRef!(env, globalRef.ref)
     }
 
+    /// Deletes a global reference previously promoted.
+    public func deleteGlobalRef(_ globalRef: jobject) {
+        env.pointee!.pointee.DeleteGlobalRef!(env, globalRef)
+    }
+
     /// Deletes a local reference to allow early GC.
     public func deleteLocalRef(_ localRef: JObject) {
         env.pointee!.pointee.DeleteLocalRef!(env, localRef.ref)
+    }
+
+    /// Deletes a local reference to allow early GC.
+    public func deleteLocalRef(_ localRef: jobject) {
+        env.pointee!.pointee.DeleteLocalRef!(env, localRef)
     }
 
     /// Returns whether two `jobject`s refer to the same underlying Java object.
