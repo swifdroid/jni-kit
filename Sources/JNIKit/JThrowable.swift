@@ -37,9 +37,9 @@ public struct JThrowable: @unchecked Sendable, JObjectable {
     /// - Parameters:
     ///   - throwable: The local `jobject` to wrap
     ///   - clazz: The resolved `JClass` for `java.lang.Throwable`
-    public init?(_ throwable: jthrowable, _ clazz: JClass) async {
+    public init?(_ throwable: jthrowable, _ clazz: JClass) {
         guard
-            let env = await JEnv.current(),
+            let env = JEnv.current(),
             let global = env.newGlobalRef(JObject(throwable, clazz))
         else { return nil }
         self.ref = global.ref
@@ -53,20 +53,20 @@ public struct JThrowable: @unchecked Sendable, JObjectable {
     /// This is useful after calling any JNI function to check and retrieve the exception object.
     ///
     /// - Returns: A `JThrowable` if an exception is pending, otherwise `nil`.
-    public static func current() async -> JThrowable? {
+    public static func current() -> JThrowable? {
         guard
-            let env = await JEnv.current(),
-            let throwable = await env.exceptionOccurred(),
-            let clazz = await JClass.load("java/lang/Throwable")
+            let env = JEnv.current(),
+            let throwable = env.exceptionOccurred(),
+            let clazz = JClass.load("java/lang/Throwable")
         else { return nil }
-        return await JThrowable(throwable.ref, clazz)
+        return JThrowable(throwable.ref, clazz)
     }
 
     /// Re-throw this Java exception back into the JVM.
     ///
     /// This is equivalent to calling `Throw(this.ref)` from JNI.
-    public func rethrow() async {
-        guard let env = await JEnv.current() else { return }
+    public func rethrow() {
+        guard let env = JEnv.current() else { return }
         _ = env.throwObject(ref)
     }
 }

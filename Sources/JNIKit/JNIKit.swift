@@ -18,7 +18,7 @@ import Android
 /// - Detach threads if needed (optional).
 ///
 /// It ensures consistent JNI usage and avoids repeated calls to `AttachCurrentThread` manually.
-public actor JNIKit: Sendable {
+public final class JNIKit: @unchecked Sendable {
     /// Singleton instance of `JNIKit` used throughout the application.
     public static let shared = JNIKit()
 
@@ -27,8 +27,22 @@ public actor JNIKit: Sendable {
     /// Set via `initialize(with:)` and required for all JNI interactions.
     public private(set) var vm: JVM!
 
+    private var isInitialized = false
+
+    private var jvmMutex = pthread_mutex_t()
+
     /// Private initializer to enforce singleton usage.
-    private init() {}
+    private init() {
+        var attr = pthread_mutexattr_t()
+        pthread_mutexattr_init(&attr)
+        pthread_mutexattr_settype(&attr, Int32(PTHREAD_MUTEX_RECURSIVE))
+        pthread_mutex_init(&jvmMutex, &attr)
+        pthread_mutexattr_destroy(&attr)
+    }
+
+    deinit {
+        pthread_mutex_destroy(&jvmMutex)
+    }
 
     /// Initialize the JNI context with the `JavaVM` pointer.
     ///
@@ -37,6 +51,9 @@ public actor JNIKit: Sendable {
     ///
     /// - Parameter vm: The `JavaVM` pointer provided by the JNI environment.
     public func initialize(with vm: JVM) {
+        pthread_mutex_lock(&jvmMutex)
+        defer { pthread_mutex_unlock(&jvmMutex) }
+        guard !isInitialized else { return }
         self.vm = vm
     }
 

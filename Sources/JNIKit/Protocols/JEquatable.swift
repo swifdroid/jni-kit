@@ -15,7 +15,7 @@ import Android
 ///
 /// Typical usage:
 /// ```swift
-/// if await javaObj1.equals(javaObj2) {
+/// if javaObj1.equals(javaObj2) {
 ///     print("Objects are equal based on Java semantics")
 /// }
 /// ```
@@ -30,7 +30,7 @@ public protocol JEquatable: Sendable {
     ///
     /// - Parameter other: Another Java object to compare with.
     /// - Returns: `true` if equal by Java semantics; otherwise, `false`.
-    func equals(_ other: JObject) async -> Bool
+    func equals(_ other: JObject) -> Bool
 }
 
 extension JEquatable {
@@ -41,10 +41,10 @@ extension JEquatable {
     /// and then calls it with the provided argument.
     ///
     /// Note: This uses the standard Java semantics and **does not** compare pointers directly.
-    public func equals(_ other: JObject) async -> Bool {
+    public func equals(_ other: JObject) -> Bool {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(name: "equals", signature: .init([.object("java/lang/Object")], returning: .boolean))
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(name: "equals", signature: .init([.object("java/lang/Object")], returning: .boolean))
         else { return false }
         return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: [other.jValue])
     }

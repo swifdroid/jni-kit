@@ -18,7 +18,7 @@ import Android
 ///
 /// Example:
 /// ```swift
-/// if let env = await JEnv.current() {
+/// if let env = JEnv.current() {
 ///     let stringClass = try env.findClass("java/lang/String")
 ///     ...
 /// }
@@ -64,16 +64,15 @@ extension JEnv {
     ///
     /// Example usage:
     /// ```swift
-    /// if let env = await JEnv.current() {
+    /// if let env = JEnv.current() {
     ///     let clazz = env.findClass("java/lang/String")
     ///     ...
     /// }
     /// ```
     ///
     /// - Returns: A `JEnv` instance for the current thread, or `nil` if the JVM is not yet available.
-    public static func current() async -> JEnv? {
-        guard let vm = await JNIKit.shared.vm else { return nil }
-        return vm.attachCurrentThread()
+    public static func current() -> JEnv? {
+        JNIKit.shared.vm.attachCurrentThread()
     }
 }
 
@@ -211,10 +210,10 @@ extension JEnv {
     /// Checks whether a Java exception has been thrown in the current thread.
     ///
     /// - Returns: A throwable object if an exception is pending, or `nil`.
-    public func exceptionOccurred() async -> JThrowable? {
+    public func exceptionOccurred() -> JThrowable? {
         guard let throwable = env.pointee!.pointee.ExceptionOccurred!(env) else { return nil }
-        guard let clazz = await JClass.load("java/lang/Throwable") else { return nil }
-        return await JThrowable(throwable, clazz)
+        guard let clazz = JClass.load("java/lang/Throwable") else { return nil }
+        return JThrowable(throwable, clazz)
     }
 
     /// Describes the current exception (if any) to stderr (for debugging).
@@ -1036,9 +1035,9 @@ extension JEnv {
     ///   - clazz: Class type of array elements.
     ///   - initialElement: Optional element to initialize all entries with.
     /// - Returns: A `JObjectArray` wrapping the created array.
-    public func newObjectArray(length: jint, clazz: JClass, initialElement: JObject? = nil) async -> JObjectArray? {
+    public func newObjectArray(length: jint, clazz: JClass, initialElement: JObject? = nil) -> JObjectArray? {
         guard let obj = env.pointee!.pointee.NewObjectArray!(env, length, clazz.ref, initialElement?.ref) else { return nil }
-        return await JObjectArray(obj, clazz)
+        return JObjectArray(obj, clazz)
     }
 
     /// Get an element from a Java object array.

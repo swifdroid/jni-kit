@@ -28,10 +28,10 @@ extension JWaitable {
     /// or a `java.lang.IllegalMonitorStateException` will be thrown.
     ///
     /// - Note: This call may block indefinitely unless `notify()` or `notifyAll()` is called on the same object.
-    public func wait() async {
+    public func wait() {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(
                 name: "wait",
                 signature: .returning(.void)
             )
@@ -46,10 +46,10 @@ extension JWaitable {
     /// - Another thread calls `notify()` or `notifyAll()` on this object.
     ///
     /// - Parameter timeoutMillis: The maximum time to wait in milliseconds.
-    public func wait(timeoutMillis: jlong) async {
+    public func wait(timeoutMillis: jlong) {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(
                 name: "wait",
                 signature: .init(.long, returning: .void)
             )
@@ -66,10 +66,10 @@ extension JWaitable {
     /// - Parameters:
     ///   - timeoutMillis: Number of milliseconds to wait.
     ///   - nanos: Additional nanoseconds (0–999999).
-    public func wait(timeoutMillis: jlong, nanos: jint) async {
+    public func wait(timeoutMillis: jlong, nanos: jint) {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(
                 name: "wait",
                 signature: .init(.long, .int, returning: .void)
             )

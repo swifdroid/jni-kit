@@ -19,8 +19,8 @@ import Logging
 ///
 /// ### Example
 /// ```swift
-/// if let stringClass = await JClass.load("java/lang/String") {
-///     let toStringID = await JNICache.shared.getMethodID(
+/// if let stringClass = JClass.load("java/lang/String") {
+///     let toStringID = JNICache.shared.getMethodID(
 ///         className: stringClass.name,
 ///         methodName: "toString",
 ///         signature: "()Ljava/lang/String;"
@@ -56,11 +56,11 @@ public struct JClass: @unchecked Sendable {
     ///
     /// - Parameter name: JNI class name using slashes (`/`) (e.g., `"java/lang/String"`).
     /// - Returns: A cached `JClass`, or `nil` if the class could not be loaded.
-    public static func load(_ name: JClassName) async -> JClass? {
+    public static func load(_ name: JClassName) -> JClass? {
         let logger = Logger(label: "\(Self.self)")
         logger.trace("load by class path: \(name.path)")
-        guard let result = await JNICache.shared.getClass(name) else {
             logger.trace("💣 \(name.path) not found")
+        guard let result = JNICache.shared.getClass(name) else {
             return nil
         }
         return result
@@ -74,8 +74,8 @@ public struct JClass: @unchecked Sendable {
     ///   - name: Method name (e.g. `"toString"`)
     ///   - signature: Method signature (e.g. `"()Ljava/lang/String;"`)
     /// - Returns: The method ID, or `nil` if not found.
-    public func methodId(name: String, signature: JMethodSignature) async -> JMethodId? {
-        await JNICache.shared.getMethodId(className: self.name, methodName: name, signature: signature)
+    public func methodId(name: String, signature: JMethodSignature) -> JMethodId? {
+        JNICache.shared.getMethodId(className: self.name, methodName: name, signature: signature)
     }
 
     /// Get an instance field ID from this class.
@@ -84,8 +84,8 @@ public struct JClass: @unchecked Sendable {
     ///   - name: Field name (e.g. `"mFlags"`)
     ///   - signature: Field signature (e.g. `"I"`)
     /// - Returns: The field ID, or `nil` if not found.
-    public func fieldId(name: String, signature: JSignatureItem) async -> JFieldId? {
-        await JNICache.shared.getFieldId(className: self.name, fieldName: name, signature: signature)
+    public func fieldId(name: String, signature: JSignatureItem) -> JFieldId? {
+        JNICache.shared.getFieldId(className: self.name, fieldName: name, signature: signature)
     }
 
     // MARK: - Static Methods
@@ -96,7 +96,7 @@ public struct JClass: @unchecked Sendable {
     ///   - name: Static method name (e.g. `"currentTimeMillis"`)
     ///   - signature: Method signature (e.g. `"()J"`)
     /// - Returns: The static method ID, or `nil` if not found.
-    public func staticMethodId(name: String, signature: JMethodSignature) async -> JMethodId? {
-        await JNICache.shared.getStaticMethodId(className: self.name, methodName: name, signature: signature)
+    public func staticMethodId(name: String, signature: JMethodSignature) -> JMethodId? {
+        JNICache.shared.getStaticMethodId(className: self.name, methodName: name, signature: signature)
     }
 }

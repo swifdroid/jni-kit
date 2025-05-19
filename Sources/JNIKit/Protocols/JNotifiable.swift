@@ -18,8 +18,8 @@ import Android
 ///
 /// Example usage:
 /// ```swift
-/// try await myJavaObject.notify()
-/// try await myJavaObject.notifyAll()
+/// try myJavaObject.notify()
+/// try myJavaObject.notifyAll()
 /// ```
 ///
 /// These calls correspond to:
@@ -44,10 +44,10 @@ extension JNotifiable {
     ///
     /// - Note: Must be called while holding the monitor on this object.
     /// - SeeAlso: [Java API: Object.notify()](https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#notify--)
-    public func notify() async {
+    public func notify() {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(
                 name: "notify",
                 signature: .returning(.void)
             )
@@ -62,10 +62,10 @@ extension JNotifiable {
     ///
     /// - Note: Must be called while holding the monitor on this object.
     /// - SeeAlso: [Java API: Object.notifyAll()](https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#notifyAll--)
-    public func notifyAll() async {
+    public func notifyAll() {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(
                 name: "notifyAll",
                 signature: .returning(.void)
             )

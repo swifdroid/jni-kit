@@ -16,10 +16,10 @@ public struct JObjectArray: @unchecked Sendable, JObjectable {
     public let length: Int
 
     /// Create a new array of Java objects with given size and element class.
-    public init?(length: Int, clazz: JClass) async {
+    public init?(length: Int, clazz: JClass) {
         guard
-            let env = await JEnv.current(),
-            let array = await env.newObjectArray(length: Int32(length), clazz: clazz),
+            let env = JEnv.current(),
+            let array = env.newObjectArray(length: Int32(length), clazz: clazz),
             let global = env.newGlobalRef(JObject(array.ref, clazz))
         else { return nil }
         self.ref = global.ref
@@ -28,9 +28,9 @@ public struct JObjectArray: @unchecked Sendable, JObjectable {
     }
 
     /// Create a wrapper from an existing `jobjectArray`.
-    public init?(_ array: jobjectArray, _ clazz: JClass) async {
+    public init?(_ array: jobjectArray, _ clazz: JClass) {
         guard
-            let env = await JEnv.current(),
+            let env = JEnv.current(),
             let global = env.newGlobalRef(JObject(array, clazz))
         else { return nil }
         self.ref = global.ref
@@ -39,28 +39,28 @@ public struct JObjectArray: @unchecked Sendable, JObjectable {
     }
 
     /// Get the object at a given index.
-    public func get(at index: Int) async -> JObject? {
+    public func get(at index: Int) -> JObject? {
         guard
-            let env = await JEnv.current(),
+            let env = JEnv.current(),
             let obj = env.getObjectArrayElement(self, index: Int32(index))
         else { return nil }
         return JObject(obj.ref, clazz)
     }
 
     /// Set an object at a given index.
-    public func set(_ value: JObject, at index: Int) async {
-        guard let env = await JEnv.current() else { return }
+    public func set(_ value: JObject, at index: Int) {
+        guard let env = JEnv.current() else { return }
         let jArray = value.ref.assumingMemoryBound(to: jobjectArray.self)
         let clazz = JClass(value.clazz.ref, value.className)
-        guard let jObjectArray = await JObjectArray(jArray, clazz) else { return }
+        guard let jObjectArray = JObjectArray(jArray, clazz) else { return }
         env.setObjectArrayElement(jObjectArray, index: Int32(index), value: value)
     }
 
     /// Convert to `[JObject]`
-    public func toArray() async -> [JObject] {
+    public func toArray() -> [JObject] {
         var result: [JObject] = []
-        for i in 0..<length {
-            if let item = await get(at: i) {
+        for i in 0 ..< length {
+            if let item = `get`(at: i) {
                 result.append(item)
             }
         }

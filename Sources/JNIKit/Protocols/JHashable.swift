@@ -16,7 +16,7 @@ import Android
 ///
 /// Example usage:
 /// ```swift
-/// let hash = await myJavaObject.hashCode()
+/// let hash = myJavaObject.hashCode()
 /// print("Java hashCode is: \(hash)")
 /// ```
 ///
@@ -33,7 +33,7 @@ public protocol JHashable: Sendable {
     /// Returns the result of calling Java’s `hashCode()` method on this object.
     ///
     /// - Returns: The 32-bit integer hash code from the Java side, or `0` if lookup fails.
-    func hashCode() async -> Int32
+    func hashCode() -> Int32
 }
 
 extension JHashable {
@@ -43,10 +43,10 @@ extension JHashable {
     /// calls it using `env.callIntMethod(...)`.
     ///
     /// - Returns: Java's `hashCode()` result as `Int32`, or `0` if lookup or call fails.
-    public func hashCode() async -> Int32 {
+    public func hashCode() -> Int32 {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(
                 name: "hashCode",
                 signature: .returning(.int)
             )

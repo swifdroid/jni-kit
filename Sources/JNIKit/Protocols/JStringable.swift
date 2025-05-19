@@ -21,7 +21,7 @@ import Android
 ///     let ref: jobject
 ///     let clazz: JClass
 ///
-///     // Now you can call `await myObject.toString()` to get its string representation
+///     // Now you can call `myObject.toString()` to get its string representation
 /// }
 /// ```
 public protocol JStringable: Sendable {
@@ -50,10 +50,10 @@ extension JStringable {
     /// 4. Converts the resulting Java `jstring` into a Swift `String`.
     ///
     /// - Returns: A Swift `String` representation of the Java object, or `nil` if the method could not be invoked.
-    public func toString() async -> String? {
+    public func toString() -> String? {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(
                 name: "toString",
                 signature: .returning("java/lang/String")
             ),
@@ -62,8 +62,8 @@ extension JStringable {
                 methodId: methodId,
                 args: []
             ),
-            let jstring = await JString(from: jstr.ref)
+            let jstring = JString(from: jstr.ref)
         else { return nil }
-        return await jstring.toSwiftString()
+        return jstring.toSwiftString()
     }
 }

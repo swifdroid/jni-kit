@@ -39,44 +39,42 @@ public struct JObject: @unchecked Sendable, JObjectable {
     }
 
     /// Create from class name and a constructor method.
-    public static func newInstance(className: JClassName, constructorSignature: JMethodSignature, args: [jvalue]) async -> JObject? {
+    public static func newInstance(className: JClassName, constructorSignature: JMethodSignature, args: [jvalue]) -> JObject? {
         guard
-            let env = await JEnv.current(),
-            let clazz = await JClass.load(className),
-            let methodId = await clazz.methodId(name: "<init>", signature: constructorSignature),
+            let env = JEnv.current(),
+            let clazz = JClass.load(className),
+            let methodId = clazz.methodId(name: "<init>", signature: constructorSignature),
             let local = env.newObject(clazz: clazz, constructor: methodId, args: args),
             let global = env.newGlobalRef(local)
-        else {
-            return nil
-        }
+        else { return nil }
         return JObject(global.ref, clazz)
     }
 
     // MARK: - Call Instance Methods
 
     /// Call an instance method on this object.
-    public func callObjectMethod(name: String, signature: JMethodSignature, args: [jvalue]) async -> JObject? {
+    public func callObjectMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> JObject? {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(name: name, signature: signature)
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(name: name, signature: signature)
         else { return nil }
         return env.callObjectMethod(object: self, methodId: methodId, args: args)
     }
 
     /// Call an instance method returning `jint`
-    public func callIntMethod(name: String, signature: JMethodSignature, args: [jvalue]) async -> Int32? {
+    public func callIntMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Int32? {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(name: name, signature: signature)
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(name: name, signature: signature)
         else { return nil }
         return env.callIntMethod(object: self, methodId: methodId, args: args)
     }
 
     /// Call an instance method returning `void`
-    public func callVoidMethod(name: String, signature: JMethodSignature, args: [jvalue]) async {
+    public func callVoidMethod(name: String, signature: JMethodSignature, args: [jvalue]) {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(name: name, signature: signature)
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(name: name, signature: signature)
         else { return }
         env.callVoidMethod(object: self, methodId: methodId, args: args)
     }

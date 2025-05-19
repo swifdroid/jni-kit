@@ -17,7 +17,7 @@ import Android
 ///
 /// Example usage:
 /// ```swift
-/// if let clazz = await myObject.getClass() {
+/// if let clazz = myObject.getClass() {
 ///     print("Runtime Java class object: \(clazz)")
 /// }
 /// ```
@@ -31,7 +31,7 @@ public protocol JGetClassable: Sendable {
     /// Returns the result of calling Java’s `getClass()` method on this object.
     ///
     /// - Returns: A `JObject` representing a Java `Class` instance, or `nil` if lookup or call fails.
-    func getClass() async -> JObject?
+    func getClass() -> JObject?
 }
 
 extension JGetClassable {
@@ -42,10 +42,10 @@ extension JGetClassable {
     ///
     /// - Returns: A `JObject` representing the Java class instance (`java.lang.Class`),
     ///   or `nil` if the call fails.
-    public func getClass() async -> JObject? {
+    public func getClass() -> JObject? {
         guard
-            let env = await JEnv.current(),
-            let methodId = await clazz.methodId(
+            let env = JEnv.current(),
+            let methodId = clazz.methodId(
                 name: "getClass",
                 signature: .returning("java/lang/Class")
             )
