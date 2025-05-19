@@ -31,6 +31,7 @@ public final class JNIKit: @unchecked Sendable {
     private var isInitialized = false
 
     private var jvmMutex = pthread_mutex_t()
+    private var logLevelMutex = pthread_mutex_t()
 
     public var logger = Logger(label: "")
 
@@ -39,10 +40,12 @@ public final class JNIKit: @unchecked Sendable {
     /// Private initializer to enforce singleton usage.
     private init() {
         jvmMutex.activate(recursive: true)
+        logLevelMutex.activate(recursive: true)
     }
 
     deinit {
         jvmMutex.destroy()
+        logLevelMutex.destroy()
     }
 
     /// Initialize the JNI context with the `JavaVM` pointer.
@@ -56,6 +59,12 @@ public final class JNIKit: @unchecked Sendable {
         defer { jvmMutex.unlock() }
         guard !isInitialized else { return }
         self.vm = vm
+    }
+
+    public func setLogLevel(_ level: Logger.Level) {
+        logLevelMutex.lock()
+        defer { logLevelMutex.unlock() }
+        logger.logLevel = level
     }
 
     /// Attach the current thread to the JVM and get a wrapped `JNIEnv*`.
