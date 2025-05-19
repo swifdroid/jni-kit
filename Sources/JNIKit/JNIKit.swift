@@ -34,6 +34,8 @@ public final class JNIKit: @unchecked Sendable {
 
     public var logger = Logger(label: "")
 
+    public static var logger: Logger { shared.logger }
+
     /// Private initializer to enforce singleton usage.
     private init() {
         var attr = pthread_mutexattr_t()
