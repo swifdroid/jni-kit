@@ -91,6 +91,18 @@ public final class JNIKit: @unchecked Sendable {
         self.vm = vm
     }
 
+    /// Initialize the JNI context with the `JavaVM` pointer.
+    ///
+    /// This method must be called once (typically from `JNI_OnLoad`) to allow JNI access
+    /// from Swift code on any thread.
+    ///
+    /// - Parameter vm: The `JavaVM` pointer provided by the JNI environment.
+    ///
+    /// - Note: This method is thread-safe and prevents reinitialization.
+    public static func initialize(with vm: JVM) {
+        shared.initialize(with: vm)
+    }
+
     // MARK: - Logging Control
 
     /// Sets the current log level for the `logger` instance.
@@ -128,6 +140,19 @@ public final class JNIKit: @unchecked Sendable {
         vm.attachCurrentThread()
     }
 
+    /// Attaches the current thread to the JVM and returns a `JEnv` wrapper for JNI calls.
+    ///
+    /// This is required before making any JNI calls from Swift on that thread.
+    /// JNI mandates that `JNIEnv*` is thread-local and must be acquired per-thread.
+    ///
+    /// - Returns: A `JEnv` instance containing the `JNIEnv*`, or `nil` if the operation fails.
+    ///
+    /// - Important: This must be called before using any JNI functions, or undefined behavior may occur.
+    /// - Note: The returned `JEnv` should be considered valid only for the current thread.
+    public static func attachCurrentThread() -> JEnv? {
+        shared.attachCurrentThread()
+    }
+
     /// Detaches the current thread from the JVM.
     ///
     /// This is generally optional but can be useful when managing your own background threads,
@@ -136,5 +161,15 @@ public final class JNIKit: @unchecked Sendable {
     /// - Note: Do not call this from the main UI thread or any thread that the JVM does not expect to be detached.
     public func detachCurrentThread() {
         vm.detachCurrentThread()
+    }
+
+    /// Detaches the current thread from the JVM.
+    ///
+    /// This is generally optional but can be useful when managing your own background threads,
+    /// native callbacks, or long-lived Swift coroutines that interact with JNI.
+    ///
+    /// - Note: Do not call this from the main UI thread or any thread that the JVM does not expect to be detached.
+    public static func detachCurrentThread() {
+        shared.detachCurrentThread()
     }
 }
