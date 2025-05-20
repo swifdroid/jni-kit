@@ -57,12 +57,12 @@ public struct JClass: @unchecked Sendable {
     /// - Parameter name: JNI class name using slashes (`/`) (e.g., `"java/lang/String"`).
     /// - Returns: A cached `JClass`, or `nil` if the class could not be loaded.
     public static func load(_ name: JClassName) -> JClass? {
-        let logger = Logger(label: "\(Self.self)")
-        logger.trace("load by class path: \(name.path)")
-            logger.trace("💣 \(name.path) not found")
+        Logger.trace("Loading \"\(name.path)\" class")
         guard let result = JNICache.shared.getClass(name) else {
+            Logger.debug("💣 Class \"\(name.path)\" not found")
             return nil
         }
+        Logger.trace("Loaded \"\(name.path)\" class")
         return result
     }
 
@@ -75,7 +75,14 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Method signature (e.g. `"()Ljava/lang/String;"`)
     /// - Returns: The method ID, or `nil` if not found.
     public func methodId(name: String, signature: JMethodSignature) -> JMethodId? {
-        JNICache.shared.getMethodId(className: self.name, methodName: name, signature: signature)
+        Logger.trace("Getting methodId \(name)\(signature.signature)")
+        guard let id = JNICache.shared.getMethodId(className: self.name, methodName: name, signature: signature)
+        else {
+            Logger.debug("💣 MethodId \"\(name)\(signature.signature)\" not found")
+            return nil
+        }
+        Logger.trace("Got methodId \(name)\(signature.signature)")
+        return id
     }
 
     /// Get an instance field ID from this class.
@@ -85,7 +92,14 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Field signature (e.g. `"I"`)
     /// - Returns: The field ID, or `nil` if not found.
     public func fieldId(name: String, signature: JSignatureItem) -> JFieldId? {
-        JNICache.shared.getFieldId(className: self.name, fieldName: name, signature: signature)
+        Logger.trace("Getting fieldId \(name)\(signature.signature)")
+        guard let id = JNICache.shared.getFieldId(className: self.name, fieldName: name, signature: signature)
+        else {
+            Logger.debug("💣 FieldId \"\(name)\(signature.signature)\" not found")
+            return nil
+        }
+        Logger.trace("Got fieldId \(name)\(signature.signature)")
+        return id
     }
 
     // MARK: - Static Methods
@@ -97,6 +111,13 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Method signature (e.g. `"()J"`)
     /// - Returns: The static method ID, or `nil` if not found.
     public func staticMethodId(name: String, signature: JMethodSignature) -> JMethodId? {
-        JNICache.shared.getStaticMethodId(className: self.name, methodName: name, signature: signature)
+        Logger.trace("Getting staticMethodId \(name)\(signature.signature)")
+        guard let id = JNICache.shared.getStaticMethodId(className: self.name, methodName: name, signature: signature)
+        else {
+            Logger.debug("💣 StaticMethodId \"\(name)\(signature.signature)\" not found")
+            return nil
+        }
+        Logger.trace("Got staticMethodId \(name)\(signature.signature)")
+        return id
     }
 }
