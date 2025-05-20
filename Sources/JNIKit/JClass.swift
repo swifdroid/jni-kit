@@ -57,12 +57,19 @@ public struct JClass: @unchecked Sendable {
     /// - Parameter name: JNI class name using slashes (`/`) (e.g., `"java/lang/String"`).
     /// - Returns: A cached `JClass`, or `nil` if the class could not be loaded.
     public static func load(_ name: JClassName) -> JClass? {
-        Logger.trace("Loading \"\(name.path)\" class")
+        #if DEBUG
+        let logKey = "\"\(name.path)\""
+        Logger.trace("Loading \(logKey) class")
+        #endif
         guard let result = JNICache.shared.getClass(name) else {
-            Logger.debug("💣 Class \"\(name.path)\" not found")
+            #if DEBUG
+            Logger.debug("💣 Class \(logKey) not found")
+            #endif
             return nil
         }
-        Logger.trace("Loaded \"\(name.path)\" class")
+        #if DEBUG
+        Logger.trace("Loaded \(logKey) class")
+        #endif
         return result
     }
 
@@ -75,13 +82,20 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Method signature (e.g. `"()Ljava/lang/String;"`)
     /// - Returns: The method ID, or `nil` if not found.
     public func methodId(name: String, signature: JMethodSignature) -> JMethodId? {
-        Logger.trace("Getting methodId \(name)\(signature.signature)")
+        #if DEBUG
+        let logKey = "\"\(name)\(signature.signature)\""
+        Logger.trace("Getting methodId \(logKey)")
+        #endif
         guard let id = JNICache.shared.getMethodId(className: self.name, methodName: name, signature: signature)
         else {
-            Logger.debug("💣 MethodId \"\(name)\(signature.signature)\" not found")
+            #if DEBUG
+            Logger.debug("💣 MethodId \(logKey) not found")
+            #endif
             return nil
         }
-        Logger.trace("Got methodId \(name)\(signature.signature)")
+        #if DEBUG
+        Logger.trace("Got methodId \(logKey)")
+        #endif
         return id
     }
 
@@ -92,13 +106,20 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Field signature (e.g. `"I"`)
     /// - Returns: The field ID, or `nil` if not found.
     public func fieldId(name: String, signature: JSignatureItem) -> JFieldId? {
-        Logger.trace("Getting fieldId \(name)\(signature.signature)")
+        #if DEBUG
+        let logKey = "\"\(name)\(signature.signature)\""
+        Logger.trace("Getting fieldId \(logKey)")
+        #endif
         guard let id = JNICache.shared.getFieldId(className: self.name, fieldName: name, signature: signature)
         else {
-            Logger.debug("💣 FieldId \"\(name)\(signature.signature)\" not found")
+            #if DEBUG
+            Logger.debug("💣 FieldId \(logKey) not found")
+            #endif
             return nil
         }
-        Logger.trace("Got fieldId \(name)\(signature.signature)")
+        #if DEBUG
+        Logger.trace("Got fieldId \(logKey)")
+        #endif
         return id
     }
 
@@ -111,13 +132,20 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Method signature (e.g. `"()J"`)
     /// - Returns: The static method ID, or `nil` if not found.
     public func staticMethodId(name: String, signature: JMethodSignature) -> JMethodId? {
-        Logger.trace("Getting staticMethodId \(name)\(signature.signature)")
+        #if DEBUG
+        let logKey = "\"\(name)\(signature.signature)\""
+        Logger.trace("Getting staticMethodId \(logKey)")
+        #endif
         guard let id = JNICache.shared.getStaticMethodId(className: self.name, methodName: name, signature: signature)
         else {
-            Logger.debug("💣 StaticMethodId \"\(name)\(signature.signature)\" not found")
+            #if DEBUG
+            Logger.debug("💣 StaticMethodId \(logKey) not found")
+            #endif
             return nil
         }
-        Logger.trace("Got staticMethodId \(name)\(signature.signature)")
+        #if DEBUG
+        Logger.trace("Got staticMethodId \(logKey)")
+        #endif
         return id
     }
 
@@ -130,13 +158,20 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Field signature (e.g. `"I"`)
     /// - Returns: The static field ID, or `nil` if not found.
     public func staticFieldId(name: String, signature: JSignatureItem) -> JFieldId? {
-        Logger.trace("Getting staticFieldId \(name)\(signature.signature)")
+        #if DEBUG
+        let logKey = "\"\(name)\(signature.signature)\""
+        Logger.trace("Getting staticFieldId \(logKey)")
+        #endif
         guard let id = JNICache.shared.getStaticFieldId(className: self.name, fieldName: name, signature: signature)
         else {
-            Logger.debug("💣 StaticFieldId \"\(name)\(signature.signature)\" not found")
+            #if DEBUG
+            Logger.debug("💣 StaticFieldId \(logKey) not found")
+            #endif
             return nil
         }
-        Logger.trace("Got staticFieldId \(name)\(signature.signature)")
+        #if DEBUG
+        Logger.trace("Got staticFieldId \(logKey)")
+        #endif
         return id
     }
 }
