@@ -30,27 +30,15 @@ public final class JNICache: @unchecked Sendable {
 
     /// Private initializer to enforce singleton usage.
     private init() {
-        var classAttr = pthread_mutexattr_t()
-        var methodAttr = pthread_mutexattr_t()
-        var fieldAttr = pthread_mutexattr_t()
-        pthread_mutexattr_init(&classAttr)
-        pthread_mutexattr_init(&methodAttr)
-        pthread_mutexattr_init(&fieldAttr)
-        pthread_mutexattr_settype(&classAttr, Int32(PTHREAD_MUTEX_RECURSIVE))
-        pthread_mutexattr_settype(&methodAttr, Int32(PTHREAD_MUTEX_RECURSIVE))
-        pthread_mutexattr_settype(&fieldAttr, Int32(PTHREAD_MUTEX_RECURSIVE))
-        pthread_mutex_init(&classMutex, &classAttr)
-        pthread_mutex_init(&methodMutex, &methodAttr)
-        pthread_mutex_init(&fieldMutex, &fieldAttr)
-        pthread_mutexattr_destroy(&classAttr)
-        pthread_mutexattr_destroy(&methodAttr)
-        pthread_mutexattr_destroy(&fieldAttr)
+        classMutex.activate(recursive: true)
+        methodMutex.activate(recursive: true)
+        fieldMutex.activate(recursive: true)
     }
 
     deinit {
-        pthread_mutex_destroy(&classMutex)
-        pthread_mutex_destroy(&methodMutex)
-        pthread_mutex_destroy(&fieldMutex)
+        classMutex.destroy()
+        methodMutex.destroy()
+        fieldMutex.destroy()
     }
 
     /// Attach the current thread to the JVM and retrieve the corresponding `JNIEnv*`.
@@ -70,8 +58,8 @@ public final class JNICache: @unchecked Sendable {
     /// - Returns: A `JClass` containing a globally retained `jclass` reference,
     ///            or `nil` if the class could not be found.
     public func getClass(_ name: JClassName) -> JClass? {
-        pthread_mutex_lock(&classMutex)
-        defer { pthread_mutex_unlock(&classMutex) }
+        classMutex.lock()
+        defer { classMutex.unlock() }
         if let cached = classCache[name] {
             return cached
         }
@@ -100,8 +88,8 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"()Ljava/lang/String;"`)
     /// - Returns: Cached or resolved `jmethodID`, or `nil` if not found.
     public func getMethodId(className: JClassName, methodName: String, signature: JMethodSignature) -> JMethodId? {
-        pthread_mutex_lock(&methodMutex)
-        defer { pthread_mutex_unlock(&methodMutex) }
+        methodMutex.lock()
+        defer { methodMutex.unlock() }
         guard let clazz = getClass(className) else {
             logger.info("getMethodId 2 exit")
             return nil
@@ -135,8 +123,8 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"()J"`)
     /// - Returns: Cached or resolved `jmethodID`, or `nil` if not found.
     public func getStaticMethodId(className: JClassName, methodName: String, signature: JMethodSignature) -> JMethodId? {
-        pthread_mutex_lock(&methodMutex)
-        defer { pthread_mutex_unlock(&methodMutex) }
+        methodMutex.lock()
+        defer { methodMutex.unlock() }
         guard
             let clazz = getClass(className),
             let env = getEnv()
@@ -166,8 +154,8 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"I"`)
     /// - Returns: Cached or resolved `jfieldID`, or `nil` if not found.
     public func getFieldId(className: JClassName, fieldName: String, signature: JSignatureItem) -> JFieldId? {
-        pthread_mutex_lock(&fieldMutex)
-        defer { pthread_mutex_unlock(&fieldMutex) }
+        fieldMutex.lock()
+        defer { fieldMutex.unlock() }
         guard
             let clazz = getClass(className),
             let env = getEnv()
@@ -195,8 +183,8 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"Ljava/lang/String;"`)
     /// - Returns: Cached or resolved `jfieldID`, or `nil` if not found.
     public func getStaticFieldId(className: JClassName, fieldName: String, signature: JSignatureItem) -> JFieldId? {
-        pthread_mutex_lock(&fieldMutex)
-        defer { pthread_mutex_unlock(&fieldMutex) }
+        fieldMutex.lock()
+        defer { fieldMutex.unlock() }
         guard
             let clazz = getClass(className),
             let env = getEnv()
