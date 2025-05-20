@@ -67,6 +67,10 @@ public final class JNIKit: @unchecked Sendable {
         logger.logLevel = level
     }
 
+    public static func setLogLevel(_ level: Logger.Level) {
+        shared.setLogLevel(level)
+    }
+
     /// Attach the current thread to the JVM and get a wrapped `JNIEnv*`.
     ///
     /// This ensures thread-local access to JNI methods and must be used before any JNI operations.
