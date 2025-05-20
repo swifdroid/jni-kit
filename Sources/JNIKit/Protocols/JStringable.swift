@@ -37,7 +37,7 @@ public protocol JStringable: Sendable {
     /// into a Swift `String`, and automatically releases memory when done.
     ///
     /// - Returns: The result of `toString()` as a Swift string, or `nil` if the call fails.
-    func toString() async -> String?
+    func toString() -> String
 }
 
 extension JStringable {
@@ -50,20 +50,17 @@ extension JStringable {
     /// 4. Converts the resulting Java `jstring` into a Swift `String`.
     ///
     /// - Returns: A Swift `String` representation of the Java object, or `nil` if the method could not be invoked.
-    public func toString() -> String? {
+    public func toString() -> String {
+        let fallbackResult = "\(clazz.name.fullName)@\(ref)"
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(
-                name: "toString",
-                signature: .returning("java/lang/String")
-            ),
+            let methodId = clazz.methodId(name: "toString", signature: .returning("java/lang/String")),
             let jstr = env.callObjectMethod(
                 object: .init(ref, clazz),
                 methodId: methodId,
                 args: []
-            ),
-            let jstring = JString(from: jstr.ref)
-        else { return nil }
-        return jstring.toSwiftString()
+            )
+        else { return fallbackResult }
+        return JString(from: jstr.ref)?.toSwiftString() ?? fallbackResult
     }
 }
