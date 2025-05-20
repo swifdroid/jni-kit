@@ -120,4 +120,23 @@ public struct JClass: @unchecked Sendable {
         Logger.trace("Got staticMethodId \(name)\(signature.signature)")
         return id
     }
+
+    // MARK: - Static Fields
+
+    /// Get a static field ID from this class.
+    ///
+    /// - Parameters:
+    ///   - name: Field name (e.g. `"mFlags"`)
+    ///   - signature: Field signature (e.g. `"I"`)
+    /// - Returns: The static field ID, or `nil` if not found.
+    public func staticFieldId(name: String, signature: JSignatureItem) -> JFieldId? {
+        Logger.trace("Getting staticFieldId \(name)\(signature.signature)")
+        guard let id = JNICache.shared.getStaticFieldId(className: self.name, fieldName: name, signature: signature)
+        else {
+            Logger.debug("💣 StaticFieldId \"\(name)\(signature.signature)\" not found")
+            return nil
+        }
+        Logger.trace("Got staticFieldId \(name)\(signature.signature)")
+        return id
+    }
 }
