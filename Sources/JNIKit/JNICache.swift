@@ -6,6 +6,7 @@
 //
 
 import Android
+import Logging
 
 /// A global actor responsible for caching JNI references and providing thread-safe access to `JNIEnv*`.
 ///
@@ -45,7 +46,13 @@ public final class JNICache: @unchecked Sendable {
     ///
     /// - Returns: A valid `JNIEnv*` for the current thread, or `nil` if attach fails.
     private func getEnv() -> JEnv? {
-        let env = JNIKit.shared.vm.attachCurrentThread()
+        guard let env = JNIKit.shared.vm.attachCurrentThread()
+        else {
+            #if DEBUG
+            Logger.debug("💣 getEnv failed")
+            #endif
+            return nil
+        }
         return env
     }
 
@@ -58,25 +65,37 @@ public final class JNICache: @unchecked Sendable {
     /// - Returns: A `JClass` containing a globally retained `jclass` reference,
     ///            or `nil` if the class could not be found.
     public func getClass(_ name: JClassName) -> JClass? {
+        #if DEBUG
+        let logKey = "\"\(name.fullName)\""
+        Logger.trace("Getting class \(logKey) from cache")
+        #endif
         classMutex.lock()
         defer { classMutex.unlock() }
         if let cached = classCache[name] {
+            #if DEBUG
+            Logger.trace("Got class \(logKey) from cache")
+            #endif
             return cached
         }
-        guard let env = getEnv()
+        #if DEBUG
+        Logger.trace("Class \(logKey) is not in cache")
+        Logger.trace("Getting class \(logKey) from JNIEnv")
+        #endif
+        guard
+            let env = getEnv(),
+            let local = env.findClass(name),
+            let global = env.newGlobalRef(local.ref)
         else {
-            return nil
-        }
-        guard let local = env.findClass(name)
-        else {
-            return nil
-        }
-        guard let global = env.newGlobalRef(local.ref)
-        else {
+            #if DEBUG
+            Logger.debug("💣 Failed to get class \(logKey) from JNIEnv")
+            #endif
             return nil
         }
         let wrapped = JClass(global, name)
         classCache[name] = wrapped
+        #if DEBUG
+        Logger.trace("Got class \(logKey) from JNIEnv, saved in cache")
+        #endif
         return wrapped
     }
 
@@ -88,30 +107,43 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"()Ljava/lang/String;"`)
     /// - Returns: Cached or resolved `jmethodID`, or `nil` if not found.
     public func getMethodId(className: JClassName, methodName: String, signature: JMethodSignature) -> JMethodId? {
+        #if DEBUG
+        let logKey = "\"\(className.fullName).\(methodName)\(signature.signature)\""
+        Logger.trace("Getting methodId \(logKey) from cache")
+        #endif
         methodMutex.lock()
         defer { methodMutex.unlock() }
-        guard let clazz = getClass(className) else {
-            logger.info("getMethodId 2 exit")
-            return nil
-        }
-        guard let env = getEnv() else {
-            logger.info("getMethodId 3 exit")
-            return nil
-        }
         let key = "\(methodName)\(signature.signature)"
         if let cached = methodCache[className]?[key] {
+            #if DEBUG
+            Logger.trace("Got methodId \(logKey) from cache")
+            #endif
             return cached
         }
+        #if DEBUG
+        Logger.trace("MethodId \(logKey) is not in cache")
+        Logger.trace("Getting methodId \(logKey) from JNIEnv")
+        #endif
+        guard
+            let env = getEnv(),
+            let clazz = getClass(className)
+        else { return nil }
         let result = methodName.withCString { cname in
             signature.signature.withCString { csig in
                 env.env.pointee?.pointee.GetMethodID?(env.env, clazz.ref, cname, csig)
             }
         }
         guard let methodId = result else {
+            #if DEBUG
+            Logger.debug("💣 Failed to get methodId \(logKey) from JNIEnv")
+            #endif
             return nil
         }
         let wrapper = JMethodId(methodId)
         methodCache[className, default: [:]][key] = wrapper
+        #if DEBUG
+        Logger.trace("Got methodId \(logKey) from JNIEnv, saved in cache")
+        #endif
         return wrapper
     }
 
@@ -123,26 +155,43 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"()J"`)
     /// - Returns: Cached or resolved `jmethodID`, or `nil` if not found.
     public func getStaticMethodId(className: JClassName, methodName: String, signature: JMethodSignature) -> JMethodId? {
+        #if DEBUG
+        let logKey = "\"\(className.fullName).\(methodName)\(signature.signature)\""
+        Logger.trace("Getting staticMethodId \(logKey) from cache")
+        #endif
         methodMutex.lock()
         defer { methodMutex.unlock() }
+        let key = "static:\(methodName)\(signature.signature)"
+        if let cached = methodCache[className]?[key] {
+            #if DEBUG
+            Logger.trace("Got staticMethodId \(logKey) from cache")
+            #endif
+            return cached
+        }
+        #if DEBUG
+        Logger.trace("StaticMethodId \(logKey) is not in cache")
+        Logger.trace("Getting staticMethodId \(logKey) from JNIEnv")
+        #endif
         guard
             let clazz = getClass(className),
             let env = getEnv()
         else { return nil }
-        let key = "static:\(methodName)\(signature.signature)"
-        if let cached = methodCache[className]?[key] {
-            return cached
-        }
         let result = methodName.withCString { cname in
             signature.signature.withCString { csig in
                 env.env.pointee?.pointee.GetStaticMethodID?(env.env, clazz.ref, cname, csig)
             }
         }
         guard let methodId = result else {
+            #if DEBUG
+            Logger.debug("💣 Failed to get staticMethodId \(logKey) from JNIEnv")
+            #endif
             return nil
         }
         let wrapper = JMethodId(methodId)
-        methodCache[className, default: [:]][key] = wrapper 
+        methodCache[className, default: [:]][key] = wrapper
+        #if DEBUG
+        Logger.trace("Got staticMethodId \(logKey) from JNIEnv, saved in cache")
+        #endif
         return wrapper
     }
 
@@ -154,24 +203,43 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"I"`)
     /// - Returns: Cached or resolved `jfieldID`, or `nil` if not found.
     public func getFieldId(className: JClassName, fieldName: String, signature: JSignatureItem) -> JFieldId? {
+        #if DEBUG
+        let logKey = "\"\(className.fullName) \(fieldName)\(signature.signature)\""
+        Logger.trace("Getting fieldId \(logKey) from cache")
+        #endif
         fieldMutex.lock()
         defer { fieldMutex.unlock() }
+        let key = "\(fieldName)\(signature.signature)"
+        if let cached = fieldCache[className]?[key] {
+            #if DEBUG
+            Logger.trace("Got fieldId \(logKey) from cache")
+            #endif
+            return cached
+        }
+        #if DEBUG
+        Logger.trace("FieldId \(logKey) is not in cache")
+        Logger.trace("Getting fieldId \(logKey) from JNIEnv")
+        #endif
         guard
             let clazz = getClass(className),
             let env = getEnv()
         else { return nil }
-        let key = "\(fieldName)\(signature.signature)"
-        if let cached = fieldCache[className]?[key] {
-            return cached
-        }
         let result = fieldName.withCString { fname in
             signature.signature.withCString { fsig in
                 env.env.pointee?.pointee.GetFieldID?(env.env, clazz.ref, fname, fsig)
             }
         }
-        guard let fieldId = result else { return nil }
+        guard let fieldId = result else {
+            #if DEBUG
+            Logger.debug("💣 Failed to get fieldId \(logKey) from JNIEnv")
+            #endif
+            return nil
+        }
         let wrapper = JFieldId(fieldId)
         fieldCache[className, default: [:]][key] = wrapper
+        #if DEBUG
+        Logger.trace("Got fieldId \(logKey) from JNIEnv, saved in cache")
+        #endif
         return wrapper
     }
 
@@ -183,24 +251,43 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"Ljava/lang/String;"`)
     /// - Returns: Cached or resolved `jfieldID`, or `nil` if not found.
     public func getStaticFieldId(className: JClassName, fieldName: String, signature: JSignatureItem) -> JFieldId? {
+        #if DEBUG
+        let logKey = "\"\(className.fullName) \(fieldName)\(signature.signature)\""
+        Logger.trace("Getting staticFieldId \(logKey) from cache")
+        #endif
         fieldMutex.lock()
         defer { fieldMutex.unlock() }
+        let key = "static:\(fieldName)\(signature.signature)"
+        if let cached = fieldCache[className]?[key] {
+            #if DEBUG
+            Logger.trace("Got staticFieldId \(logKey) from cache")
+            #endif
+            return cached
+        }
+        #if DEBUG
+        Logger.trace("StaticFieldId \(logKey) is not in cache")
+        Logger.trace("Getting staticFieldId \(logKey) from JNIEnv")
+        #endif
         guard
             let clazz = getClass(className),
             let env = getEnv()
         else { return nil }
-        let key = "static:\(fieldName)\(signature.signature)"
-        if let cached = fieldCache[className]?[key] {
-            return cached
-        }
         let result = fieldName.withCString { fname in
             signature.signature.withCString { fsig in
                 env.env.pointee?.pointee.GetStaticFieldID?(env.env, clazz.ref, fname, fsig)
             }
         }
-        guard let fieldId = result else { return nil }
+        guard let fieldId = result else {
+            #if DEBUG
+            Logger.debug("💣 Failed to get staticFieldId \(logKey) from JNIEnv")
+            #endif
+            return nil
+        }
         let wrapper = JFieldId(fieldId)
         fieldCache[className, default: [:]][key] = wrapper
+        #if DEBUG
+        Logger.trace("Got staticFieldId \(logKey) from JNIEnv, saved in cache")
+        #endif
         return wrapper
     }
 }
