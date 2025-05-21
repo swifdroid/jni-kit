@@ -54,18 +54,11 @@ public struct JString: @unchecked Sendable, JObjectable {
     /// - Parameter existing: The JNI `jstring` reference to wrap.
     /// - Returns: `nil` if JVM is unavailable or the reference cannot be globalized.
     public init?(from existing: jstring) {
-        guard let env = JEnv.current()
-        else {
-            return nil
-        }
-        guard let clazz = JClass.load(Self.className)
-        else {
-            return nil
-        }
-        guard let global = env.newGlobalRef(.init(existing, clazz))
-        else {
-            return nil
-        }
+        guard
+            let env = JEnv.current(),
+            let clazz = JClass.load(Self.className),
+            let global = env.newGlobalRef(.init(existing, clazz))
+        else { return nil }
         self.ref = global.ref
         self.clazz = clazz
         self.object = JObject(global.ref, clazz)
@@ -80,14 +73,10 @@ public struct JString: @unchecked Sendable, JObjectable {
     ///
     /// - Returns: A native Swift string or `nil` if conversion fails.
     public func toSwiftString() -> String? {
-        guard let env = JEnv.current()
-        else {
-            return nil
-        }
-        guard let cstr = env.getStringUTFChars(ref)
-        else {
-            return nil
-        }
+        guard
+            let env = JEnv.current(),
+            let cstr = env.getStringUTFChars(ref)
+        else { return nil }
         defer {
             env.releaseStringUTFChars(ref, chars: cstr)
         }
