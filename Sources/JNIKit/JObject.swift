@@ -51,33 +51,4 @@ public struct JObject: @unchecked Sendable, JObjectable {
         else { return nil }
         return JObject(global.ref, clazz)
     }
-
-    // MARK: - Call Instance Methods
-
-    /// Call an instance method on this object.
-    public func callObjectMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> JObject? {
-        guard
-            let env = JEnv.current(),
-            let methodId = clazz.methodId(name: name, signature: signature)
-        else { return nil }
-        return env.callObjectMethod(object: self, methodId: methodId, args: args)
-    }
-
-    /// Call an instance method returning `jint`
-    public func callIntMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Int32? {
-        guard
-            let env = JEnv.current(),
-            let methodId = clazz.methodId(name: name, signature: signature)
-        else { return nil }
-        return env.callIntMethod(object: self, methodId: methodId, args: args)
-    }
-
-    /// Call an instance method returning `void`
-    public func callVoidMethod(name: String, signature: JMethodSignature, args: [jvalue]) {
-        guard
-            let env = JEnv.current(),
-            let methodId = clazz.methodId(name: name, signature: signature)
-        else { return }
-        env.callVoidMethod(object: self, methodId: methodId, args: args)
-    }
 }
