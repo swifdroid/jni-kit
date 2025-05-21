@@ -35,10 +35,10 @@ public struct JString: @unchecked Sendable, JObjectable {
     ///
     /// - Parameter swiftString: The Swift string to convert into a Java string.
     /// - Returns: `nil` if JNI operations fail or JVM is unavailable.
-    public init?(from swiftString: String) async {
+    public init?(from swiftString: String) {
         guard
-            let env = await JEnv.current(),
-            let clazz = await JClass.load(Self.className),
+            let env = JEnv.current(),
+            let clazz = JClass.load(Self.className),
             let jstr = env.newStringUTF(swiftString),
             let global = env.newGlobalRef(.init(jstr, clazz))
         else { return nil }
