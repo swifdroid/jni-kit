@@ -23,6 +23,9 @@ public struct JString: @unchecked Sendable, JObjectable {
     /// The loaded `JClass` representing `java.lang.String`.
     public let clazz: JClass
 
+    /// Object wrapper
+    public var object: JObject
+
     // MARK: - Initializers
 
     /// Create a new Java string from a Swift `String`.
@@ -41,6 +44,7 @@ public struct JString: @unchecked Sendable, JObjectable {
         else { return nil }
         self.ref = global.ref
         self.clazz = clazz
+        self.object = JObject(global.ref, clazz)
     }
 
     /// Wrap an existing `jstring` from JNI and promote it to a global reference.
@@ -64,6 +68,7 @@ public struct JString: @unchecked Sendable, JObjectable {
         }
         self.ref = global.ref
         self.clazz = clazz
+        self.object = JObject(global.ref, clazz)
     }
 
     // MARK: - Conversion

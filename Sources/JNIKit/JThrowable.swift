@@ -28,6 +28,9 @@ public struct JThrowable: @unchecked Sendable, JObjectable {
     /// This may be useful for introspection or re-use in `JNICache`.
     public let clazz: JClass
 
+    /// Object wrapper
+    public let object: JObject
+
     // MARK: - Initializers
 
     /// Wrap an existing local or global `jobject` reference to a Java `Throwable`.
@@ -44,6 +47,7 @@ public struct JThrowable: @unchecked Sendable, JObjectable {
         else { return nil }
         self.ref = global.ref
         self.clazz = clazz
+        self.object = JObject(global.ref, clazz)
     }
 
     // MARK: - Factory

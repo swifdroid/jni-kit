@@ -19,6 +19,9 @@ public struct JObject: @unchecked Sendable, JObjectable {
     /// The resolved `JClass` of this object.
     public let clazz: JClass
 
+    /// Current `JObject` instance
+    public var object: JObject { self }
+
     // MARK: - Init
 
     /// Wrap an existing `jobject` by creating a global reference.

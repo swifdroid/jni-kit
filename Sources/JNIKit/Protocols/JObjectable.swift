@@ -20,6 +20,9 @@ public protocol JObjectable: JEquatable, JGetClassable, JHashable, JNotifiable, 
 
     /// The fully qualified class name of the object (e.g., `"java/lang/String"`).
     var className: JClassName { get }
+
+    /// The wrapped Java object.
+    var object: JObject { get }
 }
 
 extension JObjectable {
