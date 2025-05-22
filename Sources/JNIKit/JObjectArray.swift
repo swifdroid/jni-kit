@@ -5,16 +5,22 @@
 //  Created by Mihael Isaev on 20.04.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A Swift wrapper for a Java object array (`jobjectArray`).
 ///
 /// Retains a global reference and provides access to individual `JObject`s.
 public struct JObjectArray: @unchecked Sendable, JObjectable {
+    #if os(Android)
     public let ref: jobject // jobjectArray
+    #endif
     public let clazz: JClass
+    public let object: JObject
     public let length: Int
 
+    #if os(Android)
     /// Create a new array of Java objects with given size and element class.
     public init?(length: Int, clazz: JClass) {
         guard
@@ -24,6 +30,7 @@ public struct JObjectArray: @unchecked Sendable, JObjectable {
         else { return nil }
         self.ref = global.ref
         self.clazz = clazz
+        self.object = JObject(global.ref, clazz)
         self.length = length
     }
 
@@ -35,6 +42,7 @@ public struct JObjectArray: @unchecked Sendable, JObjectable {
         else { return nil }
         self.ref = global.ref
         self.clazz = clazz
+        self.object = JObject(global.ref, clazz)
         self.length = Int(env.getArrayLength(global.ref))
     }
 
@@ -66,4 +74,5 @@ public struct JObjectArray: @unchecked Sendable, JObjectable {
         }
         return result
     }
+    #endif
 }

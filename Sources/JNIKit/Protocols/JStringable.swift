@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 20.04.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A protocol for Java objects that can provide a Swift-readable string via Java's `toString()` method.
 ///
@@ -25,8 +27,10 @@ import Android
 /// }
 /// ```
 public protocol JStringable: Sendable {
+    #if os(Android)
     /// The raw JNI object reference representing this Java object.
     var ref: jobject { get }
+    #endif
 
     /// The resolved Java class of this object, used to look up method references like `toString()`.
     var clazz: JClass { get }
@@ -51,6 +55,7 @@ extension JStringable {
     ///
     /// - Returns: A Swift `String` representation of the Java object, or `nil` if the method could not be invoked.
     public func toString() -> String {
+        #if os(Android)
         let fallbackResult = "\(clazz.name.fullName)@\(ref)"
         guard
             let env = JEnv.current(),
@@ -62,5 +67,8 @@ extension JStringable {
             )
         else { return fallbackResult }
         return JString(from: jstr.ref)?.toSwiftString() ?? fallbackResult
+        #else
+        return ""
+        #endif
     }
 }

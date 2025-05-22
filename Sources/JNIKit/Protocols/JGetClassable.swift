@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 18.05.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A protocol for Java objects that expose the `getClass()` method to retrieve their runtime type.
 ///
@@ -22,8 +24,10 @@ import Android
 /// }
 /// ```
 public protocol JGetClassable: Sendable {
+    #if os(Android)
     /// The underlying JNI reference to the Java object.
     var ref: jobject { get }
+    #endif
 
     /// The resolved `JClass` associated with the object’s declared type.
     var clazz: JClass { get }
@@ -43,6 +47,7 @@ extension JGetClassable {
     /// - Returns: A `JObject` representing the Java class instance (`java.lang.Class`),
     ///   or `nil` if the call fails.
     public func getClass() -> JObject? {
+        #if os(Android)
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
@@ -51,5 +56,8 @@ extension JGetClassable {
             )
         else { return nil }
         return env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, args: [])
+        #else
+        return nil
+        #endif
     }
 }

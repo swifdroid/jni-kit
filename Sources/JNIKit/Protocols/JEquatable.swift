@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 18.05.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A protocol for Java objects that can be compared using `.equals(Object)`
 ///
@@ -20,8 +22,10 @@ import Android
 /// }
 /// ```
 public protocol JEquatable: Sendable {
+    #if os(Android)
     /// The underlying Java object reference.
     var ref: jobject { get }
+    #endif
 
     /// The resolved class reference of the Java object.
     var clazz: JClass { get }
@@ -42,10 +46,14 @@ extension JEquatable {
     ///
     /// Note: This uses the standard Java semantics and **does not** compare pointers directly.
     public func equals(_ other: JObject) -> Bool {
+        #if os(Android)
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: "equals", signature: .init([.object("java/lang/Object")], returning: .boolean))
         else { return false }
         return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: [other.jValue])
+        #else
+        return false
+        #endif
     }
 }

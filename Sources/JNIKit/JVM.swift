@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 20.04.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A Swift wrapper around a `JavaVM*` (the core entry point of the Java Virtual Machine).
 ///
@@ -14,6 +16,7 @@ import Android
 ///
 /// Use this when you need to bridge Swift and Java in a thread-safe and lifecycle-aware way.
 public struct JVM: @unchecked Sendable {
+    #if os(Android)
     /// A pointer to the Java Virtual Machine (`JavaVM*`), as used in JNI.
     public let ref: UnsafeMutablePointer<JavaVM?>
 
@@ -36,6 +39,7 @@ public struct JVM: @unchecked Sendable {
     public init(_ vm: UnsafeMutablePointer<JavaVM?>) {
         self.ref = vm
     }
+    #endif
 
     // MARK: - Thread Operations
 
@@ -54,9 +58,13 @@ public struct JVM: @unchecked Sendable {
     /// }
     /// ```
     public func attachCurrentThread() -> JEnv? {
+        #if os(Android)
         var env: UnsafeMutablePointer<JNIEnv?>?
         _ = ref.pointee?.pointee.AttachCurrentThread?(ref, &env, nil)
         return JEnv(env)
+        #else
+        return nil
+        #endif
     }
 
     /// Detach the current thread from the JVM.
@@ -65,10 +73,13 @@ public struct JVM: @unchecked Sendable {
     ///
     /// > Note: It is safe to call this even if the thread is already detached.
     public func detachCurrentThread() {
+        #if os(Android)
         _ = ref.pointee?.pointee.DetachCurrentThread?(ref)
+        #endif
     }
 }
 
+#if os(Android)
 extension UnsafeMutablePointer where Pointee == Optional<JNIEnv> {
     /// Convenience method to extract the associated `JavaVM` from a `JNIEnv*`.
     ///
@@ -84,3 +95,4 @@ extension UnsafeMutablePointer where Pointee == Optional<JNIEnv> {
     /// - Returns: A `JVM` wrapper around the owning `JavaVM*`.
     public func jvm() -> JVM { .init(self) }
 }
+#endif

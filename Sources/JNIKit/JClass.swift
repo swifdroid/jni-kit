@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
+#if os(Android)
 import Android
+#endif
 import Logging
 
 /// A type-safe wrapper around a globally retained Java class reference (`jclass`).
@@ -28,6 +30,7 @@ import Logging
 /// }
 /// ```
 public struct JClass: @unchecked Sendable {
+    #if os(Android)
     /// A global JNI `jclass` reference.
     /// Safe to pass across threads but must be created via `NewGlobalRef`.
     public let ref: jclass
@@ -48,6 +51,7 @@ public struct JClass: @unchecked Sendable {
         self.ref = ref
         self.name = name
     }
+    #endif
 
     /// Resolve and cache the Java class reference for the given name.
     ///
@@ -57,6 +61,7 @@ public struct JClass: @unchecked Sendable {
     /// - Parameter name: JNI class name using slashes (`/`) (e.g., `"java/lang/String"`).
     /// - Returns: A cached `JClass`, or `nil` if the class could not be loaded.
     public static func load(_ name: JClassName) -> JClass? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(name.path)\""
         Logger.trace("Loading \(logKey) class")
@@ -71,6 +76,9 @@ public struct JClass: @unchecked Sendable {
         Logger.trace("Loaded \(logKey) class")
         #endif
         return result
+        #else
+        return nil
+        #endif
     }
 
     // MARK: - Instance Methods
@@ -82,6 +90,7 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Method signature (e.g. `"()Ljava/lang/String;"`)
     /// - Returns: The method ID, or `nil` if not found.
     public func methodId(name: String, signature: JMethodSignature) -> JMethodId? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(name)\(signature.signature)\""
         Logger.trace("Getting methodId \(logKey)")
@@ -97,6 +106,9 @@ public struct JClass: @unchecked Sendable {
         Logger.trace("Got methodId \(logKey)")
         #endif
         return id
+        #else
+        return nil
+        #endif
     }
 
     /// Get an instance field ID from this class.
@@ -106,6 +118,7 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Field signature (e.g. `"I"`)
     /// - Returns: The field ID, or `nil` if not found.
     public func fieldId(name: String, signature: JSignatureItem) -> JFieldId? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(name)\(signature.signature)\""
         Logger.trace("Getting fieldId \(logKey)")
@@ -121,6 +134,9 @@ public struct JClass: @unchecked Sendable {
         Logger.trace("Got fieldId \(logKey)")
         #endif
         return id
+        #else
+        return nil
+        #endif
     }
 
     // MARK: - Static Methods
@@ -132,6 +148,7 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Method signature (e.g. `"()J"`)
     /// - Returns: The static method ID, or `nil` if not found.
     public func staticMethodId(name: String, signature: JMethodSignature) -> JMethodId? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(name)\(signature.signature)\""
         Logger.trace("Getting staticMethodId \(logKey)")
@@ -147,6 +164,9 @@ public struct JClass: @unchecked Sendable {
         Logger.trace("Got staticMethodId \(logKey)")
         #endif
         return id
+        #else
+        return nil
+        #endif
     }
 
     // MARK: - Static Fields
@@ -158,6 +178,7 @@ public struct JClass: @unchecked Sendable {
     ///   - signature: Field signature (e.g. `"I"`)
     /// - Returns: The static field ID, or `nil` if not found.
     public func staticFieldId(name: String, signature: JSignatureItem) -> JFieldId? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(name)\(signature.signature)\""
         Logger.trace("Getting staticFieldId \(logKey)")
@@ -173,5 +194,8 @@ public struct JClass: @unchecked Sendable {
         Logger.trace("Got staticFieldId \(logKey)")
         #endif
         return id
+        #else
+        return nil
+        #endif
     }
 }

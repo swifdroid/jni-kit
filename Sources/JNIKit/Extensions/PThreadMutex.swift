@@ -1,4 +1,10 @@
+#if os(Android)
 import Android
+#else
+#if canImport(Glibc)
+import Glibc
+#endif
+#endif
 
 /// Extensions for `pthread_mutex_t` to provide a more Swift-friendly API for initialization,
 /// locking, unlocking, and cleanup.

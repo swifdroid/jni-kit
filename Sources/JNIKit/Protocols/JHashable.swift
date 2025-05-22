@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 18.05.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A protocol for Java objects that expose the `hashCode()` method for use in hashing and equality.
 ///
@@ -24,8 +26,10 @@ import Android
 /// in hash-based collections like `HashMap`, `HashSet`, etc. You should also conform to `JEquatable`
 /// if implementing both.
 public protocol JHashable: Sendable {
+    #if os(Android)
     /// The underlying JNI reference to the Java object.
     var ref: jobject { get }
+    #endif
 
     /// The resolved `JClass` instance of the Java object.
     var clazz: JClass { get }
@@ -44,6 +48,7 @@ extension JHashable {
     ///
     /// - Returns: Java's `hashCode()` result as `Int32`, or `0` if lookup or call fails.
     public func hashCode() -> Int32 {
+        #if os(Android)
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
@@ -52,5 +57,8 @@ extension JHashable {
             )
         else { return 0 }
         return env.callIntMethod(object: .init(ref, clazz), methodId: methodId, args: [])
+        #else
+        return 0
+        #endif
     }
 }

@@ -5,15 +5,19 @@
 //  Created by Mihael Isaev on 23.10.2021.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A composite protocol that defines a common interface for interacting with any Java object (`jobject`) in Swift.
 ///
 /// Once a type conforms to `JObjectable`, it automatically gains access to all
 /// standard Java object methods through protocol extensions.
 public protocol JObjectable: JEquatable, JGetClassable, JHashable, JNotifiable, JStringable, JWaitable {
+    #if os(Android)
     /// The underlying JNI object reference.
     var ref: jobject { get }
+    #endif
 
     /// The resolved class reference of the Java object.
     var clazz: JClass { get }
@@ -29,9 +33,16 @@ extension JObjectable {
     /// Returns the class name of the object by accessing the `clazz.name` property.
     ///
     /// This provides a convenient default implementation based on the associated `clazz`.
-    public var className: JClassName { clazz.name }
+    public var className: JClassName {
+        #if os(Android)
+        return clazz.name
+        #else
+        return ""
+        #endif
+    }
 }
 
+#if os(Android)
 extension JObjectable {
     // MARK: - Instance Methods
 
@@ -199,3 +210,4 @@ extension JObjectable {
         env.callNonvirtualVoidMethod(object: object, clazz: clazz, methodId: methodId, args: args)
     }
 }
+#endif

@@ -1,4 +1,6 @@
+#if os(Android)
 import Android
+#endif
 import Logging
 import FoundationEssentials
 
@@ -7,6 +9,7 @@ import FoundationEssentials
 /// Use `JObjectBox` when you have an opaque `jobject` pointer (e.g., from callbacks or native code)
 /// and want to convert it into a proper `JObject` using runtime reflection.
 public final class JObjectBox: @unchecked Sendable {
+    #if os(Android)
     /// The raw JNI object reference (local or global).
     public let ref: jobject
     let vm: JVM
@@ -29,8 +32,10 @@ public final class JObjectBox: @unchecked Sendable {
     deinit {
         vm.attachCurrentThread()?.deleteGlobalRef(ref)
     }
+    #endif
 }
 
+#if os(Android)
 extension jobject {
     /// Wrap this `jobject` in a `JObjectBox` for conversion or inspection.
     /// - Returns: A `JObjectBox` containing this reference.
@@ -38,6 +43,7 @@ extension jobject {
         JObjectBox(self, env: env)
     }
 }
+#endif
 
 extension JObjectBox {
     /// Convert the boxed `jobject` into a fully typed `JObject` by inspecting its runtime class.
@@ -47,6 +53,7 @@ extension JObjectBox {
     ///
     /// - Returns: A `JObject` with resolved `JClass`, or `nil` if reflection fails.
     public func object() -> JObject? {
+        #if os(Android)
         #if DEBUG
         Logger.trace("Wrapping jobject into JObject")
         #endif
@@ -101,5 +108,8 @@ extension JObjectBox {
         Logger.trace("Wrapped jobject into JObject \"\(className.fullName)\"")
         #endif
         return JObject(self.ref, .init(objectClass, className))
+        #else
+        return nil
+        #endif
     }
 }

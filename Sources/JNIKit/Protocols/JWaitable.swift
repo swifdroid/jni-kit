@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 18.05.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A protocol for Java objects that support synchronization via the `wait()` methods from `java.lang.Object`.
 ///
@@ -14,8 +16,10 @@ import Android
 ///
 /// This protocol allows Swift code to interact with Java's monitor methods safely and idiomatically.
 public protocol JWaitable: Sendable {
+    #if os(Android)
     /// The underlying JNI object reference (typically a global or local `jobject`).
     var ref: jobject { get }
+    #endif
 
     /// The resolved Java class reference for this object.
     var clazz: JClass { get }
@@ -29,6 +33,7 @@ extension JWaitable {
     ///
     /// - Note: This call may block indefinitely unless `notify()` or `notifyAll()` is called on the same object.
     public func wait() {
+        #if os(Android)
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
@@ -37,8 +42,10 @@ extension JWaitable {
             )
         else { return }
         env.callVoidMethod(object: .init(ref, clazz), methodId: methodId, args: [])
+        #endif
     }
 
+    #if os(Android)
     /// Call Java’s `wait(long millis)` method to pause the current thread for up to a specified time.
     ///
     /// This form waits until either:
@@ -80,4 +87,5 @@ extension JWaitable {
         ]
         env.callVoidMethod(object: .init(ref, clazz), methodId: methodId, args: args)
     }
+    #endif
 }

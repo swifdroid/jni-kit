@@ -5,7 +5,13 @@
 //  Created by Mihael Isaev on 20.04.2025.
 //
 
+#if os(Android)
 import Android
+#else
+#if canImport(Glibc)
+import Glibc
+#endif
+#endif
 import Logging
 
 /// A globally accessible singleton that manages the Java Virtual Machine (JVM) and provides thread-safe

@@ -5,11 +5,14 @@
 //  Created by Mihael Isaev on 20.04.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A Swift wrapper for `jobjectRefType`, representing the type of a Java object reference
 /// (local, global, weak global, or invalid).
 public struct JObjectRefType: @unchecked Sendable {
+    #if os(Android)
     /// The raw JNI `jobjectRefType` enum value.
     public let ref: jobjectRefType
 
@@ -24,6 +27,7 @@ public struct JObjectRefType: @unchecked Sendable {
         guard let ref else { return nil }
         self.ref = ref
     }
+    #endif
 
     /// Swift-style enum representing the type of reference.
     public enum Kind: String, Sendable, CustomStringConvertible {
@@ -38,6 +42,7 @@ public struct JObjectRefType: @unchecked Sendable {
 
     /// Determine the kind of reference.
     public var kind: Kind {
+        #if os(Android)
         switch ref {
         case JNIInvalidRefType:       return .invalid
         case JNILocalRefType:         return .local
@@ -45,6 +50,9 @@ public struct JObjectRefType: @unchecked Sendable {
         case JNIWeakGlobalRefType:    return .weakGlobal
         default:                      return .unknown
         }
+        #else
+        return .unknown
+        #endif
     }
 
     /// Human-readable description of the reference type.

@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 18.05.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A protocol for Java objects that support thread notification via `notify()` and `notifyAll()` methods.
 ///
@@ -29,8 +31,10 @@ import Android
 /// }
 /// ```
 public protocol JNotifiable: Sendable {
+    #if os(Android)
     /// The raw JNI object reference.
     var ref: jobject { get }
+    #endif
 
     /// The resolved class of the object.
     var clazz: JClass { get }
@@ -45,6 +49,7 @@ extension JNotifiable {
     /// - Note: Must be called while holding the monitor on this object.
     /// - SeeAlso: [Java API: Object.notify()](https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#notify--)
     public func notify() {
+        #if os(Android)
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
@@ -53,6 +58,7 @@ extension JNotifiable {
             )
         else { return }
         env.callVoidMethod(object: .init(ref, clazz), methodId: methodId, args: [])
+        #endif
     }
 
     /// Calls Java’s `notifyAll()` method on this object.
@@ -63,6 +69,7 @@ extension JNotifiable {
     /// - Note: Must be called while holding the monitor on this object.
     /// - SeeAlso: [Java API: Object.notifyAll()](https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#notifyAll--)
     public func notifyAll() {
+        #if os(Android)
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
@@ -71,5 +78,6 @@ extension JNotifiable {
             )
         else { return }
         env.callVoidMethod(object: .init(ref, clazz), methodId: methodId, args: [])
+        #endif
     }
 }

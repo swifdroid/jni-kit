@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 20.04.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A Swift wrapper around a Java `Throwable` (`java.lang.Throwable`) object.
 ///
@@ -18,10 +20,12 @@ import Android
 /// - Passing Java exceptions back to Swift for logging or message extraction
 /// - Re-throwing Java exceptions from Swift via `Throw()` or `ThrowNew()`
 public struct JThrowable: @unchecked Sendable, JObjectable {
+    #if os(Android)
     /// The globally retained reference to the `Throwable` object.
     ///
     /// This is a `jobject` pointing to a `java.lang.Throwable` or subclass.
     public let ref: jobject
+    #endif
 
     /// The class wrapper representing `java.lang.Throwable`.
     ///
@@ -32,7 +36,7 @@ public struct JThrowable: @unchecked Sendable, JObjectable {
     public let object: JObject
 
     // MARK: - Initializers
-
+    #if os(Android)
     /// Wrap an existing local or global `jobject` reference to a Java `Throwable`.
     ///
     /// This will automatically convert it to a global reference to retain it safely.
@@ -73,4 +77,5 @@ public struct JThrowable: @unchecked Sendable, JObjectable {
         guard let env = JEnv.current() else { return }
         _ = env.throwObject(ref)
     }
+    #endif
 }

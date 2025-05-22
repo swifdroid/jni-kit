@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 20.04.2025.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A Swift wrapper around a Java `java.lang.String` object.
 ///
@@ -14,8 +16,10 @@ import Android
 public struct JString: @unchecked Sendable, JObjectable {
     // MARK: - Properties
 
+    #if os(Android)
     /// The globally retained JNI reference to the Java string.
     public let ref: jstring
+    #endif
 
     /// The JNI class name for `java.lang.String`.
     public static let className: JClassName = "java/lang/String"
@@ -28,6 +32,7 @@ public struct JString: @unchecked Sendable, JObjectable {
 
     // MARK: - Initializers
 
+    #if os(Android)
     /// Create a new Java string from a Swift `String`.
     ///
     /// This performs a JNI call to construct a new UTF-8 encoded `java.lang.String`,
@@ -82,10 +87,12 @@ public struct JString: @unchecked Sendable, JObjectable {
         }
         return String(cString: cstr)
     }
+    #endif
 }
 
 // MARK: - Instance Methods
 
+#if os(Android)
 extension JString {
     /// Calls Java's `String.isEmpty()`
     public func isEmpty() -> Bool {
@@ -176,3 +183,4 @@ extension JString {
         return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: jvalues)
     }
 }
+#endif

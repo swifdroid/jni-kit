@@ -5,7 +5,13 @@
 //  Created by Mihael Isaev on 20.04.2025.
 //
 
+#if os(Android)
 import Android
+#else
+#if canImport(Glibc)
+import Glibc
+#endif
+#endif
 import Logging
 
 /// A global actor responsible for caching JNI references and providing thread-safe access to `JNIEnv*`.
@@ -65,6 +71,7 @@ public final class JNICache: @unchecked Sendable {
     /// - Returns: A `JClass` containing a globally retained `jclass` reference,
     ///            or `nil` if the class could not be found.
     public func getClass(_ name: JClassName) -> JClass? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(name.fullName)\""
         Logger.trace("Getting class \(logKey) from cache")
@@ -97,6 +104,9 @@ public final class JNICache: @unchecked Sendable {
         Logger.trace("Got class \(logKey) from JNIEnv, saved in cache")
         #endif
         return wrapped
+        #else
+        return nil
+        #endif
     }
 
     /// Get an instance method ID for the specified class, method, and signature.
@@ -107,6 +117,7 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"()Ljava/lang/String;"`)
     /// - Returns: Cached or resolved `jmethodID`, or `nil` if not found.
     public func getMethodId(className: JClassName, methodName: String, signature: JMethodSignature) -> JMethodId? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(className.fullName).\(methodName)\(signature.signature)\""
         Logger.trace("Getting methodId \(logKey) from cache")
@@ -145,6 +156,9 @@ public final class JNICache: @unchecked Sendable {
         Logger.trace("Got methodId \(logKey) from JNIEnv, saved in cache")
         #endif
         return wrapper
+        #else
+        return nil
+        #endif
     }
 
     /// Get a static method ID for the specified class, method, and signature.
@@ -155,6 +169,7 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"()J"`)
     /// - Returns: Cached or resolved `jmethodID`, or `nil` if not found.
     public func getStaticMethodId(className: JClassName, methodName: String, signature: JMethodSignature) -> JMethodId? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(className.fullName).\(methodName)\(signature.signature)\""
         Logger.trace("Getting staticMethodId \(logKey) from cache")
@@ -193,6 +208,9 @@ public final class JNICache: @unchecked Sendable {
         Logger.trace("Got staticMethodId \(logKey) from JNIEnv, saved in cache")
         #endif
         return wrapper
+        #else
+        return nil
+        #endif
     }
 
     /// Get an instance field ID for the specified class, field name, and signature.
@@ -203,6 +221,7 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"I"`)
     /// - Returns: Cached or resolved `jfieldID`, or `nil` if not found.
     public func getFieldId(className: JClassName, fieldName: String, signature: JSignatureItem) -> JFieldId? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(className.fullName) \(fieldName)\(signature.signature)\""
         Logger.trace("Getting fieldId \(logKey) from cache")
@@ -241,6 +260,9 @@ public final class JNICache: @unchecked Sendable {
         Logger.trace("Got fieldId \(logKey) from JNIEnv, saved in cache")
         #endif
         return wrapper
+        #else
+        return nil
+        #endif
     }
 
     /// Get a static field ID for the specified class, field name, and signature.
@@ -251,6 +273,7 @@ public final class JNICache: @unchecked Sendable {
     ///   - signature: JNI signature string (e.g., `"Ljava/lang/String;"`)
     /// - Returns: Cached or resolved `jfieldID`, or `nil` if not found.
     public func getStaticFieldId(className: JClassName, fieldName: String, signature: JSignatureItem) -> JFieldId? {
+        #if os(Android)
         #if DEBUG
         let logKey = "\"\(className.fullName) \(fieldName)\(signature.signature)\""
         Logger.trace("Getting staticFieldId \(logKey) from cache")
@@ -289,5 +312,8 @@ public final class JNICache: @unchecked Sendable {
         Logger.trace("Got staticFieldId \(logKey) from JNIEnv, saved in cache")
         #endif
         return wrapper
+        #else
+        return nil
+        #endif
     }
 }

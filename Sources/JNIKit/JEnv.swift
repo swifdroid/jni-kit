@@ -5,7 +5,9 @@
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A thread-safe, ergonomic Swift wrapper around `JNIEnv*` for use with JNI in Swift 6.1+.
 ///
@@ -24,6 +26,7 @@ import Android
 /// }
 /// ```
 public struct JEnv: @unchecked Sendable {
+    #if os(Android)
     /// The raw JNI environment pointer for the current thread (`JNIEnv*`).
     ///
     /// This pointer is thread-local and should only be used from the thread
@@ -49,6 +52,7 @@ public struct JEnv: @unchecked Sendable {
         guard let env else { return nil }
         self.env = env
     }
+    #endif
 }
 
 extension JEnv {
@@ -92,6 +96,7 @@ public struct JNIVersion: Equatable, Hashable, Sendable, CustomStringConvertible
     }
 }
 
+#if os(Android)
 extension JEnv {
     // MARK: - Version
 
@@ -1586,3 +1591,4 @@ extension JEnv {
         JObjectRefType(env.pointee!.pointee.GetObjectRefType!(env, obj.ref))
     }
 }
+#endif

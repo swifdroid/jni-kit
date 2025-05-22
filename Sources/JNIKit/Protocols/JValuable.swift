@@ -5,17 +5,22 @@
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
+#if os(Android)
 import Android
+#endif
 
 /// A protocol that allows Swift types to be converted into a JNI-compatible `jvalue`
 ///
 /// Conforming types can be passed directly into JNI method calls through convenience APIs.
 /// For example: `callMethod(name: "add", args: [1, 2.0, true])`
 public protocol JValuable {
+    #if os(Android)
     /// Convert the Swift value into a JNI `jvalue` union
     var jValue: jvalue { get }
+    #endif
 }
 
+#if os(Android)
 extension Int: JValuable {
     /// Converts `Int` to JNI `jint`
     public var jValue: jvalue { .init(i: jint(self)) }
@@ -71,3 +76,4 @@ extension JObject: JValuable {
 extension JString: JValuable {
     public var jValue: jvalue { .init(l: ref) }
 }
+#endif

@@ -5,6 +5,7 @@
 //  Created by Mihael Isaev on 20.04.2025.
 //
 
+#if os(Android)
 import Android
 
 extension Bool {
@@ -16,3 +17,4 @@ extension Bool {
 extension jboolean {
     var value: Bool { self == JNI_TRUE }
 }
+#endif
