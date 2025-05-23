@@ -97,18 +97,6 @@ public final class JNIKit: @unchecked Sendable {
         self.vm = vm
     }
 
-    /// Initialize the JNI context with the `JavaVM` pointer.
-    ///
-    /// This method must be called once (typically from `JNI_OnLoad`) to allow JNI access
-    /// from Swift code on any thread.
-    ///
-    /// - Parameter vm: The `JavaVM` pointer provided by the JNI environment.
-    ///
-    /// - Note: This method is thread-safe and prevents reinitialization.
-    public static func initialize(with vm: JVM) {
-        shared.initialize(with: vm)
-    }
-
     // MARK: - Logging Control
 
     /// Sets the current log level for the `logger` instance.
