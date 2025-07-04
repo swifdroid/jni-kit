@@ -28,10 +28,6 @@ public final class JObjectBox: @unchecked Sendable {
         self.ref = globalRef
         self.vm = JVM(env.env)
     }
-
-    deinit {
-        vm.attachCurrentThread()?.deleteGlobalRef(ref)
-    }
     #endif
 }
 
