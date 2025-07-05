@@ -12,7 +12,6 @@ public final class JObjectBox: @unchecked Sendable {
     #if os(Android)
     /// The raw JNI object reference (local or global).
     public let ref: jobject
-    let vm: JVM
 
     /// Initialize a box from a `jobject` reference.
     /// - Parameter object: A valid JNI object pointer.
@@ -26,7 +25,6 @@ public final class JObjectBox: @unchecked Sendable {
             return nil
         }
         self.ref = globalRef
-        self.vm = JVM(env.env)
     }
     #endif
 }
@@ -55,7 +53,6 @@ extension JObjectBox {
         #endif
         guard
             // Step 1: Attach thread and get env
-            let env = vm.attachCurrentThread(),
             // Step 2: Get the class of the original object (e.g. MainActivity.class)
             let objectClass = env.env.pointee?.pointee.GetObjectClass?(env.env, self.ref),
             // Step 3: Get method ID for getClass()
@@ -92,6 +89,7 @@ extension JObjectBox {
             // Step 9: Convert the jstring name into a Swift string
             let javaString = JString(from: globalNameObj),
             let name = javaString.toSwiftString()
+            let env = JEnv.current()
         else {
             #if DEBUG
             Logger.debug("💣 Failed wrapping jobject into JObject")
