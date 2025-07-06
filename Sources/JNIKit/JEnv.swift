@@ -132,7 +132,11 @@ extension JEnv {
     /// - Returns: A newly defined Java class, or `nil` if failed.
     public func defineClass(name: JClassName, loader: JObject?, buf: UnsafePointer<jbyte>, size: jint) -> JClass? {
         name.path.withCString {
-            JClass(env.pointee!.pointee.DefineClass!(env, $0, loader?.ref, buf, size), name)
+            let local = env.pointee!.pointee.DefineClass!(env, $0, loader?.ref.ref, buf, size)
+            defer {
+                env.pointee!.pointee.DeleteLocalRef(env, local)
+            }
+            return JClass(env.pointee!.pointee.NewGlobalRef(env, local), name)
         }
     }
 
@@ -142,7 +146,11 @@ extension JEnv {
     /// - Returns: A wrapped class reference or `nil` if not found.
     public func findClass(_ name: JClassName) -> JClass? {
         name.path.withCString {
-            JClass(env.pointee!.pointee.FindClass!(env, $0), name)
+            let local = env.pointee!.pointee.FindClass!(env, $0)
+            defer {
+                env.pointee!.pointee.DeleteLocalRef(env, local)
+            }
+            return JClass(env.pointee!.pointee.NewGlobalRef(env, local), name)
         }
     }
 
@@ -182,7 +190,11 @@ extension JEnv {
 
     /// Gets the superclass of a Java class.
     public func getSuperclass(of clazz: JClass) -> JClass? {
-        JClass(env.pointee!.pointee.GetSuperclass!(env, clazz.ref), clazz.name)
+        let local = env.pointee!.pointee.GetSuperclass!(env, clazz.ref)
+        defer {
+            env.pointee!.pointee.DeleteLocalRef(env, local)
+        }
+        return JClass(env.pointee!.pointee.NewGlobalRef(env, local), clazz.name)
     }
 
     /// Determines if `clazz2` is assignable to `clazz1`, equivalent to `clazz1.isAssignableFrom(clazz2)` in Java.
