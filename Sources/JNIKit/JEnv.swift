@@ -158,12 +158,12 @@ extension JEnv {
 
     /// Converts a Java `Method` object to a native method ID.
     public func fromReflectedMethod(_ method: JObject) -> JMethodId? {
-        JMethodId(env.pointee!.pointee.FromReflectedMethod!(env, method.ref))
+        JMethodId(env.pointee!.pointee.FromReflectedMethod!(env, method.ref.ref))
     }
 
     /// Converts a Java `Field` object to a native field ID.
     public func fromReflectedField(_ field: JObject) -> JFieldId? {
-        JFieldId(env.pointee!.pointee.FromReflectedField!(env, field.ref))
+        JFieldId(env.pointee!.pointee.FromReflectedField!(env, field.ref.ref))
     }
 
     /// Converts a native method ID into a Java `Method` or `Constructor` object.
@@ -173,7 +173,10 @@ extension JEnv {
     ///   - methodId: The native method ID
     ///   - isStatic: Whether the method is static
     public func toReflectedMethod(clazz: JClass, methodId: JMethodId, isStatic: Bool) -> JObject? {
-        JObject(env.pointee!.pointee.ToReflectedMethod!(env, clazz.ref, methodId.id, isStatic.jboolean), clazz)
+        guard
+            let box = env.pointee!.pointee.ToReflectedMethod!(env, clazz.ref, methodId.id, isStatic.jboolean)?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, clazz)
     }
 
     /// Converts a native field ID into a Java `Field` object.
@@ -183,7 +186,10 @@ extension JEnv {
     ///   - fieldId: Native field ID
     ///   - isStatic: Whether the field is static
     public func toReflectedField(clazz: JClass, fieldId: JFieldId, isStatic: Bool) -> JObject? {
-        JObject(env.pointee!.pointee.ToReflectedField!(env, clazz.ref, fieldId.id, isStatic.jboolean), clazz)
+        guard
+            let box = env.pointee!.pointee.ToReflectedField!(env, clazz.ref, fieldId.id, isStatic.jboolean)?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, clazz)
     }
 
     // MARK: - Class Hierarchy
@@ -228,9 +234,12 @@ extension JEnv {
     ///
     /// - Returns: A throwable object if an exception is pending, or `nil`.
     public func exceptionOccurred() -> JThrowable? {
-        guard let throwable = env.pointee!.pointee.ExceptionOccurred!(env) else { return nil }
-        guard let clazz = JClass.load("java/lang/Throwable") else { return nil }
-        return JThrowable(throwable, clazz)
+        guard
+            let throwable = env.pointee!.pointee.ExceptionOccurred!(env),
+            let box = throwable.box(JEnv(env)),
+            let clazz = JClass.load("java/lang/Throwable")
+        else { return nil }
+        return JThrowable(box, clazz)
     }
 
     /// Describes the current exception (if any) to stderr (for debugging).
@@ -257,7 +266,7 @@ extension JEnv {
 
     /// Throws a `JThrowable` instance and returns a typed JNI status.
     public func throwObject(_ throwable: JThrowable) -> JNIStatus {
-        JNIStatus(fromRawValue: env.pointee!.pointee.Throw!(env, throwable.ref))
+        JNIStatus(fromRawValue: env.pointee!.pointee.Throw!(env, throwable.ref.ref))
     }
 
     // MARK: - Reference Frames
@@ -274,14 +283,20 @@ extension JEnv {
     ///
     /// - Parameter result: Optional object to retain from the popped frame
     public func popLocalFrame(result: JObject?) -> JObject? {
-        JObject(env.pointee!.pointee.PopLocalFrame!(env, result?.ref), result?.clazz)
+        guard
+            let box = env.pointee!.pointee.PopLocalFrame!(env, result?.ref.ref)?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, result?.clazz)
     }
 
     // MARK: - Reference Management
 
     /// Promotes a local reference to a global one (GC-safe).
     public func newGlobalRef(_ obj: JObject) -> JObject? {
-        JObject(env.pointee!.pointee.NewGlobalRef!(env, obj.ref), obj.clazz)
+        guard
+            let box = env.pointee!.pointee.NewGlobalRef!(env, obj.ref.ref)?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, obj.clazz)
     }
 
     /// Promotes a local reference to a global one (GC-safe).
@@ -291,7 +306,7 @@ extension JEnv {
 
     /// Deletes a global reference previously promoted.
     public func deleteGlobalRef(_ globalRef: JObject) {
-        env.pointee!.pointee.DeleteGlobalRef!(env, globalRef.ref)
+        env.pointee!.pointee.DeleteGlobalRef!(env, globalRef.ref.ref)
     }
 
     /// Deletes a global reference previously promoted.
@@ -301,7 +316,7 @@ extension JEnv {
 
     /// Deletes a local reference to allow early GC.
     public func deleteLocalRef(_ localRef: JObject) {
-        env.pointee!.pointee.DeleteLocalRef!(env, localRef.ref)
+        env.pointee!.pointee.DeleteLocalRef!(env, localRef.ref.ref)
     }
 
     /// Deletes a local reference to allow early GC.
@@ -311,12 +326,15 @@ extension JEnv {
 
     /// Returns whether two `jobject`s refer to the same underlying Java object.
     public func isSameObject(_ obj1: JObject, _ obj2: JObject) -> Bool {
-        env.pointee!.pointee.IsSameObject!(env, obj1.ref, obj2.ref).value
+        env.pointee!.pointee.IsSameObject!(env, obj1.ref.ref, obj2.ref.ref).value
     }
 
     /// Creates a new local reference to the given object.
     public func newLocalRef(_ obj: JObject) -> JObject? {
-        JObject(env.pointee!.pointee.NewLocalRef!(env, obj.ref), obj.clazz)
+        guard
+            let box = env.pointee!.pointee.NewLocalRef!(env, obj.ref.ref)?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, obj.clazz)
     }
 
     /// Ensures there's room for `capacity` more local references in the current frame.
@@ -330,7 +348,10 @@ extension JEnv {
 
     /// Allocates an instance of a class without calling its constructor.
     public func allocObject(_ clazz: JClass) -> JObject? {
-        JObject(env.pointee!.pointee.AllocObject!(env, clazz.ref), clazz)
+        guard
+            let box = env.pointee!.pointee.AllocObject!(env, clazz.ref)?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, clazz)
     }
 
     // MARK: - Object Creation
@@ -339,7 +360,7 @@ extension JEnv {
     ///
     /// This is equivalent to:
     /// ```c
-    /// jobject obj = (*env)->NewObjectA(env, clazz, constructor, args);
+    /// jobject obj = (*env)->NewObjectA(env, clazz, constructor, args.map { $0.jValue });
     /// ```
     ///
     /// - Parameters:
@@ -352,8 +373,11 @@ extension JEnv {
         constructor: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> JObject? {
-        guard let obj = env.pointee!.pointee.NewObjectA!(env, clazz.ref, constructor.id, args) else { return nil }
-        return JObject(obj, clazz)
+        guard
+            let obj = env.pointee!.pointee.NewObjectA!(env, clazz.ref, constructor.id, args?.map { $0.jValue }),
+            let box = obj.box(JEnv(env))
+        else { return nil }
+        return JObject(box, clazz)
     }
 
     // MARK: - Object Info
@@ -364,9 +388,13 @@ extension JEnv {
     ///
     /// - Parameter object: The object to inspect.
     /// - Returns: A `JClass` representing the object's runtime class.
-    public func getObjectClass(_ object: JObject) -> JClass? {
-        JClass(env.pointee!.pointee.GetObjectClass!(env, object.ref), object.className)
-    }
+    // public func getObjectClass(_ object: jobject) -> JClass? {
+    //     let local = env.pointee!.pointee.GetObjectClass!(env, object)
+    //     defer {
+    //         env.pointee!.pointee.DeleteLocalRef(env, local)
+    //     }
+    //     return JClass(env.pointee!.pointee.NewGlobalRef(env, local), object.className) // TODO: get class name. or decide that this situation is impossible in current architecture
+    // }
 
     /// Checks whether a Java object is an instance of a given class.
     ///
@@ -377,7 +405,7 @@ extension JEnv {
     ///   - clazz: The class to compare against.
     /// - Returns: `true` if `object` is an instance of `clazz` or its subclass; otherwise, `false`.
     public func isInstanceOf(_ object: JObject, _ clazz: JClass) -> Bool {
-        env.pointee!.pointee.IsInstanceOf!(env, object.ref, clazz.ref) == UInt8(JNI_TRUE)
+        env.pointee!.pointee.IsInstanceOf!(env, object.ref.ref, clazz.ref) == UInt8(JNI_TRUE)
     }
 
     // MARK: - Method Lookup
@@ -410,8 +438,13 @@ extension JEnv {
         object: JObject,
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
+        clazz: JClass? = nil,
     ) -> JObject? {
-        JObject(env.pointee!.pointee.CallObjectMethodA!(env, object.ref, methodId.id, args), object.clazz)
+        guard
+            let box = env.pointee!.pointee.CallObjectMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, clazz ?? object.clazz)
+    }
     }
 
     /// Call a Java method returning `boolean`.
@@ -420,7 +453,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Bool {
-        env.pointee!.pointee.CallBooleanMethodA!(env, object.ref, methodId.id, args).value
+        env.pointee!.pointee.CallBooleanMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue }).value
     }
 
     /// Call a Java method returning `byte`.
@@ -429,7 +462,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int8 {
-        env.pointee!.pointee.CallByteMethodA!(env, object.ref, methodId.id, args)
+        env.pointee!.pointee.CallByteMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a Java method returning `char`.
@@ -438,7 +471,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> UInt16 {
-        env.pointee!.pointee.CallCharMethodA!(env, object.ref, methodId.id, args)
+        env.pointee!.pointee.CallCharMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a Java method returning `short`.
@@ -447,7 +480,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int16 {
-        env.pointee!.pointee.CallShortMethodA!(env, object.ref, methodId.id, args)
+        env.pointee!.pointee.CallShortMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a Java method returning `int`.
@@ -456,7 +489,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int32 {
-        env.pointee!.pointee.CallIntMethodA!(env, object.ref, methodId.id, args)
+        env.pointee!.pointee.CallIntMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a Java method returning `long`.
@@ -465,7 +498,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int64 {
-        env.pointee!.pointee.CallLongMethodA!(env, object.ref, methodId.id, args)
+        env.pointee!.pointee.CallLongMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a Java method returning `float`.
@@ -474,7 +507,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Float {
-        env.pointee!.pointee.CallFloatMethodA!(env, object.ref, methodId.id, args)
+        env.pointee!.pointee.CallFloatMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a Java method returning `double`.
@@ -483,7 +516,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Double {
-        env.pointee!.pointee.CallDoubleMethodA!(env, object.ref, methodId.id, args)
+        env.pointee!.pointee.CallDoubleMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a Java method returning `void`.
@@ -492,7 +525,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) {
-        env.pointee!.pointee.CallVoidMethodA!(env, object.ref, methodId.id, args)
+        env.pointee!.pointee.CallVoidMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
 
     // MARK: - Non-Virtual Method Calls
@@ -504,7 +537,10 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> JObject? {
-        JObject(env.pointee!.pointee.CallNonvirtualObjectMethodA!(env, object.ref, clazz.ref, methodId.id, args), clazz)
+        guard
+            let box = env.pointee!.pointee.CallNonvirtualObjectMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, clazz)
     }
 
     /// Call a nonvirtual Java method returning `boolean`.
@@ -514,7 +550,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Bool {
-        env.pointee!.pointee.CallNonvirtualBooleanMethodA!(env, object.ref, clazz.ref, methodId.id, args).value
+        env.pointee!.pointee.CallNonvirtualBooleanMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue }).value
     }
 
     /// Call a nonvirtual Java method returning `byte`.
@@ -524,7 +560,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int8 {
-        env.pointee!.pointee.CallNonvirtualByteMethodA!(env, object.ref, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallNonvirtualByteMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a nonvirtual Java method returning `char`.
@@ -534,7 +570,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> UInt16 {
-        env.pointee!.pointee.CallNonvirtualCharMethodA!(env, object.ref, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallNonvirtualCharMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a nonvirtual Java method returning `short`.
@@ -544,7 +580,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int16 {
-        env.pointee!.pointee.CallNonvirtualShortMethodA!(env, object.ref, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallNonvirtualShortMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a nonvirtual Java method returning `int`.
@@ -554,7 +590,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int32 {
-        env.pointee!.pointee.CallNonvirtualIntMethodA!(env, object.ref, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallNonvirtualIntMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a nonvirtual Java method returning `long`.
@@ -564,7 +600,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int64 {
-        env.pointee!.pointee.CallNonvirtualLongMethodA!(env, object.ref, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallNonvirtualLongMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a nonvirtual Java method returning `float`.
@@ -574,7 +610,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Float {
-        env.pointee!.pointee.CallNonvirtualFloatMethodA!(env, object.ref, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallNonvirtualFloatMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a nonvirtual Java method returning `double`.
@@ -584,7 +620,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Double {
-        env.pointee!.pointee.CallNonvirtualDoubleMethodA!(env, object.ref, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallNonvirtualDoubleMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a nonvirtual Java method returning `void`.
@@ -594,7 +630,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) {
-        env.pointee!.pointee.CallNonvirtualVoidMethodA!(env, object.ref, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallNonvirtualVoidMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     // MARK: - Instance Field Lookup
@@ -624,94 +660,97 @@ extension JEnv {
 
     /// Get a reference to an object field from a Java instance.
     public func getObjectField(_ object: JObject, _ fieldId: JFieldId) -> JObject? {
-        JObject(env.pointee!.pointee.GetObjectField!(env, object.ref, fieldId.id), object.clazz)
+        guard
+            let box = env.pointee!.pointee.GetObjectField!(env, object.ref.ref, fieldId.id)?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, object.clazz)
     }
 
     /// Get a `boolean` field from a Java instance.
     public func getBooleanField(_ object: JObject, _ fieldId: JFieldId) -> Bool {
-        env.pointee!.pointee.GetBooleanField!(env, object.ref, fieldId.id).value
+        env.pointee!.pointee.GetBooleanField!(env, object.ref.ref, fieldId.id).value
     }
 
     /// Get a `byte` field from a Java instance.
     public func getByteField(_ object: JObject, _ fieldId: JFieldId) -> Int8 {
-        env.pointee!.pointee.GetByteField!(env, object.ref, fieldId.id)
+        env.pointee!.pointee.GetByteField!(env, object.ref.ref, fieldId.id)
     }
 
     /// Get a `char` field from a Java instance.
     public func getCharField(_ object: JObject, _ fieldId: JFieldId) -> UInt16 {
-        env.pointee!.pointee.GetCharField!(env, object.ref, fieldId.id)
+        env.pointee!.pointee.GetCharField!(env, object.ref.ref, fieldId.id)
     }
 
     /// Get a `short` field from a Java instance.
     public func getShortField(_ object: JObject, _ fieldId: JFieldId) -> Int16 {
-        env.pointee!.pointee.GetShortField!(env, object.ref, fieldId.id)
+        env.pointee!.pointee.GetShortField!(env, object.ref.ref, fieldId.id)
     }
 
     /// Get an `int` field from a Java instance.
     public func getIntField(_ object: JObject, _ fieldId: JFieldId) -> Int32 {
-        env.pointee!.pointee.GetIntField!(env, object.ref, fieldId.id)
+        env.pointee!.pointee.GetIntField!(env, object.ref.ref, fieldId.id)
     }
 
     /// Get a `long` field from a Java instance.
     public func getLongField(_ object: JObject, _ fieldId: JFieldId) -> Int64 {
-        env.pointee!.pointee.GetLongField!(env, object.ref, fieldId.id)
+        env.pointee!.pointee.GetLongField!(env, object.ref.ref, fieldId.id)
     }
 
     /// Get a `float` field from a Java instance.
     public func getFloatField(_ object: JObject, _ fieldId: JFieldId) -> Float {
-        env.pointee!.pointee.GetFloatField!(env, object.ref, fieldId.id)
+        env.pointee!.pointee.GetFloatField!(env, object.ref.ref, fieldId.id)
     }
 
     /// Get a `double` field from a Java instance.
     public func getDoubleField(_ object: JObject, _ fieldId: JFieldId) -> Double {
-        env.pointee!.pointee.GetDoubleField!(env, object.ref, fieldId.id)
+        env.pointee!.pointee.GetDoubleField!(env, object.ref.ref, fieldId.id)
     }
 
     // MARK: - Set Instance Field Values
 
     /// Set an `object` field on a Java instance.
     public func setObjectField(_ object: JObject, _ fieldId: JFieldId, _ value: JObject?) {
-        env.pointee!.pointee.SetObjectField!(env, object.ref, fieldId.id, value?.ref)
+        env.pointee!.pointee.SetObjectField!(env, object.ref.ref, fieldId.id, value?.ref.ref)
     }
 
     /// Set a `boolean` field on a Java instance.
     public func setBooleanField(_ object: JObject, _ fieldId: JFieldId, _ value: jboolean) {
-        env.pointee!.pointee.SetBooleanField!(env, object.ref, fieldId.id, value)
+        env.pointee!.pointee.SetBooleanField!(env, object.ref.ref, fieldId.id, value)
     }
 
     /// Set a `byte` field on a Java instance.
     public func setByteField(_ object: JObject, _ fieldId: JFieldId, _ value: jbyte) {
-        env.pointee!.pointee.SetByteField!(env, object.ref, fieldId.id, value)
+        env.pointee!.pointee.SetByteField!(env, object.ref.ref, fieldId.id, value)
     }
 
     /// Set a `char` field on a Java instance.
     public func setCharField(_ object: JObject, _ fieldId: JFieldId, _ value: jchar) {
-        env.pointee!.pointee.SetCharField!(env, object.ref, fieldId.id, value)
+        env.pointee!.pointee.SetCharField!(env, object.ref.ref, fieldId.id, value)
     }
 
     /// Set a `short` field on a Java instance.
     public func setShortField(_ object: JObject, _ fieldId: JFieldId, _ value: jshort) {
-        env.pointee!.pointee.SetShortField!(env, object.ref, fieldId.id, value)
+        env.pointee!.pointee.SetShortField!(env, object.ref.ref, fieldId.id, value)
     }
 
     /// Set an `int` field on a Java instance.
     public func setIntField(_ object: JObject, _ fieldId: JFieldId, _ value: jint) {
-        env.pointee!.pointee.SetIntField!(env, object.ref, fieldId.id, value)
+        env.pointee!.pointee.SetIntField!(env, object.ref.ref, fieldId.id, value)
     }
 
     /// Set a `long` field on a Java instance.
     public func setLongField(_ object: JObject, _ fieldId: JFieldId, _ value: Int64) {
-        env.pointee!.pointee.SetLongField!(env, object.ref, fieldId.id, value)
+        env.pointee!.pointee.SetLongField!(env, object.ref.ref, fieldId.id, value)
     }
 
     /// Set a `float` field on a Java instance.
     public func setFloatField(_ object: JObject, _ fieldId: JFieldId, _ value: Float) {
-        env.pointee!.pointee.SetFloatField!(env, object.ref, fieldId.id, value)
+        env.pointee!.pointee.SetFloatField!(env, object.ref.ref, fieldId.id, value)
     }
 
     /// Set a `double` field on a Java instance.
     public func setDoubleField(_ object: JObject, _ fieldId: JFieldId, _ value: Double) {
-        env.pointee!.pointee.SetDoubleField!(env, object.ref, fieldId.id, value)
+        env.pointee!.pointee.SetDoubleField!(env, object.ref.ref, fieldId.id, value)
     }
 
     // MARK: - Static Method Lookup
@@ -743,7 +782,10 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> JObject? {
-        JObject(env.pointee!.pointee.CallStaticObjectMethodA!(env, clazz.ref, methodId.id, args), clazz)
+        guard
+            let box = env.pointee!.pointee.CallStaticObjectMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, clazz)
     }
 
     /// Call a static method returning `boolean`.
@@ -752,7 +794,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Bool {
-        env.pointee!.pointee.CallStaticBooleanMethodA!(env, clazz.ref, methodId.id, args).value
+        env.pointee!.pointee.CallStaticBooleanMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue }).value
     }
 
     /// Call a static method returning `byte`.
@@ -761,7 +803,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int8 {
-        env.pointee!.pointee.CallStaticByteMethodA!(env, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallStaticByteMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a static method returning `char`.
@@ -770,7 +812,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> UInt16 {
-        env.pointee!.pointee.CallStaticCharMethodA!(env, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallStaticCharMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a static method returning `short`.
@@ -779,7 +821,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int16 {
-        env.pointee!.pointee.CallStaticShortMethodA!(env, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallStaticShortMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a static method returning `int`.
@@ -788,7 +830,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int32 {
-        env.pointee!.pointee.CallStaticIntMethodA!(env, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallStaticIntMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a static method returning `long`.
@@ -797,7 +839,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Int64 {
-        env.pointee!.pointee.CallStaticLongMethodA!(env, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallStaticLongMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a static method returning `float`.
@@ -806,7 +848,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Float {
-        env.pointee!.pointee.CallStaticFloatMethodA!(env, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallStaticFloatMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a static method returning `double`.
@@ -815,7 +857,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) -> Double {
-        env.pointee!.pointee.CallStaticDoubleMethodA!(env, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallStaticDoubleMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a static method returning `void`.
@@ -824,7 +866,7 @@ extension JEnv {
         methodId: JMethodId,
         args: UnsafePointer<jvalue>?
     ) {
-        env.pointee!.pointee.CallStaticVoidMethodA!(env, clazz.ref, methodId.id, args)
+        env.pointee!.pointee.CallStaticVoidMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
 
     // MARK: - Static Field Lookup
@@ -857,7 +899,10 @@ extension JEnv {
     ///   - fieldId: The field ID previously resolved using `getStaticFieldId`.
     /// - Returns: A wrapped `JObject` if the value is not null, or `nil`.
     public func getStaticObjectField(_ clazz: JClass, _ fieldId: JFieldId) -> JObject? {
-        JObject(env.pointee!.pointee.GetStaticObjectField!(env, clazz.ref, fieldId.id), clazz)
+        guard
+            let box = env.pointee!.pointee.GetStaticObjectField!(env, clazz.ref, fieldId.id)?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, clazz)
     }
 
     /// Get the value of a static field returning a `boolean`.
@@ -909,7 +954,7 @@ extension JEnv {
     ///   - fieldId: Field identifier previously resolved.
     ///   - value: The new object value to assign, or `nil` for null.
     public func setStaticObjectField(_ clazz: JClass, _ fieldId: JFieldId, _ value: JObject?) {
-        env.pointee!.pointee.SetStaticObjectField!(env, clazz.ref, fieldId.id, value?.ref)
+        env.pointee!.pointee.SetStaticObjectField!(env, clazz.ref, fieldId.id, value?.ref.ref)
     }
 
     /// Set a static `boolean` field.
@@ -1068,7 +1113,7 @@ extension JEnv {
     ///   - initialElement: Optional element to initialize all entries with.
     /// - Returns: A `JObjectArray` wrapping the created array.
     public func newObjectArray(length: jint, clazz: JClass, initialElement: JObject? = nil) -> JObjectArray? {
-        guard let obj = env.pointee!.pointee.NewObjectArray!(env, length, clazz.ref, initialElement?.ref) else { return nil }
+        guard let obj = env.pointee!.pointee.NewObjectArray!(env, length, clazz.ref, initialElement?.ref.ref) else { return nil }
         return JObjectArray(obj, clazz)
     }
 
@@ -1079,8 +1124,11 @@ extension JEnv {
     ///   - index: The index of the element to retrieve.
     /// - Returns: A `JObject` wrapper for the element at that index.
     public func getObjectArrayElement(_ array: JObjectArray, index: jint) -> JObject? {
-        let arrayRef = array.ref.assumingMemoryBound(to: jobjectArray.self).pointee
-        return JObject(env.pointee!.pointee.GetObjectArrayElement!(env, arrayRef, index), array.clazz)
+        let arrayRef = array.ref.ref.assumingMemoryBound(to: jobjectArray.self).pointee
+        guard
+            let box = env.pointee!.pointee.GetObjectArrayElement!(env, arrayRef, index)?.box(JEnv(env))
+        else { return nil }
+        return JObject(box, array.clazz)
     }
 
     /// Set an element in a Java object array.
@@ -1090,7 +1138,7 @@ extension JEnv {
     ///   - index: Index of the element to set.
     ///   - value: The value to insert (may be `nil`).
     public func setObjectArrayElement(_ array: JObjectArray, index: jint, value: JObject?) {
-        env.pointee!.pointee.SetObjectArrayElement!(env, array.ref, index, value?.ref)
+        env.pointee!.pointee.SetObjectArrayElement!(env, array.ref.ref, index, value?.ref.ref)
     }
 
     // MARK: - Primitive Arrays
@@ -1489,12 +1537,12 @@ extension JEnv {
 
     /// Enter the monitor associated with a Java object (like `synchronized` block).
     public func monitorEnter(_ object: JObject) -> Int32 {
-        env.pointee!.pointee.MonitorEnter!(env, object.ref)
+        env.pointee!.pointee.MonitorEnter!(env, object.ref.ref)
     }
 
     /// Exit the monitor associated with a Java object.
     public func monitorExit(_ object: JObject) -> Int32 {
-        env.pointee!.pointee.MonitorExit!(env, object.ref)
+        env.pointee!.pointee.MonitorExit!(env, object.ref.ref)
     }
 
     // MARK: - JVM Access
@@ -1556,7 +1604,7 @@ extension JEnv {
     ///
     /// Weak references allow the JVM to GC the object when no strong references exist.
     public func newWeakGlobalRef(_ obj: JObject) -> jweak? {
-        env.pointee!.pointee.NewWeakGlobalRef!(env, obj.ref)
+        env.pointee!.pointee.NewWeakGlobalRef!(env, obj.ref.ref)
     }
 
     /// Delete a previously created weak global reference.
@@ -1586,12 +1634,12 @@ extension JEnv {
 
     /// Get the memory address backing a direct byte buffer.
     public func getDirectBufferAddress(_ buffer: JObject) -> UnsafeMutableRawPointer? {
-        env.pointee!.pointee.GetDirectBufferAddress!(env, buffer.ref)
+        env.pointee!.pointee.GetDirectBufferAddress!(env, buffer.ref.ref)
     }
 
     /// Get the capacity in bytes of a direct byte buffer.
     public func getDirectBufferCapacity(_ buffer: JObject) -> Int64 {
-        env.pointee!.pointee.GetDirectBufferCapacity!(env, buffer.ref)
+        env.pointee!.pointee.GetDirectBufferCapacity!(env, buffer.ref.ref)
     }
 
     // MARK: - Reference Type Inspection
@@ -1600,7 +1648,7 @@ extension JEnv {
     ///
     /// - Returns: A `JObjectRefType` describing the reference type.
     public func getObjectRefType(_ obj: JObject) -> JObjectRefType {
-        JObjectRefType(env.pointee!.pointee.GetObjectRefType!(env, obj.ref))
+        JObjectRefType(env.pointee!.pointee.GetObjectRefType!(env, obj.ref.ref))
     }
 }
 #endif

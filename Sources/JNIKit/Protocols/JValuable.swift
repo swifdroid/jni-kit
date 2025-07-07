@@ -70,10 +70,10 @@ extension UnicodeScalar: JValuable {
 
 extension JObject: JValuable {
     /// Converts any Java object reference into JNI `jvalue`
-    public var jValue: jvalue { .init(l: ref) }
+    public var jValue: jvalue { .init(l: ref.ref) }
 }
 
 extension JString: JValuable {
-    public var jValue: jvalue { .init(l: ref) }
+    public var jValue: jvalue { .init(l: ref.ref) }
 }
 #endif

@@ -22,11 +22,9 @@ import Android
 /// }
 /// ```
 public protocol JEquatable: Sendable {
-    #if os(Android)
     /// The underlying Java object reference.
-    var ref: jobject { get }
-    #endif
-
+    var ref: JObjectBox { get }
+    
     /// The resolved class reference of the Java object.
     var clazz: JClass { get }
 

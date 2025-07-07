@@ -13,11 +13,9 @@ import Android
 ///
 /// Use `JObject` to represent any Java object passed from or constructed in Swift.
 /// It retains a global reference automatically to prevent premature GC.
-public struct JObject: @unchecked Sendable, JObjectable {
-    #if os(Android)
+public final class JObject: Sendable, JObjectable {
     /// The globally retained reference to the Java object.
-    public let ref: jobject
-    #endif
+    public let ref: JObjectBox
     
     /// The resolved `JClass` of this object.
     public let clazz: JClass
@@ -33,28 +31,16 @@ public struct JObject: @unchecked Sendable, JObjectable {
     ///   - ref: The local or global `jobject`
     ///   - className: The Java class name in JNI format (e.g. `"java/lang/String"`)
     ///   - clazz: The resolved `JClass` wrapper
-    public init(_ ref: jobject, _ clazz: JClass) {
+    public init(_ ref: JObjectBox, _ clazz: JClass) {
         self.ref = ref
-        self.clazz = JClass(clazz.ref, clazz.name)
+        self.clazz = clazz
     }
 
     /// Convenient overload for optional `ref` and `clazz`
-    public init?(_ ref: jobject?, _ clazz: JClass?) {
+    public init?(_ ref: JObjectBox?, _ clazz: JClass?) {
         guard let ref, let clazz else { return nil }
         self.ref = ref
-        self.clazz = JClass(clazz.ref, clazz.name)
-    }
-
-    /// Create from class name and a constructor method.
-    public static func newInstance(className: JClassName, constructorSignature: JMethodSignature, args: [jvalue]) -> JObject? {
-        guard
-            let env = JEnv.current(),
-            let clazz = JClass.load(className),
-            let methodId = clazz.methodId(name: "<init>", signature: constructorSignature),
-            let local = env.newObject(clazz: clazz, constructor: methodId, args: args),
-            let global = env.newGlobalRef(local)
-        else { return nil }
-        return JObject(global.ref, clazz)
+        self.clazz = clazz
     }
     #endif
 }

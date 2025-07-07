@@ -12,10 +12,8 @@ import Android
 /// A Swift wrapper for a Java object array (`jobjectArray`).
 ///
 /// Retains a global reference and provides access to individual `JObject`s.
-public struct JObjectArray: @unchecked Sendable, JObjectable {
-    #if os(Android)
-    public let ref: jobject // jobjectArray
-    #endif
+public struct JObjectArray: Sendable, JObjectable {
+    public let ref: JObjectBox // jobjectArray
     public let clazz: JClass
     public let object: JObject
     public let length: Int
@@ -38,12 +36,13 @@ public struct JObjectArray: @unchecked Sendable, JObjectable {
     public init?(_ array: jobjectArray, _ clazz: JClass) {
         guard
             let env = JEnv.current(),
-            let global = env.newGlobalRef(JObject(array, clazz))
+            let box = array.box(env),
+            let global = env.newGlobalRef(JObject(box, clazz))
         else { return nil }
         self.ref = global.ref
         self.clazz = clazz
         self.object = JObject(global.ref, clazz)
-        self.length = Int(env.getArrayLength(global.ref))
+        self.length = Int(env.getArrayLength(global.ref.ref))
     }
 
     /// Get the object at a given index.
@@ -58,7 +57,7 @@ public struct JObjectArray: @unchecked Sendable, JObjectable {
     /// Set an object at a given index.
     public func set(_ value: JObject, at index: Int) {
         guard let env = JEnv.current() else { return }
-        let jArray = value.ref.assumingMemoryBound(to: jobjectArray.self)
+        let jArray = value.ref.ref.assumingMemoryBound(to: jobjectArray.self)
         let clazz = JClass(value.clazz.ref, value.className)
         guard let jObjectArray = JObjectArray(jArray, clazz) else { return }
         env.setObjectArrayElement(jObjectArray, index: Int32(index), value: value)

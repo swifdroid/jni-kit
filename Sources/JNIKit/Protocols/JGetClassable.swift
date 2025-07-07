@@ -24,11 +24,9 @@ import Android
 /// }
 /// ```
 public protocol JGetClassable: Sendable {
-    #if os(Android)
     /// The underlying JNI reference to the Java object.
-    var ref: jobject { get }
-    #endif
-
+    var ref: JObjectBox { get }
+    
     /// The resolved `JClass` associated with the object’s declared type.
     var clazz: JClass { get }
 

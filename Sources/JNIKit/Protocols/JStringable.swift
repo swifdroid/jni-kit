@@ -27,11 +27,9 @@ import Android
 /// }
 /// ```
 public protocol JStringable: Sendable {
-    #if os(Android)
     /// The raw JNI object reference representing this Java object.
-    var ref: jobject { get }
-    #endif
-
+    var ref: JObjectBox { get }
+    
     /// The resolved Java class of this object, used to look up method references like `toString()`.
     var clazz: JClass { get }
 
@@ -66,7 +64,7 @@ extension JStringable {
                 args: []
             )
         else { return fallbackResult }
-        return JString(from: jstr.ref)?.toSwiftString() ?? fallbackResult
+        return JString(from: jstr.ref.ref)?.toSwiftString() ?? fallbackResult
         #else
         return ""
         #endif

@@ -19,14 +19,12 @@ import Android
 /// - Wrapping a thrown Java exception from `ExceptionOccurred()`
 /// - Passing Java exceptions back to Swift for logging or message extraction
 /// - Re-throwing Java exceptions from Swift via `Throw()` or `ThrowNew()`
-public struct JThrowable: @unchecked Sendable, JObjectable {
-    #if os(Android)
+public struct JThrowable: Sendable, JObjectable {
     /// The globally retained reference to the `Throwable` object.
     ///
     /// This is a `jobject` pointing to a `java.lang.Throwable` or subclass.
-    public let ref: jobject
-    #endif
-
+    public let ref: JObjectBox
+    
     /// The class wrapper representing `java.lang.Throwable`.
     ///
     /// This may be useful for introspection or re-use in `JNICache`.
@@ -44,7 +42,7 @@ public struct JThrowable: @unchecked Sendable, JObjectable {
     /// - Parameters:
     ///   - throwable: The local `jobject` to wrap
     ///   - clazz: The resolved `JClass` for `java.lang.Throwable`
-    public init?(_ throwable: jthrowable, _ clazz: JClass) {
+    public init?(_ throwable: JObjectBox, _ clazz: JClass) {
         guard
             let env = JEnv.current(),
             let global = env.newGlobalRef(JObject(throwable, clazz))
@@ -75,7 +73,7 @@ public struct JThrowable: @unchecked Sendable, JObjectable {
     /// This is equivalent to calling `Throw(this.ref)` from JNI.
     public func rethrow() {
         guard let env = JEnv.current() else { return }
-        _ = env.throwObject(ref)
+        _ = env.throwObject(ref.ref)
     }
     #endif
 }

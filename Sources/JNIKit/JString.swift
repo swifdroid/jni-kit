@@ -13,22 +13,12 @@ import Android
 ///
 /// This type provides safe and ergonomic access to Java strings from Swift.
 /// It manages JNI references, converts between Swift and Java strings, and supports common string operations.
-public struct JString: @unchecked Sendable, JObjectable {
-    // MARK: - Properties
-
-    #if os(Android)
-    /// The globally retained JNI reference to the Java string.
-    public let ref: jstring
-    #endif
-
+public final class JString: Sendable, JObjectable {
     /// The JNI class name for `java.lang.String`.
     public static let className: JClassName = "java/lang/String"
 
-    /// The loaded `JClass` representing `java.lang.String`.
-    public let clazz: JClass
-
     /// Object wrapper
-    public var object: JObject
+    public let object: JObject
 
     // MARK: - Initializers
 
@@ -45,11 +35,9 @@ public struct JString: @unchecked Sendable, JObjectable {
             let env = JEnv.current(),
             let clazz = JClass.load(Self.className),
             let jstr = env.newStringUTF(swiftString),
-            let global = env.newGlobalRef(.init(jstr, clazz))
+            let jstrBox = jstr.box(env)
         else { return nil }
-        self.ref = global.ref
-        self.clazz = clazz
-        self.object = JObject(global.ref, clazz)
+        self.object = JObject(jstrBox, clazz)
     }
 
     /// Wrap an existing `jstring` from JNI and promote it to a global reference.
@@ -62,12 +50,15 @@ public struct JString: @unchecked Sendable, JObjectable {
         guard
             let env = JEnv.current(),
             let clazz = JClass.load(Self.className),
-            let global = env.newGlobalRef(.init(existing, clazz))
+            let existingBox = existing.box(env)
         else { return nil }
-        self.ref = global.ref
-        self.clazz = clazz
-        self.object = JObject(global.ref, clazz)
+        self.object = JObject(existingBox, clazz)
     }
+    #else
+    init?(_ object: JObject) {
+        self.object = object
+    }
+    #endif
 
     // MARK: - Conversion
 
@@ -78,16 +69,19 @@ public struct JString: @unchecked Sendable, JObjectable {
     ///
     /// - Returns: A native Swift string or `nil` if conversion fails.
     public func toSwiftString() -> String? {
+        #if os(Android)
         guard
             let env = JEnv.current(),
-            let cstr = env.getStringUTFChars(ref)
+            let cstr = env.getStringUTFChars(ref.ref)
         else { return nil }
         defer {
-            env.releaseStringUTFChars(ref, chars: cstr)
+            env.releaseStringUTFChars(ref.ref, chars: cstr)
         }
         return String(cString: cstr)
+        #else
+        return nil
+        #endif
     }
-    #endif
 }
 
 // MARK: - Instance Methods

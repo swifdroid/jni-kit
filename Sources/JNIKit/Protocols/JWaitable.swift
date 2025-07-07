@@ -16,11 +16,9 @@ import Android
 ///
 /// This protocol allows Swift code to interact with Java's monitor methods safely and idiomatically.
 public protocol JWaitable: Sendable {
-    #if os(Android)
     /// The underlying JNI object reference (typically a global or local `jobject`).
-    var ref: jobject { get }
-    #endif
-
+    var ref: JObjectBox { get }
+    
     /// The resolved Java class reference for this object.
     var clazz: JClass { get }
 }

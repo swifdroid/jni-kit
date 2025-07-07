@@ -26,11 +26,9 @@ import Android
 /// in hash-based collections like `HashMap`, `HashSet`, etc. You should also conform to `JEquatable`
 /// if implementing both.
 public protocol JHashable: Sendable {
-    #if os(Android)
     /// The underlying JNI reference to the Java object.
-    var ref: jobject { get }
-    #endif
-
+    var ref: JObjectBox { get }
+    
     /// The resolved `JClass` instance of the Java object.
     var clazz: JClass { get }
 

@@ -31,11 +31,9 @@ import Android
 /// }
 /// ```
 public protocol JNotifiable: Sendable {
-    #if os(Android)
     /// The raw JNI object reference.
-    var ref: jobject { get }
-    #endif
-
+    var ref: JObjectBox { get }
+    
     /// The resolved class of the object.
     var clazz: JClass { get }
 }

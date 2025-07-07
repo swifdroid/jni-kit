@@ -14,11 +14,9 @@ import Android
 /// Once a type conforms to `JObjectable`, it automatically gains access to all
 /// standard Java object methods through protocol extensions.
 public protocol JObjectable: JEquatable, JGetClassable, JHashable, JNotifiable, JStringable, JWaitable {
-    #if os(Android)
     /// The underlying JNI object reference.
-    var ref: jobject { get }
-    #endif
-
+    var ref: JObjectBox { get }
+    
     /// The resolved class reference of the Java object.
     var clazz: JClass { get }
 
@@ -30,6 +28,12 @@ public protocol JObjectable: JEquatable, JGetClassable, JHashable, JNotifiable, 
 }
 
 extension JObjectable {
+    /// The underlying JNI object reference.
+    public var ref: JObjectBox { object.ref }
+    
+    /// The resolved class reference of the Java object.
+    public var clazz: JClass { object.clazz }
+
     /// Returns the class name of the object by accessing the `clazz.name` property.
     ///
     /// This provides a convenient default implementation based on the associated `clazz`.
