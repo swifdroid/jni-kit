@@ -51,7 +51,7 @@ extension JObjectable {
     // MARK: - Instance Methods
 
     /// Call an instance method on this object.
-    public func callObjectMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> JObject? {
+    public func callObjectMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> JObject? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -60,7 +60,7 @@ extension JObjectable {
     }
 
     /// Call an instance method returning `jboolean`
-    public func callBoolMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Bool? {
+    public func callBoolMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Bool? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -69,7 +69,7 @@ extension JObjectable {
     }
 
     /// Call an instance method returning `jbyte`
-    public func callByteMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Int8? {
+    public func callByteMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int8? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -78,7 +78,7 @@ extension JObjectable {
     }
 
     /// Call an instance method returning `jchar`
-    public func callCharMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> UInt16? {
+    public func callCharMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> UInt16? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -87,7 +87,7 @@ extension JObjectable {
     }
 
     /// Call an instance method returning `jdouble`
-    public func callDoubleMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Double? {
+    public func callDoubleMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Double? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -96,7 +96,7 @@ extension JObjectable {
     }
 
     /// Call an instance method returning `jfloat`
-    public func callFloatMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Float? {
+    public func callFloatMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Float? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -105,7 +105,7 @@ extension JObjectable {
     }
     
     /// Call an instance method returning `jint`
-    public func callIntMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Int32? {
+    public func callIntMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int32? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -114,7 +114,7 @@ extension JObjectable {
     }
 
     /// Call an instance method returning `long`
-    public func callLongMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Int64? {
+    public func callLongMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int64? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -123,7 +123,7 @@ extension JObjectable {
     }
 
     /// Call an instance method returning `void`
-    public func callVoidMethod(name: String, signature: JMethodSignature, args: [jvalue]) {
+    public func callVoidMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -134,7 +134,7 @@ extension JObjectable {
     // MARK: - Non-Virtual Instance Methods
 
     /// Call a non-virtual instance method on this object.
-    public func callNonvirtualObjectMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> JObject? {
+    public func callNonvirtualObjectMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> JObject? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -143,7 +143,7 @@ extension JObjectable {
     }
 
     /// Call a non-virtual instance method returning `jboolean`
-    public func callNonvirtualBoolMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Bool? {
+    public func callNonvirtualBoolMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Bool? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -152,7 +152,7 @@ extension JObjectable {
     }
 
     /// Call a non-virtual instance method returning `jbyte`
-    public func callNonvirtualByteMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Int8? {
+    public func callNonvirtualByteMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int8? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -161,7 +161,7 @@ extension JObjectable {
     }
 
     /// Call a non-virtual instance method returning `jchar`
-    public func callNonvirtualCharMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> UInt16? {
+    public func callNonvirtualCharMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> UInt16? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -170,7 +170,7 @@ extension JObjectable {
     }
 
     /// Call a non-virtual instance method returning `jdouble`
-    public func callNonvirtualDoubleMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Double? {
+    public func callNonvirtualDoubleMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Double? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -179,7 +179,7 @@ extension JObjectable {
     }
 
     /// Call a non-virtual instance method returning `jfloat`
-    public func callNonvirtualFloatMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Float? {
+    public func callNonvirtualFloatMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Float? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -188,7 +188,7 @@ extension JObjectable {
     }
     
     /// Call a non-virtual instance method returning `jint`
-    public func callNonvirtualIntMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Int32? {
+    public func callNonvirtualIntMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int32? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -197,7 +197,7 @@ extension JObjectable {
     }
 
     /// Call a non-virtual instance method returning `long`
-    public func callNonvirtualLongMethod(name: String, signature: JMethodSignature, args: [jvalue]) -> Int64? {
+    public func callNonvirtualLongMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int64? {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
@@ -206,7 +206,7 @@ extension JObjectable {
     }
 
     /// Call a non-virtual instance method returning `void`
-    public func callNonvirtualVoidMethod(name: String, signature: JMethodSignature, args: [jvalue]) {
+    public func callNonvirtualVoidMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)

@@ -59,8 +59,7 @@ extension JWaitable {
                 signature: .init(.long, returning: .void)
             )
         else { return }
-        let args: [jvalue] = [jvalue(j: timeoutMillis)]
-        env.callVoidMethod(object: .init(ref, clazz), methodId: methodId, args: args)
+        env.callVoidMethod(object: .init(ref, clazz), methodId: methodId, args: [timeoutMillis])
     }
 
     /// Call Java’s `wait(long millis, int nanos)` method to wait with nanosecond precision.
@@ -79,11 +78,7 @@ extension JWaitable {
                 signature: .init(.long, .int, returning: .void)
             )
         else { return }
-        let args: [jvalue] = [
-            jvalue(j: timeoutMillis),
-            jvalue(i: nanos)
-        ]
-        env.callVoidMethod(object: .init(ref, clazz), methodId: methodId, args: args)
+        env.callVoidMethod(object: .init(ref, clazz), methodId: methodId, args: [timeoutMillis, nanos])
     }
     #endif
 }

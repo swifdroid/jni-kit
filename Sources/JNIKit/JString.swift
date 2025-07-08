@@ -163,9 +163,8 @@ extension JString {
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
         else { return nil }
-        let jvalues = args.map { $0.jValue }
-        guard let object = env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, args: jvalues) else { return nil }
-        return JString(from: object.ref.assumingMemoryBound(to: jstring.self))
+        guard let object = env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, args: args) else { return nil }
+        return JString(from: object.ref.ref.assumingMemoryBound(to: jstring.self))
     }
 
     private func callBoolean(_ name: String, signature: JMethodSignature, args: [JString]) -> Bool {
@@ -173,8 +172,7 @@ extension JString {
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: name, signature: signature)
         else { return false }
-        let jvalues = args.map { $0.jValue }
-        return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: jvalues)
+        return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: args)
     }
 }
 #endif

@@ -371,7 +371,7 @@ extension JEnv {
     public func newObject(
         clazz: JClass,
         constructor: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> JObject? {
         guard
             let obj = env.pointee!.pointee.NewObjectA!(env, clazz.ref, constructor.id, args?.map { $0.jValue }),
@@ -437,8 +437,8 @@ extension JEnv {
     public func callObjectMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
         clazz: JClass? = nil,
+        args: [any JValuable]? = nil
     ) -> JObject? {
         guard
             let box = env.pointee!.pointee.CallObjectMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
@@ -451,7 +451,7 @@ extension JEnv {
     public func callBooleanMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Bool {
         env.pointee!.pointee.CallBooleanMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue }).value
     }
@@ -460,7 +460,7 @@ extension JEnv {
     public func callByteMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int8 {
         env.pointee!.pointee.CallByteMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -469,7 +469,7 @@ extension JEnv {
     public func callCharMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> UInt16 {
         env.pointee!.pointee.CallCharMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -478,7 +478,7 @@ extension JEnv {
     public func callShortMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int16 {
         env.pointee!.pointee.CallShortMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -487,7 +487,7 @@ extension JEnv {
     public func callIntMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int32 {
         env.pointee!.pointee.CallIntMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -496,7 +496,7 @@ extension JEnv {
     public func callLongMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int64 {
         env.pointee!.pointee.CallLongMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -505,7 +505,7 @@ extension JEnv {
     public func callFloatMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Float {
         env.pointee!.pointee.CallFloatMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -514,7 +514,7 @@ extension JEnv {
     public func callDoubleMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Double {
         env.pointee!.pointee.CallDoubleMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -523,7 +523,7 @@ extension JEnv {
     public func callVoidMethod(
         object: JObject,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) {
         env.pointee!.pointee.CallVoidMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -535,7 +535,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> JObject? {
         guard
             let box = env.pointee!.pointee.CallNonvirtualObjectMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
@@ -548,7 +548,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Bool {
         env.pointee!.pointee.CallNonvirtualBooleanMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue }).value
     }
@@ -558,7 +558,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int8 {
         env.pointee!.pointee.CallNonvirtualByteMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -568,7 +568,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> UInt16 {
         env.pointee!.pointee.CallNonvirtualCharMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -578,7 +578,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int16 {
         env.pointee!.pointee.CallNonvirtualShortMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -588,7 +588,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int32 {
         env.pointee!.pointee.CallNonvirtualIntMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -598,7 +598,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int64 {
         env.pointee!.pointee.CallNonvirtualLongMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -608,7 +608,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Float {
         env.pointee!.pointee.CallNonvirtualFloatMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -618,7 +618,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Double {
         env.pointee!.pointee.CallNonvirtualDoubleMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -628,7 +628,7 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) {
         env.pointee!.pointee.CallNonvirtualVoidMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -780,7 +780,7 @@ extension JEnv {
     public func callStaticObjectMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> JObject? {
         guard
             let box = env.pointee!.pointee.CallStaticObjectMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
@@ -792,7 +792,7 @@ extension JEnv {
     public func callStaticBooleanMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Bool {
         env.pointee!.pointee.CallStaticBooleanMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue }).value
     }
@@ -801,7 +801,7 @@ extension JEnv {
     public func callStaticByteMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int8 {
         env.pointee!.pointee.CallStaticByteMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -810,7 +810,7 @@ extension JEnv {
     public func callStaticCharMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> UInt16 {
         env.pointee!.pointee.CallStaticCharMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -819,7 +819,7 @@ extension JEnv {
     public func callStaticShortMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int16 {
         env.pointee!.pointee.CallStaticShortMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -828,7 +828,7 @@ extension JEnv {
     public func callStaticIntMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int32 {
         env.pointee!.pointee.CallStaticIntMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -837,7 +837,7 @@ extension JEnv {
     public func callStaticLongMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Int64 {
         env.pointee!.pointee.CallStaticLongMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -846,7 +846,7 @@ extension JEnv {
     public func callStaticFloatMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Float {
         env.pointee!.pointee.CallStaticFloatMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -855,7 +855,7 @@ extension JEnv {
     public func callStaticDoubleMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) -> Double {
         env.pointee!.pointee.CallStaticDoubleMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }
@@ -864,7 +864,7 @@ extension JEnv {
     public func callStaticVoidMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: UnsafePointer<jvalue>?
+        args: [any JValuable]? = nil
     ) {
         env.pointee!.pointee.CallStaticVoidMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })
     }

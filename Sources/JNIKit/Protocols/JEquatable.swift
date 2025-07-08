@@ -49,7 +49,7 @@ extension JEquatable {
             let env = JEnv.current(),
             let methodId = clazz.methodId(name: "equals", signature: .init([.object("java/lang/Object")], returning: .boolean))
         else { return false }
-        return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: [other.jValue])
+        return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: [other])
         #else
         return false
         #endif
