@@ -89,13 +89,13 @@ public struct JClass: @unchecked Sendable {
     ///   - name: Method name (e.g. `"toString"`)
     ///   - signature: Method signature (e.g. `"()Ljava/lang/String;"`)
     /// - Returns: The method ID, or `nil` if not found.
-    public func methodId(name: String, signature: JMethodSignature) -> JMethodId? {
+    public func methodId(env: JEnv, name: String, signature: JMethodSignature) -> JMethodId? {
         #if os(Android)
         #if DEBUG
         let logKey = "\"\(name)\(signature.signature)\""
         Logger.trace("Getting methodId \(logKey)")
         #endif
-        guard let id = JNICache.shared.getMethodId(className: self.name, methodName: name, signature: signature)
+        guard let id = JNICache.shared.getMethodId(env: env, clazz: self, methodName: name, signature: signature)
         else {
             #if DEBUG
             Logger.debug("💣 MethodId \(logKey) not found")

@@ -49,6 +49,7 @@ extension JGetClassable {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
+                env: env,
                 name: "getClass",
                 signature: .returning("java/lang/Class")
             )

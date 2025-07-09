@@ -92,7 +92,7 @@ extension JString {
     public func isEmpty() -> Bool {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(name: "isEmpty", signature: .returning(.boolean))
+            let methodId = clazz.methodId(env: env, name: "isEmpty", signature: .returning(.boolean))
         else { return false }
         return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: [])
     }
@@ -101,7 +101,7 @@ extension JString {
     public func length() -> Int {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(name: "length", signature: .returning(.int))
+            let methodId = clazz.methodId(env: env, name: "length", signature: .returning(.int))
         else { return 0 }
         return Int(env.callIntMethod(object: .init(ref, clazz), methodId: methodId, args: []))
     }
@@ -161,7 +161,7 @@ extension JString {
     private func callReturningString(_ name: String, signature: JMethodSignature, args: [JString] = []) -> JString? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: signature)
         else { return nil }
         guard let object = env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, args: args) else { return nil }
         return JString(from: object.ref.ref.assumingMemoryBound(to: jstring.self))
@@ -170,7 +170,7 @@ extension JString {
     private func callBoolean(_ name: String, signature: JMethodSignature, args: [JString]) -> Bool {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: signature)
         else { return false }
         return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: args)
     }

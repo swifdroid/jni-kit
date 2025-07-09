@@ -50,6 +50,7 @@ extension JHashable {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
+                env: env,
                 name: "hashCode",
                 signature: .returning(.int)
             )

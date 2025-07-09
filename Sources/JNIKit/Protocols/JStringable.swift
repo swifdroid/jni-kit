@@ -57,7 +57,7 @@ extension JStringable {
         let fallbackResult = "\(clazz.name.fullName)@\(ref)"
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(name: "toString", signature: .returning("java/lang/String")),
+            let methodId = clazz.methodId(env: env, name: "toString", signature: .returning("java/lang/String")),
             let jstr = env.callObjectMethod(
                 object: .init(ref, clazz),
                 methodId: methodId,

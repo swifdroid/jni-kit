@@ -35,6 +35,7 @@ extension JWaitable {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
+                env: env,
                 name: "wait",
                 signature: .returning(.void)
             )
@@ -55,6 +56,7 @@ extension JWaitable {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
+                env: env,
                 name: "wait",
                 signature: .init(.long, returning: .void)
             )
@@ -74,6 +76,7 @@ extension JWaitable {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
+                env: env,
                 name: "wait",
                 signature: .init(.long, .int, returning: .void)
             )

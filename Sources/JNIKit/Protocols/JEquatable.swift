@@ -47,7 +47,7 @@ extension JEquatable {
         #if os(Android)
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(name: "equals", signature: .init([.object("java/lang/Object")], returning: .boolean))
+            let methodId = clazz.methodId(env: env, name: "equals", signature: .init([.object("java/lang/Object")], returning: .boolean))
         else { return false }
         return env.callBooleanMethod(object: .init(ref, clazz), methodId: methodId, args: [other])
         #else

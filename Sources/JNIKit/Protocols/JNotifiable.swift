@@ -51,6 +51,7 @@ extension JNotifiable {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
+                env: env,
                 name: "notify",
                 signature: .returning(.void)
             )
@@ -71,6 +72,7 @@ extension JNotifiable {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(
+                env: env,
                 name: "notifyAll",
                 signature: .returning(.void)
             )
