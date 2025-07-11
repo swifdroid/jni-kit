@@ -44,11 +44,11 @@ public struct JObjectRefType: @unchecked Sendable {
     public var kind: Kind {
         #if os(Android)
         switch ref {
-        case JNIInvalidRefType:       return .invalid
-        case JNILocalRefType:         return .local
-        case JNIGlobalRefType:        return .global
-        case JNIWeakGlobalRefType:    return .weakGlobal
-        default:                      return .unknown
+        case JNIInvalidRefType: return .invalid
+        case JNILocalRefType: return .local
+        case JNIGlobalRefType: return .global
+        case JNIWeakGlobalRefType: return .weakGlobal
+        default: return .unknown
         }
         #else
         return .unknown
