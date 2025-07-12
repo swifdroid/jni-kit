@@ -1,7 +1,11 @@
 #if os(Android)
 import Android
 #endif
+#if JNILOGS
+#if canImport(Logging)
 import Logging
+#endif
+#endif
 import FoundationEssentials
 
 /// A lightweight wrapper for a raw `jobject`, allowing type-safe conversions and introspection.
@@ -19,8 +23,8 @@ public final class JObjectBox: @unchecked Sendable {
         guard
             let globalRef = env.newGlobalRef(localObject)
         else {
-            #if DEBUG
-            Logger.debug("💣 JObjectBox: newGlobalRef returned nil")
+            #if JNILOGS
+            Logger.critical("💣 JObjectBox: newGlobalRef returned nil")
             #endif
             return nil
         }
@@ -48,8 +52,8 @@ extension JObjectBox {
     /// - Returns: A `JObject` with resolved `JClass`, or `nil` if reflection fails.
     public func object() -> JObject? {
         #if os(Android)
-        #if DEBUG
-        Logger.trace("Wrapping jobject into JObject")
+        #if JNILOGS
+        Logger.trace("JObjectBox.object 1")
         #endif
         guard
             // Step 1: Attach thread and get env

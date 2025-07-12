@@ -95,6 +95,9 @@ public final class JNIKit: @unchecked Sendable {
         defer { jvmMutex.unlock() }
         guard !isInitialized else { return }
         self.vm = vm
+        #if JNILOGS
+        setLogLevel(.trace)
+        #endif
     }
 
     // MARK: - Logging Control

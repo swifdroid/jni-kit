@@ -8,7 +8,11 @@
 #if os(Android)
 import Android
 #endif
+#if JNILOGS
+#if canImport(Logging)
 import Logging
+#endif
+#endif
 
 /// A type-safe wrapper around a globally retained Java class reference (`jclass`).
 ///
@@ -29,7 +33,7 @@ import Logging
 ///     )
 /// }
 /// ```
-public struct JClass: @unchecked Sendable {
+public class JClass: @unchecked Sendable {
     #if os(Android)
     /// A global JNI `jclass` reference.
     /// Safe to pass across threads but must be created via `NewGlobalRef`.
@@ -38,20 +42,34 @@ public struct JClass: @unchecked Sendable {
     /// Fully qualified JNI class name (e.g. `"java/lang/String"`).
     public let name: JClassName
 
+    /// Is it has global reference or local
+    public let isGlobalRef: Bool
+
     /// Construct manually from a global `jclass` and its name.
     /// Use only when you're sure the reference is global.
-    public init(_ ref: jclass, _ name: JClassName) {
+    public init(_ ref: jclass, _ name: JClassName, isGlobalRef: Bool = true) {
         self.ref = ref
         self.name = name
+        self.isGlobalRef = isGlobalRef
     }
 
     /// Convenient overload for optional `ref`
-    public init?(_ ref: jclass?, _ name: JClassName) {
+    public convenience init?(_ ref: jclass?, _ name: JClassName, isGlobalRef: Bool = true) {
         guard let ref else { return nil }
-        self.ref = ref
-        self.name = name
+        self.init(ref, name, isGlobalRef: isGlobalRef)
     }
     #endif
+
+    deinit {
+        #if JNILOGS
+        Logger.critical("🧹🧹🧹 deleted \(isGlobalRef ? "global" : "local") ref: \(ref)")
+        #endif
+        if isGlobalRef {
+            JEnv.current()?.deleteGlobalRef(ref)
+        } else {
+            JEnv.current()?.deleteLocalRef(ref)
+        }
+    }
 
     /// Resolve and cache the Java class reference for the given name.
     ///
@@ -62,18 +80,18 @@ public struct JClass: @unchecked Sendable {
     /// - Returns: A cached `JClass`, or `nil` if the class could not be loaded.
     public static func load(_ name: JClassName) -> JClass? {
         #if os(Android)
-        #if DEBUG
+        #if JNILOGS
         let logKey = "\"\(name.path)\""
-        Logger.trace("Loading \(logKey) class")
+        Logger.trace("JClass.load 1, loading \(logKey)")
         #endif
         guard let result = JNICache.shared.getClass(name) else {
-            #if DEBUG
-            Logger.debug("💣 Class \(logKey) not found")
+            #if JNILOGS
+            Logger.debug("JClass.load 1.1 exit: 💣 Class \(logKey) not found")
             #endif
             return nil
         }
-        #if DEBUG
-        Logger.trace("Loaded \(logKey) class")
+        #if JNILOGS
+        Logger.trace("JClass.load 2, loaded \(logKey)")
         #endif
         return result
         #else
@@ -91,19 +109,19 @@ public struct JClass: @unchecked Sendable {
     /// - Returns: The method ID, or `nil` if not found.
     public func methodId(env: JEnv, name: String, signature: JMethodSignature) -> JMethodId? {
         #if os(Android)
-        #if DEBUG
+        #if JNILOGS
         let logKey = "\"\(name)\(signature.signature)\""
-        Logger.trace("Getting methodId \(logKey)")
+        Logger.trace("JClass.methodId 1, getting \(logKey)")
         #endif
         guard let id = JNICache.shared.getMethodId(env: env, clazz: self, methodName: name, signature: signature)
         else {
-            #if DEBUG
-            Logger.debug("💣 MethodId \(logKey) not found")
+            #if JNILOGS
+            Logger.debug("JClass.methodId 1.1 exit: 💣 \(logKey) not found")
             #endif
             return nil
         }
-        #if DEBUG
-        Logger.trace("Got methodId \(logKey)")
+        #if JNILOGS
+        Logger.trace("JClass.methodId 2, got \(logKey)")
         #endif
         return id
         #else
@@ -119,19 +137,19 @@ public struct JClass: @unchecked Sendable {
     /// - Returns: The field ID, or `nil` if not found.
     public func fieldId(name: String, signature: JSignatureItem) -> JFieldId? {
         #if os(Android)
-        #if DEBUG
+        #if JNILOGS
         let logKey = "\"\(name)\(signature.signature)\""
-        Logger.trace("Getting fieldId \(logKey)")
+        Logger.trace("JClass.fieldId 1, getting \(logKey)")
         #endif
         guard let id = JNICache.shared.getFieldId(className: self.name, fieldName: name, signature: signature)
         else {
-            #if DEBUG
-            Logger.debug("💣 FieldId \(logKey) not found")
+            #if JNILOGS
+            Logger.debug("JClass.fieldId 1.1 exit: 💣 \(logKey) not found")
             #endif
             return nil
         }
-        #if DEBUG
-        Logger.trace("Got fieldId \(logKey)")
+        #if JNILOGS
+        Logger.trace("JClass.fieldId 2, got \(logKey)")
         #endif
         return id
         #else
@@ -149,19 +167,19 @@ public struct JClass: @unchecked Sendable {
     /// - Returns: The static method ID, or `nil` if not found.
     public func staticMethodId(name: String, signature: JMethodSignature) -> JMethodId? {
         #if os(Android)
-        #if DEBUG
+        #if JNILOGS
         let logKey = "\"\(name)\(signature.signature)\""
-        Logger.trace("Getting staticMethodId \(logKey)")
+        Logger.trace("JClass.staticMethodId 1, getting \(logKey)")
         #endif
         guard let id = JNICache.shared.getStaticMethodId(className: self.name, methodName: name, signature: signature)
         else {
-            #if DEBUG
-            Logger.debug("💣 StaticMethodId \(logKey) not found")
+            #if JNILOGS
+            Logger.debug("JClass.staticMethodId 1.1 exit: 💣 \(logKey) not found")
             #endif
             return nil
         }
-        #if DEBUG
-        Logger.trace("Got staticMethodId \(logKey)")
+        #if JNILOGS
+        Logger.trace("JClass.staticMethodId 2, got \(logKey)")
         #endif
         return id
         #else
@@ -179,19 +197,19 @@ public struct JClass: @unchecked Sendable {
     /// - Returns: The static field ID, or `nil` if not found.
     public func staticFieldId(name: String, signature: JSignatureItem) -> JFieldId? {
         #if os(Android)
-        #if DEBUG
+        #if JNILOGS
         let logKey = "\"\(name)\(signature.signature)\""
-        Logger.trace("Getting staticFieldId \(logKey)")
+        Logger.trace("JClass.staticFieldId 1, getting \(logKey)")
         #endif
         guard let id = JNICache.shared.getStaticFieldId(className: self.name, fieldName: name, signature: signature)
         else {
-            #if DEBUG
-            Logger.debug("💣 StaticFieldId \(logKey) not found")
+            #if JNILOGS
+            Logger.debug("JClass.staticFieldId 1.1 exit: 💣 \(logKey) not found")
             #endif
             return nil
         }
-        #if DEBUG
-        Logger.trace("Got staticFieldId \(logKey)")
+        #if JNILOGS
+        Logger.trace("JClass.staticFieldId 2, got \(logKey)")
         #endif
         return id
         #else
