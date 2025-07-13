@@ -48,13 +48,14 @@ extension JGetClassable {
         #if os(Android)
         guard
             let env = JEnv.current(),
+            let clazz = env.findClass("java/lang/Class"),
             let methodId = clazz.methodId(
                 env: env,
                 name: "getClass",
                 signature: .returning("java/lang/Class")
             )
         else { return nil }
-        return env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, args: [])
+        return env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, clazz: clazz, args: [])
         #else
         return nil
         #endif
