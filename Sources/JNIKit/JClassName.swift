@@ -8,7 +8,7 @@
 /// A model for constructing Java class names in JNI-compatible format.
 ///
 /// Supports slash-separated (`/`) names for packages and dollar-separated (`$`) inner classes.
-public class JClassName: @unchecked Sendable, ExpressibleByStringLiteral {
+open class JClassName: @unchecked Sendable, ExpressibleByStringLiteral {
     /// Parent class or package (can be nil for root)
     public let parent: JClassName?
 
@@ -27,16 +27,16 @@ public class JClassName: @unchecked Sendable, ExpressibleByStringLiteral {
     /// Initialize from a root name (e.g. `"java"`, `"android"`)
     required public init(stringLiteral: String) {
         self.parent = nil
-        self.name = stringLiteral
+        self.name = stringLiteral.components(separatedBy: "/").last ?? stringLiteral
         self.isInnerClass = false
-        self.path = name
-        self.fullName = name.components(separatedBy: "/").joined(separator: ".")
+        self.path = stringLiteral
+        self.fullName = stringLiteral.components(separatedBy: "/").joined(separator: ".")
     }
 
     /// Initialize from a parent and class segment, specifying whether it's an inner class.
     public init(parent: JClassName, name: String, isInnerClass: Bool = false) {
         self.parent = parent
-        self.name = name
+        self.name = name.components(separatedBy: "/").last ?? name
         self.isInnerClass = isInnerClass
         let separator = isInnerClass ? "$" : "/"
         let path = parent.path + separator + name
