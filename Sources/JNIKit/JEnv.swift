@@ -300,6 +300,11 @@ extension JEnv {
     }
 
     /// Promotes a local reference to a global one (GC-safe).
+    public func newGlobalRefPure(_ ref: jobject) -> jobject? {
+        env.pointee!.pointee.NewGlobalRef!(env, ref)
+    }
+
+    /// Promotes a local reference to a global one (GC-safe).
     public func newGlobalRef(_ ref: jobject) -> jobject? {
         env.pointee!.pointee.NewGlobalRef!(env, ref)
     }
