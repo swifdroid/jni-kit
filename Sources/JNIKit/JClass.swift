@@ -38,6 +38,7 @@ public class JClass: @unchecked Sendable {
     /// A global JNI `jclass` reference.
     /// Safe to pass across threads but must be created via `NewGlobalRef`.
     public let ref: jclass
+    #endif
 
     /// Fully qualified JNI class name (e.g. `"java/lang/String"`).
     public let name: JClassName
@@ -45,6 +46,7 @@ public class JClass: @unchecked Sendable {
     /// Is it has global reference or local
     public let isGlobalRef: Bool
 
+    #if os(Android)
     /// Construct manually from a global `jclass` and its name.
     /// Use only when you're sure the reference is global.
     public init(_ ref: jclass, _ name: JClassName, isGlobalRef: Bool = true) {
@@ -58,17 +60,24 @@ public class JClass: @unchecked Sendable {
         guard let ref else { return nil }
         self.init(ref, name, isGlobalRef: isGlobalRef)
     }
+    #else
+    public init(_ name: JClassName, isGlobalRef: Bool = true) {
+        self.name = name
+        self.isGlobalRef = isGlobalRef
+    }
     #endif
 
     deinit {
         #if JNILOGS
         Logger.critical("🧹🧹🧹 deleted \(isGlobalRef ? "global" : "local") ref: \(ref)")
         #endif
+        #if os(Android)
         if isGlobalRef {
             JEnv.current()?.deleteGlobalRef(ref)
         } else {
             JEnv.current()?.deleteLocalRef(ref)
         }
+        #endif
     }
 
     /// Resolve and cache the Java class reference for the given name.

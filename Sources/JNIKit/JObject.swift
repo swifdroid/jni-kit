@@ -5,10 +5,6 @@
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
-#if os(Android)
-import Android
-#endif
-
 /// A Swift wrapper around a global `jobject`, retained safely across threads and JNI calls.
 ///
 /// Use `JObject` to represent any Java object passed from or constructed in Swift.
@@ -25,7 +21,6 @@ public final class JObject: Sendable, JObjectable {
 
     // MARK: - Init
     
-    #if os(Android)
     /// Wrap an existing `jobject` by creating a global reference.
     /// - Parameters:
     ///   - ref: The local or global `jobject`
@@ -42,5 +37,4 @@ public final class JObject: Sendable, JObjectable {
         self.ref = ref
         self.clazz = clazz
     }
-    #endif
 }
