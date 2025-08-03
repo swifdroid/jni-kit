@@ -35,6 +35,8 @@ public final class JObjectBox: @unchecked Sendable {
     //     Logger(label: "JObjectBox").critical("🧹🧹🧹 deleted global ref: \(ref)")
     //     vm.attachCurrentThread()?.deleteGlobalRef(ref)
     // }
+    #else
+    public init () {}
     #endif
 }
 
