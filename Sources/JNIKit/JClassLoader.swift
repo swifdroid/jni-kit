@@ -33,13 +33,13 @@ public final class JClassLoader: Sendable, JObjectable {
 
 // MARK: - Instance Methods
 
-#if os(Android)
 extension JClassLoader {
     /// Loads the class with the specified binary name.
     ///
     /// - Parameter name: JNI slash-separated class path (e.g. `"java/lang/String"`)
     /// - Returns: A wrapped class reference or `nil` if not found.
     public func loadClass(_ name: JClassName) -> JClass? {
+        #if os(Android)
         #if JNILOGS
         Logger.trace("JClassLoader.loadClass 1 clazz: \(clazz.name.path)")
         #endif
@@ -87,6 +87,9 @@ extension JClassLoader {
         Logger.info("JClassLoader.loadClass 5")
         #endif
         return JClass(env.newGlobalRefPure(local), name)
+        #else
+        return nil
+        #endif
     }
 
     // /// Finds a class by name using this class loader.
@@ -110,4 +113,3 @@ extension JClassLoader {
     //     return JClass(classObject.ref, name)
     // }
 }
-#endif
