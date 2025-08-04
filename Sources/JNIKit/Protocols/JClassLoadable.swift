@@ -21,7 +21,7 @@ import Android
 /// ```swift
 /// let classLoader = myObject.getClassLoader()
 /// ```
-public protocol JClassLoadable: Sendable {
+public protocol JClassLoadable: AnyObject, Sendable {
     /// The underlying JNI reference to the Java object.
     var ref: JObjectBox { get }
     
