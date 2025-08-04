@@ -54,3 +54,7 @@ extension JClassName: Hashable, Equatable {
         return lhs.path == rhs.path
     }
 }
+
+extension JClassName: CustomStringConvertible {
+    public var description: String { path }
+}
