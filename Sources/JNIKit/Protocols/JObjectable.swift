@@ -60,73 +60,73 @@ extension JObjectable {
     }
 
     /// Call an instance method returning `jboolean`
-    public func callBoolMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Bool? {
+    public func callBoolMethod(name: String, args: [any JValuable]? = nil) -> Bool? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.boolean))
         else { return nil }
         return env.callBooleanMethod(object: object, methodId: methodId, args: args)
     }
 
     /// Call an instance method returning `jbyte`
-    public func callByteMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int8? {
+    public func callByteMethod(name: String, args: [any JValuable]? = nil) -> Int8? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.byte))
         else { return nil }
         return env.callByteMethod(object: object, methodId: methodId, args: args)
     }
 
     /// Call an instance method returning `jchar`
-    public func callCharMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> UInt16? {
+    public func callCharMethod(name: String, args: [any JValuable]? = nil) -> UInt16? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.char))
         else { return nil }
         return env.callCharMethod(object: object, methodId: methodId, args: args)
     }
 
     /// Call an instance method returning `jdouble`
-    public func callDoubleMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Double? {
+    public func callDoubleMethod(name: String, args: [any JValuable]? = nil) -> Double? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.double))
         else { return nil }
         return env.callDoubleMethod(object: object, methodId: methodId, args: args)
     }
 
     /// Call an instance method returning `jfloat`
-    public func callFloatMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Float? {
+    public func callFloatMethod(name: String, args: [any JValuable]? = nil) -> Float? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.float))
         else { return nil }
         return env.callFloatMethod(object: object, methodId: methodId, args: args)
     }
     
     /// Call an instance method returning `jint`
-    public func callIntMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int32? {
+    public func callIntMethod(name: String, args: [any JValuable]? = nil) -> Int32? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.int))
         else { return nil }
         return env.callIntMethod(object: object, methodId: methodId, args: args)
     }
 
     /// Call an instance method returning `long`
-    public func callLongMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int64? {
+    public func callLongMethod(name: String, args: [any JValuable]? = nil) -> Int64? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.long))
         else { return nil }
         return env.callLongMethod(object: object, methodId: methodId, args: args)
     }
 
     /// Call an instance method returning `void`
-    public func callVoidMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) {
+    public func callVoidMethod(name: String, args: [any JValuable]? = nil) {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.void))
         else { return }
         env.callVoidMethod(object: object, methodId: methodId, args: args)
     }
@@ -143,73 +143,73 @@ extension JObjectable {
     }
 
     /// Call a non-virtual instance method returning `jboolean`
-    public func callNonvirtualBoolMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Bool? {
+    public func callNonvirtualBoolMethod(name: String, args: [any JValuable]? = nil) -> Bool? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.boolean))
         else { return nil }
         return env.callNonvirtualBooleanMethod(object: object, clazz: clazz, methodId: methodId, args: args)
     }
 
     /// Call a non-virtual instance method returning `jbyte`
-    public func callNonvirtualByteMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int8? {
+    public func callNonvirtualByteMethod(name: String, args: [any JValuable]? = nil) -> Int8? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.byte))
         else { return nil }
         return env.callNonvirtualByteMethod(object: object, clazz: clazz, methodId: methodId, args: args)
     }
 
     /// Call a non-virtual instance method returning `jchar`
-    public func callNonvirtualCharMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> UInt16? {
+    public func callNonvirtualCharMethod(name: String, args: [any JValuable]? = nil) -> UInt16? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.char))
         else { return nil }
         return env.callNonvirtualCharMethod(object: object, clazz: clazz, methodId: methodId, args: args)
     }
 
     /// Call a non-virtual instance method returning `jdouble`
-    public func callNonvirtualDoubleMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Double? {
+    public func callNonvirtualDoubleMethod(name: String, args: [any JValuable]? = nil) -> Double? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.double))
         else { return nil }
         return env.callNonvirtualDoubleMethod(object: object, clazz: clazz, methodId: methodId, args: args)
     }
 
     /// Call a non-virtual instance method returning `jfloat`
-    public func callNonvirtualFloatMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Float? {
+    public func callNonvirtualFloatMethod(name: String, args: [any JValuable]? = nil) -> Float? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.float))
         else { return nil }
         return env.callNonvirtualFloatMethod(object: object, clazz: clazz, methodId: methodId, args: args)
     }
     
     /// Call a non-virtual instance method returning `jint`
-    public func callNonvirtualIntMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int32? {
+    public func callNonvirtualIntMethod(name: String, args: [any JValuable]? = nil) -> Int32? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.int))
         else { return nil }
         return env.callNonvirtualIntMethod(object: object, clazz: clazz, methodId: methodId, args: args)
     }
 
     /// Call a non-virtual instance method returning `long`
-    public func callNonvirtualLongMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) -> Int64? {
+    public func callNonvirtualLongMethod(name: String, args: [any JValuable]? = nil) -> Int64? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.long))
         else { return nil }
         return env.callNonvirtualLongMethod(object: object, clazz: clazz, methodId: methodId, args: args)
     }
 
     /// Call a non-virtual instance method returning `void`
-    public func callNonvirtualVoidMethod(name: String, signature: JMethodSignature, args: [any JValuable]? = nil) {
+    public func callNonvirtualVoidMethod(name: String, args: [any JValuable]? = nil) {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: .returning(.void))
         else { return }
         env.callNonvirtualVoidMethod(object: object, clazz: clazz, methodId: methodId, args: args)
     }
