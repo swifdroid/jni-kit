@@ -28,6 +28,9 @@ public protocol JClassLoadable: AnyObject, Sendable {
     /// The resolved `JClass` associated with the object’s declared type.
     var clazz: JClass { get }
 
+    /// Cached instance of the `ClassLoader` to avoid JNI round-trips.
+    var cachedClassLoader: JClassLoader? { get set }
+
     /// Returns the result of calling Java’s `getClass()` method on this object.
     ///
     /// - Returns: A `JObject` representing a Java `Class` instance, or `nil` if lookup or call fails.
@@ -43,6 +46,9 @@ extension JClassLoadable {
     /// - Returns: A `JObject` representing the Java class instance (`java.lang.Class`),
     ///   or `nil` if the call fails.
     public func getClassLoader() -> JClassLoader? {
+        if let cachedClassLoader {
+            return cachedClassLoader
+        }
         #if os(Android)
         guard
             let env = JEnv.current() else {
@@ -66,7 +72,8 @@ extension JClassLoadable {
             // logger?.info("getClassLoader 4 exit")
             return nil
         }
-        return JClassLoader(obj)
+        cachedClassLoader = JClassLoader(obj)
+        return cachedClassLoader
         #else
         return nil
         #endif
