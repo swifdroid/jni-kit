@@ -71,10 +71,12 @@ public final class JNICache: @unchecked Sendable {
     /// This method ensures the class is only looked up once via `FindClass`,
     /// converted into a global reference using `NewGlobalRef`, and cached for reuse.
     ///
-    /// - Parameter name: The JNI class name (e.g. `"java/lang/String"`), using slash-separated format.
+    /// - Parameters:
+    ///   - name: The JNI class name (e.g. `"java/lang/String"`), using slash-separated format.
+    ///   - classLoader: optional object confirming to JClassLoader, but necessary for non-system classes
     /// - Returns: A `JClass` containing a globally retained `jclass` reference,
     ///            or `nil` if the class could not be found.
-    public func getClass(_ name: JClassName) -> JClass? {
+    public func getClass(_ name: JClassName, _ classLoader: JClassLoader? = nil) -> JClass? {
         #if os(Android)
         #if JNILOGS
         let logKey = "\"\(name.fullName)\""
@@ -100,7 +102,7 @@ public final class JNICache: @unchecked Sendable {
             return nil
         }
         guard
-            let global = env.findClass(name)
+            let global = classLoader?.loadClass(name) ?? env.findClass(name)
         else {
             #if JNILOGS
             Logger.trace("JNICache.getClass 2 exit 2")
@@ -123,11 +125,12 @@ public final class JNICache: @unchecked Sendable {
     /// Get an instance method ID for the specified class, method, and signature.
     ///
     /// - Parameters:
-    ///   - className: The name of the class (e.g., `"java/lang/String"`)
+    ///   - env: JNI environment instance
+    ///   - clazz: The class instance (e.g., `"java/lang/String"`)
     ///   - methodName: The method name (e.g., `"toString"`)
     ///   - signature: JNI signature string (e.g., `"()Ljava/lang/String;"`)
     /// - Returns: Cached or resolved `jmethodID`, or `nil` if not found.
-    public func getMethodId(env: JEnv, clazz: JClass, methodName: String, signature: JMethodSignature) -> JMethodId? {
+    public func getMethodId(env: JEnv? = .current(), clazz: JClass, methodName: String, signature: JMethodSignature) -> JMethodId? {
         #if os(Android)
         #if JNILOGS
         let logKey = "\"\(clazz.name.fullName).\(methodName)\(signature.signature)\""
@@ -145,6 +148,7 @@ public final class JNICache: @unchecked Sendable {
         #if JNILOGS
         Logger.trace("JNICache.getMethodId 3, \(logKey) is not in cache, getting from JNI")
         #endif
+        guard let env else { return nil }
         let result = methodName.withCString { cname in
             signature.signature.withCString { csig in
                 env.env.pointee?.pointee.GetMethodID?(env.env, clazz.ref, cname, csig)
@@ -173,11 +177,12 @@ public final class JNICache: @unchecked Sendable {
     /// Get a static method ID for the specified class, method, and signature.
     ///
     /// - Parameters:
-    ///   - className: The name of the class (e.g., `"java/lang/System"`)
+    ///   - env: JNI environment instance
+    ///   - clazz: The class instance (e.g., `"java/lang/System"`)
     ///   - methodName: The static method name (e.g., `"currentTimeMillis"`)
     ///   - signature: JNI signature string (e.g., `"()J"`)
     /// - Returns: Cached or resolved `jmethodID`, or `nil` if not found.
-    public func getStaticMethodId(className: JClassName, methodName: String, signature: JMethodSignature) -> JMethodId? {
+    public func getStaticMethodId(env: JEnv? = .current(), clazz: JClass, methodName: String, signature: JMethodSignature) -> JMethodId? {
         #if os(Android)
         #if JNILOGS
         let logKey = "\"\(className.fullName).\(methodName)\(signature.signature)\""
@@ -186,7 +191,7 @@ public final class JNICache: @unchecked Sendable {
         methodMutex.lock()
         defer { methodMutex.unlock() }
         let key = "static:\(methodName)\(signature.signature)"
-        if let cached = methodCache[className]?[key] {
+        if let cached = methodCache[clazz.name]?[key] {
             #if JNILOGS
             Logger.trace("JNICache.getStaticMethodId 2, got \(logKey) from cache")
             #endif
@@ -195,10 +200,7 @@ public final class JNICache: @unchecked Sendable {
         #if JNILOGS
         Logger.trace("JNICache.getStaticMethodId 3, \(logKey) is not in cache, getting from JNI")
         #endif
-        guard
-            let clazz = getClass(className),
-            let env = getEnv()
-        else { return nil }
+        guard let env else { return nil }
         let result = methodName.withCString { cname in
             signature.signature.withCString { csig in
                 env.env.pointee?.pointee.GetStaticMethodID?(env.env, clazz.ref, cname, csig)
@@ -214,7 +216,7 @@ public final class JNICache: @unchecked Sendable {
             return nil
         }
         let wrapper = JMethodId(methodId)
-        methodCache[className, default: [:]][key] = wrapper
+        methodCache[clazz.name, default: [:]][key] = wrapper
         #if JNILOGS
         Logger.trace("JNICache.getStaticMethodId 5, got \(logKey) from JNI, saved in cache")
         #endif
@@ -227,11 +229,12 @@ public final class JNICache: @unchecked Sendable {
     /// Get an instance field ID for the specified class, field name, and signature.
     ///
     /// - Parameters:
-    ///   - className: The class name (e.g., `"android/content/Intent"`)
+    ///   - env: JNI environment instance
+    ///   - clazz: The class instance (e.g., `"android/content/Intent"`)
     ///   - fieldName: The field name (e.g., `"mFlags"`)
     ///   - signature: JNI signature string (e.g., `"I"`)
     /// - Returns: Cached or resolved `jfieldID`, or `nil` if not found.
-    public func getFieldId(className: JClassName, fieldName: String, signature: JSignatureItem) -> JFieldId? {
+    public func getFieldId(env: JEnv? = .current(), clazz: JClass, fieldName: String, signature: JSignatureItem) -> JFieldId? {
         #if os(Android)
         #if JNILOGS
         let logKey = "\"\(className.fullName) \(fieldName)\(signature.signature)\""
@@ -240,7 +243,7 @@ public final class JNICache: @unchecked Sendable {
         fieldMutex.lock()
         defer { fieldMutex.unlock() }
         let key = "\(fieldName)\(signature.signature)"
-        if let cached = fieldCache[className]?[key] {
+        if let cached = fieldCache[clazz.name]?[key] {
             #if JNILOGS
             Logger.trace("JNICache.getFieldId 2, got \(logKey) from cache")
             #endif
@@ -249,10 +252,7 @@ public final class JNICache: @unchecked Sendable {
         #if JNILOGS
         Logger.trace("JNICache.getFieldId 3, \(logKey) is not in cache, getting from JNI")
         #endif
-        guard
-            let clazz = getClass(className),
-            let env = getEnv()
-        else { return nil }
+        guard let env else { return nil }
         let result = fieldName.withCString { fname in
             signature.signature.withCString { fsig in
                 env.env.pointee?.pointee.GetFieldID?(env.env, clazz.ref, fname, fsig)
@@ -268,7 +268,7 @@ public final class JNICache: @unchecked Sendable {
             return nil
         }
         let wrapper = JFieldId(fieldId)
-        fieldCache[className, default: [:]][key] = wrapper
+        fieldCache[clazz.name, default: [:]][key] = wrapper
         #if JNILOGS
         Logger.trace("JNICache.getFieldId 5, got \(logKey) from JNI, saved in cache")
         #endif
@@ -281,11 +281,12 @@ public final class JNICache: @unchecked Sendable {
     /// Get a static field ID for the specified class, field name, and signature.
     ///
     /// - Parameters:
-    ///   - className: The class name (e.g., `"android/os/Build"`)
+    ///   - env: JNI environment instance
+    ///   - clazz: The class instance (e.g., `"android/os/Build"`)
     ///   - fieldName: The static field name (e.g., `"MODEL"`)
     ///   - signature: JNI signature string (e.g., `"Ljava/lang/String;"`)
     /// - Returns: Cached or resolved `jfieldID`, or `nil` if not found.
-    public func getStaticFieldId(className: JClassName, fieldName: String, signature: JSignatureItem) -> JFieldId? {
+    public func getStaticFieldId(env: JEnv? = .current(), clazz: JClass, fieldName: String, signature: JSignatureItem) -> JFieldId? {
         #if os(Android)
         #if JNILOGS
         let logKey = "\"\(className.fullName) \(fieldName)\(signature.signature)\""
@@ -294,7 +295,7 @@ public final class JNICache: @unchecked Sendable {
         fieldMutex.lock()
         defer { fieldMutex.unlock() }
         let key = "static:\(fieldName)\(signature.signature)"
-        if let cached = fieldCache[className]?[key] {
+        if let cached = fieldCache[clazz.name]?[key] {
             #if JNILOGS
             Logger.trace("JNICache.getStaticFieldId 2, got \(logKey) from cache")
             #endif
@@ -303,10 +304,7 @@ public final class JNICache: @unchecked Sendable {
         #if JNILOGS
         Logger.trace("JNICache.getStaticFieldId 3, \(logKey) is not in cache, getting from JNI")
         #endif
-        guard
-            let clazz = getClass(className),
-            let env = getEnv()
-        else { return nil }
+        guard let env else { return nil }
         let result = fieldName.withCString { fname in
             signature.signature.withCString { fsig in
                 env.env.pointee?.pointee.GetStaticFieldID?(env.env, clazz.ref, fname, fsig)
@@ -322,7 +320,7 @@ public final class JNICache: @unchecked Sendable {
             return nil
         }
         let wrapper = JFieldId(fieldId)
-        fieldCache[className, default: [:]][key] = wrapper
+        fieldCache[clazz.name, default: [:]][key] = wrapper
         #if JNILOGS
         Logger.trace("JNICache.getStaticFieldId 5, got \(logKey) from JNI, saved in cache")
         #endif

@@ -85,15 +85,17 @@ public class JClass: @unchecked Sendable {
     /// This is the preferred way to construct a `JClass`.
     /// It automatically performs caching and returns a globally retained reference.
     ///
-    /// - Parameter name: JNI class name using slashes (`/`) (e.g., `"java/lang/String"`).
+    /// - Parameters:
+    ///   - name: JNI class name using slashes (`/`) (e.g., `"java/lang/String"`).
+    ///   - classLoader: optional object confirming to JClassLoader, but necessary for non-system classes
     /// - Returns: A cached `JClass`, or `nil` if the class could not be loaded.
-    public static func load(_ name: JClassName) -> JClass? {
+    public static func load(_ name: JClassName, _ classLoader: JClassLoader? = nil) -> JClass? {
         #if os(Android)
         #if JNILOGS
         let logKey = "\"\(name.path)\""
         Logger.trace("JClass.load 1, loading \(logKey)")
         #endif
-        guard let result = JNICache.shared.getClass(name) else {
+        guard let result = JNICache.shared.getClass(name, classLoader) else {
             #if JNILOGS
             Logger.debug("JClass.load 1.1 exit: 💣 Class \(logKey) not found")
             #endif
@@ -150,7 +152,7 @@ public class JClass: @unchecked Sendable {
         let logKey = "\"\(name)\(signature.signature)\""
         Logger.trace("JClass.fieldId 1, getting \(logKey)")
         #endif
-        guard let id = JNICache.shared.getFieldId(className: self.name, fieldName: name, signature: signature)
+        guard let id = JNICache.shared.getFieldId(clazz: self, fieldName: name, signature: signature)
         else {
             #if JNILOGS
             Logger.debug("JClass.fieldId 1.1 exit: 💣 \(logKey) not found")
@@ -180,7 +182,7 @@ public class JClass: @unchecked Sendable {
         let logKey = "\"\(name)\(signature.signature)\""
         Logger.trace("JClass.staticMethodId 1, getting \(logKey)")
         #endif
-        guard let id = JNICache.shared.getStaticMethodId(className: self.name, methodName: name, signature: signature)
+        guard let id = JNICache.shared.getStaticMethodId(clazz: self, methodName: name, signature: signature)
         else {
             #if JNILOGS
             Logger.debug("JClass.staticMethodId 1.1 exit: 💣 \(logKey) not found")
@@ -210,7 +212,7 @@ public class JClass: @unchecked Sendable {
         let logKey = "\"\(name)\(signature.signature)\""
         Logger.trace("JClass.staticFieldId 1, getting \(logKey)")
         #endif
-        guard let id = JNICache.shared.getStaticFieldId(className: self.name, fieldName: name, signature: signature)
+        guard let id = JNICache.shared.getStaticFieldId(clazz: self, fieldName: name, signature: signature)
         else {
             #if JNILOGS
             Logger.debug("JClass.staticFieldId 1.1 exit: 💣 \(logKey) not found")
