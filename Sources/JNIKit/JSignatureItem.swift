@@ -102,3 +102,89 @@ extension JSignatureItem: JTypeSignature {
         [.object, .objects].contains(typeCode)
     }
 }
+public enum JSignatureItemWithValue: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { self }
+
+    /// JNI primitives
+    case boolean(Bool)
+    case byte(Int8)
+    case char(UnicodeScalar)
+    case short(Int16)
+    case int(Int32)
+    case long(Int64)
+    case float(Float)
+    case double(Double)
+
+    // MARK: Object
+
+    case object(JObject, JClassName)
+
+    // MARK: Signature Item
+    
+    #if os(Android)
+    var value: any JValuable {
+        switch self {
+            case .boolean(let value): return value
+            case .byte(let value): return value
+            case .char(let value): return value
+            case .short(let value): return value
+            case .int(let value): return value
+            case .long(let value): return value
+            case .float(let value): return value
+            case .double(let value): return value
+            case .object(let value, _): return value
+        }
+    }
+    #endif
+    
+    var signatureItem: JSignatureItem {
+        switch self {
+            case .boolean: return .boolean
+            case .byte: return .byte
+            case .char: return .char
+            case .short: return .short
+            case .int: return .int
+            case .long: return .long
+            case .float: return .float
+            case .double: return .double
+            case .object(_, let className): return .object(className)
+        }
+    }
+}
+public protocol JSignatureItemable {
+    var signatureItemWithValue: JSignatureItemWithValue { get }
+}
+extension Int8: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { .byte(self) }
+}
+extension Int16: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { .short(self) }
+}
+extension Int32: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { .int(self) }
+}
+extension Int64: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { .long(self) }
+}
+extension Bool: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { .boolean(self) }
+}
+extension Float: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { .float(self) }
+}
+extension Double: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { .double(self) }
+}
+extension UnicodeScalar: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { .char(self) }
+}
+extension JObject {
+    public func signed(as className: JClassName? = nil) -> JSignatureItemWithValue {
+        .object(self, className ?? self.className)
+    }
+}
+extension JObjectable {
+    public func signed(as className: JClassName? = nil) -> JSignatureItemWithValue {
+        .object(self.object, className ?? self.className)
+    }
+}
