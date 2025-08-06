@@ -10,6 +10,7 @@
 public struct JMethodSignature: Sendable {
     /// The complete JNI signature string (e.g., `(I)V`)
     public let signature: String
+    public let returning: JSignatureItem
 
     /// Initialize a method signature from parameter types and a return type.
     /// - Parameters:
@@ -17,6 +18,7 @@ public struct JMethodSignature: Sendable {
     ///   - returning: The return type as a `JSignatureItem`
     public init(_ args: [JSignatureItem], returning: JSignatureItem) {
         self.signature = "(" + args.map(\.signature).joined() + ")" + returning.signature
+        self.returning = returning
     }
 
     /// Variadic version of init
