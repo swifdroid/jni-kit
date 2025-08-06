@@ -19,7 +19,7 @@
 /// ```
 public struct JSignatureItem: Sendable {
     /// The raw JNI type code prefix, such as `"I"` for `int`, `"L"` for object, or `"[I"` for array of ints.
-    private let typeCode: TypeCode
+    public let typeCode: TypeCode
 
     /// The class name for object types, in slash-separated format (e.g., `"java/lang/String"`),
     /// or empty for primitive types.
