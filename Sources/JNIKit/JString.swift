@@ -30,7 +30,7 @@ public final class JString: Sendable, JObjectable {
     ///
     /// - Parameter swiftString: The Swift string to convert into a Java string.
     /// - Returns: `nil` if JNI operations fail or JVM is unavailable.
-    public init?(from swiftString: String) {
+    public init? (from swiftString: String) {
         guard
             let env = JEnv.current(),
             let clazz = JClass.load(Self.className),
