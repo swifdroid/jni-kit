@@ -122,7 +122,7 @@ public enum JSignatureItemWithValue: JSignatureItemable {
     // MARK: Signature Item
     
     #if os(Android)
-    var value: any JValuable {
+    public var value: any JValuable {
         switch self {
             case .boolean(let value): return value
             case .byte(let value): return value
@@ -137,7 +137,7 @@ public enum JSignatureItemWithValue: JSignatureItemable {
     }
     #endif
     
-    var signatureItem: JSignatureItem {
+    public var signatureItem: JSignatureItem {
         switch self {
             case .boolean: return .boolean
             case .byte: return .byte
