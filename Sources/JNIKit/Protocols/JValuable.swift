@@ -61,9 +61,9 @@ extension Double: JValuable {
     public var jValue: jvalue { .init(d: jdouble(self)) }
 }
 
-extension UnicodeScalar: JValuable {
-    /// Converts `UnicodeScalar` to JNI `jchar`
-    public var jValue: jvalue { .init(c: jchar(self.value)) }
+extension UInt16: JValuable {
+    /// Converts `UInt16` to JNI `jchar`
+    public var jValue: jvalue { .init(c: jchar(self)) }
 }
 
 // MARK: - Objects

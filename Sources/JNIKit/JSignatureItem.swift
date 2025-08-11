@@ -108,7 +108,7 @@ public enum JSignatureItemWithValue: JSignatureItemable {
     /// JNI primitives
     case boolean(Bool)
     case byte(Int8)
-    case char(UnicodeScalar)
+    case char(UInt16)
     case short(Int16)
     case int(Int32)
     case long(Int64)
@@ -175,7 +175,7 @@ extension Float: JSignatureItemable {
 extension Double: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .double(self) }
 }
-extension UnicodeScalar: JSignatureItemable {
+extension UInt16: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .char(self) }
 }
 extension JObject {
