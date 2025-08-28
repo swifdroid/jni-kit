@@ -23,7 +23,10 @@ public final class JString: Sendable, JObjectable {
 
     // MARK: - Initializers
 
-    #if os(Android)
+    public init (_ object: JObject) {
+        self.object = object
+    }
+
     /// Create a new Java string from a Swift `String`.
     ///
     /// This performs a JNI call to construct a new UTF-8 encoded `java.lang.String`,
@@ -44,7 +47,7 @@ public final class JString: Sendable, JObjectable {
         return nil
         #endif
     }
-
+    #if os(Android)
     /// Wrap an existing `jstring` from JNI and promote it to a global reference.
     ///
     /// This is useful when receiving a string from Java code and you want to safely retain it.
@@ -58,10 +61,6 @@ public final class JString: Sendable, JObjectable {
             let existingBox = existing.box(env)
         else { return nil }
         self.object = JObject(existingBox, clazz)
-    }
-    #else
-    init?(_ object: JObject) {
-        self.object = object
     }
     #endif
 
