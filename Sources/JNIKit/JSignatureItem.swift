@@ -188,3 +188,12 @@ extension JObjectable {
         .object(self.object, className ?? self.className)
     }
 }
+extension JString {
+    public func signedAsString() -> JSignatureItemWithValue {
+        signed(as: "java/lang/String")
+    }
+
+    public func signedAsCharSequence() -> JSignatureItemWithValue {
+        signed(as: "java/lang/CharSequence")
+    }
+}
