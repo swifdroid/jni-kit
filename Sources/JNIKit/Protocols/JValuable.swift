@@ -73,6 +73,11 @@ extension JObject: JValuable {
     public var jValue: jvalue { .init(l: ref.ref) }
 }
 
+extension JClass: JValuable {
+    /// Converts any Java object reference into JNI `jvalue`
+    public var jValue: jvalue { .init(l: ref) }
+}
+
 extension JString: JValuable {
     public var jValue: jvalue { .init(l: ref.ref) }
 }
