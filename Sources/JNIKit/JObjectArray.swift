@@ -16,6 +16,11 @@ public struct JObjectArray: Sendable, JObjectable {
     public let object: JObject
     public let length: Int
 
+    public init (_ object: JObject, length: Int) {
+        self.object = object
+        self.length = length
+    }
+
     #if os(Android)
     /// Create a new array of Java objects with given size and element class.
     public init?(length: Int, clazz: JClass) {
