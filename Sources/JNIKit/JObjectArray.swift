@@ -13,8 +13,6 @@ import Android
 ///
 /// Retains a global reference and provides access to individual `JObject`s.
 public struct JObjectArray: Sendable, JObjectable {
-    public let ref: JObjectBox // jobjectArray
-    public let clazz: JClass
     public let object: JObject
     public let length: Int
 
@@ -26,8 +24,6 @@ public struct JObjectArray: Sendable, JObjectable {
             let array = env.newObjectArray(length: Int32(length), clazz: clazz),
             let global = env.newGlobalRef(JObject(array.ref, clazz))
         else { return nil }
-        self.ref = global.ref
-        self.clazz = clazz
         self.object = JObject(global.ref, clazz)
         self.length = length
     }
@@ -39,8 +35,6 @@ public struct JObjectArray: Sendable, JObjectable {
             let box = array.box(env),
             let global = env.newGlobalRef(JObject(box, clazz))
         else { return nil }
-        self.ref = global.ref
-        self.clazz = clazz
         self.object = JObject(global.ref, clazz)
         self.length = Int(env.getArrayLength(global.ref.ref))
     }
