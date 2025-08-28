@@ -608,4 +608,123 @@ extension JObjectable {
     public func callNonvirtualVoidMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) {
         callNonvirtualVoidMethod(env, name: name, args: args)
     }
+
+    // MARK: - Fields
+
+    /// Get an `object` field from a Java instance.
+    public func objectField(_ env: JEnv? = nil, name: String, _ signature: JSignatureItem) -> JObject? {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: signature)
+        else { return nil }
+        return env.getObjectField(object, fieldId)
+        #else
+        return nil
+        #endif
+    }
+
+    /// Get a `boolean` field from a Java instance.
+    public func booleanField(_ env: JEnv? = nil, name: String) -> Bool! {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .boolean)
+        else { return nil }
+        return env.getBooleanField(object, fieldId)
+        #else
+        return false
+        #endif
+    }
+
+    /// Get a `byte` field from a Java instance.
+    public func byteField(_ env: JEnv? = nil, name: String) -> Int8! {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .byte)
+        else { return nil }
+        return env.getByteField(object, fieldId)
+        #else
+        return 0
+        #endif
+    }
+
+    /// Get a `char` field from a Java instance.
+    public func charField(_ env: JEnv? = nil, name: String) -> UInt16! {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .char)
+        else { return nil }
+        return env.getCharField(object, fieldId)
+        #else
+        return 0
+        #endif
+    }
+
+    /// Get a `short` field from a Java instance.
+    public func shortField(_ env: JEnv? = nil, name: String) -> Int16! {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .short)
+        else { return nil }
+        return env.getShortField(object, fieldId)
+        #else
+        return 0
+        #endif
+    }
+
+    /// Get a `int` field from a Java instance.
+    public func intField(_ env: JEnv? = nil, name: String) -> Int32! {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .int)
+        else { return nil }
+        return env.getIntField(object, fieldId)
+        #else
+        return 0
+        #endif
+    }
+
+    /// Get a `long` field from a Java instance.
+    public func longField(_ env: JEnv? = nil, name: String) -> Int64! {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .long)
+        else { return nil }
+        return env.getLongField(object, fieldId)
+        #else
+        return 0
+        #endif
+    }
+
+    /// Get a `float` field from a Java instance.
+    public func floatField(_ env: JEnv? = nil, name: String) -> Float! {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .float)
+        else { return nil }
+        return env.getFloatField(object, fieldId)
+        #else
+        return 0
+        #endif
+    }
+
+    /// Get a `double` field from a Java instance.
+    public func doubleField(_ env: JEnv? = nil, name: String) -> Double! {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .double)
+        else { return nil }
+        return env.getDoubleField(object, fieldId)
+        #else
+        return 0
+        #endif
+    }
 }
