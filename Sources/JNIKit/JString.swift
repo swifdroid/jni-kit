@@ -32,6 +32,7 @@ public final class JString: Sendable, JObjectable {
     /// - Parameter swiftString: The Swift string to convert into a Java string.
     /// - Returns: `nil` if JNI operations fail or JVM is unavailable.
     public init? (from swiftString: String) {
+        #if os(Android)
         guard
             let env = JEnv.current(),
             let clazz = JClass.load(Self.className),
@@ -39,6 +40,9 @@ public final class JString: Sendable, JObjectable {
             let jstrBox = jstr.box(env)
         else { return nil }
         self.object = JObject(jstrBox, clazz)
+        #else
+        return nil
+        #endif
     }
 
     /// Wrap an existing `jstring` from JNI and promote it to a global reference.
