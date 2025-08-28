@@ -16,6 +16,7 @@ import Android
 public final class JString: Sendable, JObjectable {
     /// The JNI class name for `java.lang.String`.
     public static let className: JClassName = "java/lang/String"
+    public static let charSequenseClassName: JClassName = "java/lang/CharSequence"
 
     /// Object wrapper
     public let object: JObject
