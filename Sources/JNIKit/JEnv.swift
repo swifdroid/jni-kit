@@ -442,20 +442,19 @@ extension JEnv {
     public func callObjectMethod(
         object: JObject,
         methodId: JMethodId,
-        clazz: JClass? = nil,
+        clazz: JClass,
         args: [any JValuable]? = nil
     ) -> JObject? {
         guard
             let box = env.pointee!.pointee.CallObjectMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
         else { return nil }
-        return JObject(box, clazz ?? object.clazz)
+        return JObject(box, clazz)
     }
 
     /// Call a Java method returning an `jobject`.
     public func callObjectMethodPure(
         object: JObject,
         methodId: JMethodId,
-        clazz: JClass? = nil,
         args: [any JValuable]? = nil
     ) -> jobject? {
         env.pointee!.pointee.CallObjectMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })

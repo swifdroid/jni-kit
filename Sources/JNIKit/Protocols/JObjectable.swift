@@ -50,34 +50,34 @@ extension JObjectable {
     // MARK: - Instance Methods
     
     /// Call an instance method on this object.
-    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)], returning: JSignatureItem) -> JObject? {
+    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)], returningClass: JClass, returning: JSignatureItem) -> JObject? {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
             let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.1 }), returning: returning))
         else { return nil }
-        return env.callObjectMethod(object: object, methodId: methodId, args: args.map({ $0.0 }))
+        return env.callObjectMethod(object: object, methodId: methodId, clazz: returningClass, args: args.map({ $0.0 }))
         #else
         return nil
         #endif
     }
 
     /// Call an instance method on this object.
-    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable], returning: JSignatureItem = .void) -> JObject? {
+    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable], returningClass: JClass, returning: JSignatureItem) -> JObject? {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
             let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: returning))
         else { return nil }
-        return env.callObjectMethod(object: object, methodId: methodId, args: args.map({ $0.signatureItemWithValue.value }))
+        return env.callObjectMethod(object: object, methodId: methodId, clazz: returningClass, args: args.map({ $0.signatureItemWithValue.value }))
         #else
         return nil
         #endif
     }
 
     /// Call an instance method on this object.
-    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable..., returning: JSignatureItem = .void) -> JObject? {
-        callObjectMethod(env, name: name, args: args, returning: returning)
+    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable..., returningClass: JClass, returning: JSignatureItem) -> JObject? {
+        callObjectMethod(env, name: name, args: args, returningClass: returningClass, returning: returning)
     }
 
     /// Call an instance method returning `jboolean`

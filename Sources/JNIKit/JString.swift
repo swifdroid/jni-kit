@@ -165,9 +165,10 @@ extension JString {
     private func callReturningString(_ name: String, signature: JMethodSignature, args: [JString] = []) -> JString? {
         guard
             let env = JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: signature)
+            let methodId = clazz.methodId(env: env, name: name, signature: signature),
+            let stringClazz = JClass.load(.init(stringLiteral: signature.returning.className))
         else { return nil }
-        guard let object = env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, args: args) else { return nil }
+        guard let object = env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, clazz: stringClazz, args: args) else { return nil }
         return JString(from: object.ref.ref.assumingMemoryBound(to: jstring.self))
     }
 
