@@ -20,19 +20,25 @@ public final class JObject: Sendable, JObjectable {
     public var object: JObject { self }
 
     // MARK: - Init
+
+    /// Consume existing `JObject` and glue it with the right `JClass`
+    public init(_ object: consuming JObject, _ clazz: JClass) {
+        self.ref = object.ref
+        self.clazz = clazz
+    }
     
     /// Wrap an existing `jobject` by creating a global reference.
     /// - Parameters:
     ///   - ref: The local or global `jobject`
     ///   - className: The Java class name in JNI format (e.g. `"java/lang/String"`)
     ///   - clazz: The resolved `JClass` wrapper
-    public init(_ ref: JObjectBox, _ clazz: JClass) {
+    public init(_ ref: consuming JObjectBox, _ clazz: JClass) {
         self.ref = ref
         self.clazz = clazz
     }
 
     /// Convenient overload for optional `ref` and `clazz`
-    public init?(_ ref: JObjectBox?, _ clazz: JClass?) {
+    public init?(_ ref: consuming JObjectBox?, _ clazz: JClass?) {
         guard let ref, let clazz else { return nil }
         self.ref = ref
         self.clazz = clazz
