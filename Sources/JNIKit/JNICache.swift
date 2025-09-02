@@ -26,6 +26,9 @@ public final class JNICache: @unchecked Sendable {
     /// Shared singleton instance for global access.
     public static let shared = JNICache()
 
+    /// Cached instance of the `ClassLoader` to avoid JNI round-trips.
+    private var cachedClassLoader: JClassLoader? = nil
+
     /// Cache for global `jclass` references by class name.
     private var classCache: [JClassName: JClass] = [:]
 
@@ -35,18 +38,21 @@ public final class JNICache: @unchecked Sendable {
     /// Cache for instance and static field IDs by class and signature key.
     private var fieldCache: [JClassName: [String: JFieldId]] = [:]
 
+    private var classLoaderMutex = pthread_mutex_t()
     private var classMutex = pthread_mutex_t()
     private var methodMutex = pthread_mutex_t()
     private var fieldMutex = pthread_mutex_t()
 
     /// Private initializer to enforce singleton usage.
     private init() {
+        classLoaderMutex.activate(recursive: true)
         classMutex.activate(recursive: true)
         methodMutex.activate(recursive: true)
         fieldMutex.activate(recursive: true)
     }
 
     deinit {
+        classLoaderMutex.destroy()
         classMutex.destroy()
         methodMutex.destroy()
         fieldMutex.destroy()
@@ -64,6 +70,28 @@ public final class JNICache: @unchecked Sendable {
             return nil
         }
         return env
+    }
+
+    /// Store global app's class loader reference. It consumes the object.
+    public func setClassLoader(_ classLoader: consuming JClassLoader) {
+        classLoaderMutex.lock()
+        defer { classLoaderMutex.unlock() }
+        cachedClassLoader = classLoader
+        #if JNILOGS
+        Logger.trace("JNICache.setClassLoader ✅")
+        #endif
+    }
+    
+    /// Get a global, cached reference to the app's class loader.
+    public func getClassLoader() -> JClassLoader? {
+        classLoaderMutex.lock()
+        defer { classLoaderMutex.unlock() }
+        #if JNILOGS
+        if cachedClassLoader == nil {
+            Logger.trace("JNICache.getClassLoader NOT CACHED ⚠️")
+        }
+        #endif
+        return cachedClassLoader
     }
 
     /// Get a global, cached reference to the specified Java class.
@@ -102,7 +130,9 @@ public final class JNICache: @unchecked Sendable {
             return nil
         }
         guard
-            let global = classLoader?.loadClass(name) ?? env.findClass(name)
+            let global = classLoader?.loadClass(name) // 1. checking if there's provided class loader instance
+                ?? JNICache.shared.getClassLoader()?.loadClass(name) // 2. checking cached class loader instance (it should be cached)
+                ?? env.findClass(name) // 3. fall back to system's class loader which can't load classes from dynamic libs (means any app's gradle dependencies)
         else {
             #if JNILOGS
             Logger.trace("JNICache.getClass 2 exit 2")
