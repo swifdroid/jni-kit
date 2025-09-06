@@ -86,6 +86,23 @@ public final class JString: Sendable, JObjectable {
         return nil
         #endif
     }
+
+    #if os(Android)
+    /// Access the underlying JNI `jstring` reference.
+    public func reference() -> jobject? {
+        object.ref.ref
+    }
+    #endif
+}
+
+/// Optional extension for `JString`.
+extension Optional where Wrapped == JString {
+    #if os(Android)
+    /// Access the underlying JNI `jstring` reference.
+    public func reference() -> jobject? {
+        self?.object.ref.ref
+    }
+    #endif
 }
 
 // MARK: - Instance Methods
