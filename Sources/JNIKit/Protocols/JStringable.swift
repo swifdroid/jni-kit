@@ -66,7 +66,7 @@ extension JStringable {
             let clazz = env.findClass("java/lang/String"),
             let jstr = object.callObjectMethod(name: "toString", returningClass: clazz, returning: .object(clazz.name))
         else { return fallbackResult }
-        return JString(from: jstr.ref.ref)?.toSwiftString() ?? fallbackResult
+        return JString(from: jstr.ref.ref)?.string() ?? fallbackResult
         #else
         return ""
         #endif

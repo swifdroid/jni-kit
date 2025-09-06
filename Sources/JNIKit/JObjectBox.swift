@@ -175,7 +175,7 @@ extension JObjectBox {
         #if JNILOGS
         Logger.trace("JObjectBox.object 10")
         #endif
-        guard let name = javaString.toSwiftString() else {
+        guard let name = javaString.string() else {
             #if JNILOGS
             Logger.critical("JObjectBox.object 10.1 exit: 💣 Unable to convert javaString into String")
             #endif
