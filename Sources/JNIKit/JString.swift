@@ -89,7 +89,7 @@ public final class JString: Sendable, JObjectable {
 
     #if os(Android)
     /// Access the underlying JNI `jstring` reference.
-    public func reference() -> jobject? {
+    public func reference() -> jstring? {
         object.ref.ref
     }
     #endif
@@ -99,7 +99,7 @@ public final class JString: Sendable, JObjectable {
 extension Optional where Wrapped == JString {
     #if os(Android)
     /// Access the underlying JNI `jstring` reference.
-    public func reference() -> jobject? {
+    public func reference() -> jstring? {
         self?.reference()
     }
     #endif
