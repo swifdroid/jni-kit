@@ -102,8 +102,27 @@ extension Optional where Wrapped == JString {
     public func reference() -> jstring? {
         self?.reference()
     }
+
+    /// Convert this Java string to a Swift `String`.
+    ///
+    /// This performs a JNI `GetStringUTFChars` operation and safely converts the result to Swift.
+    /// The JNI memory is released automatically after conversion.
+    ///
+    /// - Returns: A native Swift string or `nil` if conversion fails.
+    public func toSwiftString() -> String? {
+        self?.toSwiftString()
+    }
     #endif
 }
+
+#if os(Android)
+extension jstring {
+    /// Wrap this `jstring` reference into a `JString` for use in JNI.
+    func wrap() -> JString? {
+        .init(from: self)
+    }
+}
+#endif
 
 /// Convenience method to wrap a Swift `String` into a `JString`.
 extension String {
