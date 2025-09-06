@@ -33,6 +33,9 @@ public protocol JStringable: Sendable {
     /// The resolved Java class of this object, used to look up method references like `toString()`.
     var clazz: JClass { get }
 
+    /// The wrapped Java object.
+    var object: JObject { get }
+
     /// Calls the Java `toString()` method and returns the result as a Swift `String`.
     ///
     /// This method performs a JNI call to `toString()` on the wrapped object, converts the resulting `jstring`
@@ -55,11 +58,13 @@ extension JStringable {
     public func toString() -> String {
         #if os(Android)
         let fallbackResult = "\(clazz.name.fullName)@\(ref)"
-        let object = JObject(ref, clazz)
+        #if JNILOGS
+        Logger.trace("toString fallbackResult: \(fallbackResult)")
+        #endif
         guard
             let env = JEnv.current(),
             let clazz = env.findClass("java/lang/String"),
-            let jstr = object.callObjectMethod(name: "toString", returningClass: clazz, returning: .object(clazz.name))            
+            let jstr = object.callObjectMethod(name: "toString", returningClass: clazz, returning: .object(clazz.name))
         else { return fallbackResult }
         return JString(from: jstr.ref.ref)?.toSwiftString() ?? fallbackResult
         #else
