@@ -48,6 +48,21 @@ extension JObjectable {
 
 extension JObjectable {
     // MARK: - Instance Methods
+
+    /// Get the class loader that loaded this object's class.
+    public func getClassLoader(_ env: JEnv? = nil) -> JClassLoader? {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let methodId = clazz.methodId(env: env, name: "getClass", signature: .returning("java/lang/Class")),
+            let returningClazz = JClass.load(JClassLoader.className),
+            let object = object.callObjectMethod(name: "getClass", returningClass: returningClazz, returning: .object("java/lang/Class"))
+        else { return nil }
+        return JClassLoader(object)
+        #else
+        return nil
+        #endif
+    }
     
     /// Call an instance method on this object.
     public func callObjectMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)], returningClass: JClass, returning: JSignatureItem) -> JObject? {
