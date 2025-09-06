@@ -100,9 +100,17 @@ extension Optional where Wrapped == JString {
     #if os(Android)
     /// Access the underlying JNI `jstring` reference.
     public func reference() -> jobject? {
-        self?.object.ref.ref
+        self?.reference()
     }
     #endif
+}
+
+/// Convenience method to wrap a Swift `String` into a `JString`.
+extension String {
+    /// Wrap this Swift `String` into a `JString` for use with JNI.
+    public func wrap() -> JString? {
+        .init(from: self)
+    }
 }
 
 // MARK: - Instance Methods
