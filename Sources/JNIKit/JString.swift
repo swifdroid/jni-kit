@@ -72,7 +72,7 @@ public final class JString: Sendable, JObjectable {
     /// The JNI memory is released automatically after conversion.
     ///
     /// - Returns: A native Swift string or `nil` if conversion fails.
-    public func toSwiftString() -> String? {
+    public func string() -> String? {
         #if os(Android)
         guard
             let env = JEnv.current(),
@@ -109,8 +109,8 @@ extension Optional where Wrapped == JString {
     /// The JNI memory is released automatically after conversion.
     ///
     /// - Returns: A native Swift string or `nil` if conversion fails.
-    public func toSwiftString() -> String? {
-        self?.toSwiftString()
+    public func string() -> String? {
+        self?.string()
     }
     #endif
 }
@@ -118,7 +118,7 @@ extension Optional where Wrapped == JString {
 #if os(Android)
 extension jstring {
     /// Wrap this `jstring` reference into a `JString` for use in JNI.
-    func wrap() -> JString? {
+    public func wrap() -> JString? {
         .init(from: self)
     }
 }
