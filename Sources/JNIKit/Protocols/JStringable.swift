@@ -55,16 +55,11 @@ extension JStringable {
     public func toString() -> String {
         #if os(Android)
         let fallbackResult = "\(clazz.name.fullName)@\(ref)"
+        let object = JObject(ref, clazz)
         guard
             let env = JEnv.current(),
             let clazz = env.findClass("java/lang/String"),
-            let methodId = clazz.methodId(env: env, name: "toString", signature: .returning("java/lang/String")),
-            let jstr = env.callObjectMethod(
-                object: .init(ref, clazz),
-                methodId: methodId,
-                clazz: clazz,
-                args: []
-            )
+            let jstr = object.callObjectMethod(name: "toString", returningClass: clazz, returning: .object(clazz.name))            
         else { return fallbackResult }
         return JString(from: jstr.ref.ref)?.toSwiftString() ?? fallbackResult
         #else
