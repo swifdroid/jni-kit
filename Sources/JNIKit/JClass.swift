@@ -228,6 +228,72 @@ public class JClass: @unchecked Sendable {
         #endif
     }
 
+    // MARK: - New Object
+
+    /// Call to a constructor method which returns a new object.
+    ///
+    /// - Parameters:
+    ///  - env: The JNI environment to use. If `nil`, the current environment will be used.
+    /// ```swift
+    ///     env: JEnv.current()!
+    /// ```
+    ///  - args: An array of tuples containing the argument value and its corresponding JNI signature item.
+    /// ```swift
+    ///     args: [("string".wrap()!.object, .object("java/lang/String")), (0, .int)]
+    /// ```
+    ///  - Returns: The instance of constructed `JObject`.
+    public func newObject(_ env: JEnv? = nil, args: [(any JValuable, JSignatureItem)]) -> JObject? {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let methodId = methodId(env: env, name: "<init>", signature: .init(args.map({ $0.1 }), returning:.void))
+        else { return nil }
+        return env.newObject(clazz: self, constructor: methodId, args: args.map({ $0.0 }))
+        #else
+        return nil
+        #endif
+    }
+
+    /// Call to a constructor method which returns a new object.
+    ///
+    /// - Parameters:
+    ///  - env: The JNI environment to use. If `nil`, the current environment will be used.
+    /// ```swift
+    ///     env: JEnv.current()!
+    /// ```
+    ///  - args: An array of objects conforming to `JSignatureItemable` or `.signed()`, representing the method arguments.
+    /// ```swift
+    ///     args: ["hi".wrap()!.signedAsString(), someObject.signed(as: "com/some/Object"), 0]
+    /// ```
+    ///  - Returns: The instance of constructed `JObject`.
+    public func newObject(_ env: JEnv? = nil, args: [JSignatureItemable]) -> JObject? {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let methodId = methodId(env: env, name: "<init>", signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning:.void))
+        else { return nil }
+        return env.newObject(clazz: self, constructor: methodId, args: args.map({ $0.signatureItemWithValue.value }))
+        #else
+        return nil
+        #endif
+    }
+
+    /// Call to a constructor method which returns a new object.
+    ///
+    /// - Parameters:
+    ///  - env: The JNI environment to use. If `nil`, the current environment will be used.
+    /// ```swift
+    ///     env: JEnv.current()!
+    /// ```
+    ///  - args: An array of objects conforming to `JSignatureItemable` or `.signed()`, representing the constructor arguments.
+    /// ```swift
+    ///     args: "hi".wrap()!.signedAsString(), someObject.signed(as: "com/some/Object"), 0
+    /// ```
+    ///  - Returns: The instance of constructed `JObject`.
+    public func newObject(_ env: JEnv? = nil, args: JSignatureItemable...) -> JObject? {
+        newObject(env, args: args)
+    }
+
     // MARK: - Static Methods
 
     /// Call a static class method which returns an object.
