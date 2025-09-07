@@ -13,7 +13,7 @@ import Android
 ///
 /// Once a type conforms to `JObjectable`, it automatically gains access to all
 /// standard Java object methods through protocol extensions.
-public protocol JObjectable: JEquatable, JGetClassable, JHashable, JNotifiable, JStringable, JWaitable {
+public protocol JObjectable: JEquatable, JHashable, JNotifiable, JStringable, JWaitable {
     /// The underlying JNI object reference.
     var ref: JObjectBox { get }
     
