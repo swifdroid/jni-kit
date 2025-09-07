@@ -758,7 +758,7 @@ extension JObjectable {
         callNonvirtualVoidMethod(env, name: name, args: args)
     }
 
-    // MARK: - Fields
+    // MARK: - Field Getters
 
     /// Get an `object` field from a Java instance.
     public func objectField(_ env: JEnv? = nil, name: String, returningClass: JClass) -> JObject? {
@@ -874,6 +874,107 @@ extension JObjectable {
         return env.getDoubleField(object, fieldId)
         #else
         return 0
+        #endif
+    }
+
+    // MARK: - Field Setters
+
+    /// Set an `object` field on a Java instance.
+    public func setObjectField(_ env: JEnv? = nil, name: String, value: JObject) {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .object(value.clazz.name))
+        else { return }
+        env.setObjectField(object, fieldId, value)
+        #endif
+    }
+
+    /// Set a `boolean` field on a Java instance.
+    public func booleanField(_ env: JEnv? = nil, name: String, value: Bool) {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .boolean)
+        else { return }
+        env.setBooleanField(object, fieldId, value.jboolean)
+        #endif
+    }
+
+    /// Set a `byte` field on a Java instance.
+    public func byteField(_ env: JEnv? = nil, name: String, value: Int8) {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .byte)
+        else { return }
+        env.setByteField(object, fieldId, value)
+        #endif
+    }
+
+    /// Set a `char` field on a Java instance.
+    public func charField(_ env: JEnv? = nil, name: String, value: UInt16) {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .char)
+        else { return }
+        env.setCharField(object, fieldId, value)
+        #endif
+    }
+
+    /// Set a `short` field on a Java instance.
+    public func shortField(_ env: JEnv? = nil, name: String, value: Int16) {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .short)
+        else { return }
+        env.setShortField(object, fieldId, value)
+        #endif
+    }
+
+    /// Set a `int` field on a Java instance.
+    public func intField(_ env: JEnv? = nil, name: String, value: Int32) {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .int)
+        else { return }
+        env.setIntField(object, fieldId, value)
+        #endif
+    }
+
+    /// Set a `long` field on a Java instance.
+    public func longField(_ env: JEnv? = nil, name: String, value: Int64) {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .long)
+        else { return }
+        env.setLongField(object, fieldId, value)
+        #endif
+    }
+
+    /// Set a `float` field on a Java instance.
+    public func floatField(_ env: JEnv? = nil, name: String, value: Float) {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .float)
+        else { return }
+        env.setFloatField(object, fieldId, value)
+        #endif
+    }
+
+    /// Set a `double` field on a Java instance.
+    public func doubleField(_ env: JEnv? = nil, name: String, value: Double) {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let fieldId = clazz.fieldId(name: name, signature: .double)
+        else { return }
+        env.setDoubleField(object, fieldId, value)
         #endif
     }
 }
