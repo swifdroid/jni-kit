@@ -53,46 +53,115 @@ extension JObjectable {
     public func getClassLoader(_ env: JEnv? = nil) -> JClassLoader? {
         #if os(Android)
         guard
-            let env = env ?? JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: "getClass", signature: .returning("java/lang/Class")),
-            let returningClazz = JClass.load(JClassLoader.className),
-            let object = object.callObjectMethod(name: "getClass", returningClass: returningClazz, returning: .object("java/lang/Class"))
+            let returningClazz = JClass.load("java/lang/Class"),
+            let returningLoaderClazz = JClass.load(JClassLoader.className),
+            let classObject = object.callObjectMethod(name: "getClass", returningClass: returningClazz),
+            let loaderObject = classObject.callObjectMethod(name: "getClassLoader", returningClass: returningLoaderClazz)
         else { return nil }
-        return JClassLoader(object)
+        return JClassLoader(loaderObject)
         #else
         return nil
         #endif
     }
     
     /// Call an instance method on this object.
-    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)], returningClass: JClass, returning: JSignatureItem) -> JObject? {
+    ///
+    /// - Parameters:
+    ///  - env: The JNI environment to use. If `nil`, the current environment will be used.
+    /// ```swift
+    ///     env: JEnv.current()!
+    /// ```
+    ///  - name: The name of the method to call.
+    /// ```swift
+    ///     name: "getSomeObject"
+    /// ```
+    ///  - args: An array of tuples containing the argument value and its corresponding JNI signature item.
+    /// ```swift
+    ///     args: [("string".wrap()!.object, .object("java/lang/String")), (0, .int)]
+    /// ```
+    ///  - returningClass: The expected class of the return value.
+    /// ```swift
+    ///     returningClass: JClass.load("java/lang/String")!
+    /// ```
+    ///  - returning: The JNI signature item representing the return type.
+    /// ```swift
+    ///     returning: .object("com/some/Object")
+    /// ```
+    ///  - Returns: The `JObject` result of the method call with applied returning class.
+    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)], returningClass: JClass) -> JObject? {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.1 }), returning: returning))
+            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.1 }), returning: .object(returningClass.name)))
         else { return nil }
-        return env.callObjectMethod(object: object, methodId: methodId, clazz: returningClass, args: args.map({ $0.0 }))
+        return env.callObjectMethod(object: object, methodId: methodId, args: args.map({ $0.0 }), returningClass: returningClass)
         #else
         return nil
         #endif
     }
 
     /// Call an instance method on this object.
-    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable], returningClass: JClass, returning: JSignatureItem) -> JObject? {
+    ///
+    /// - Parameters:
+    ///  - env: The JNI environment to use. If `nil`, the current environment will be used.
+    /// ```swift
+    ///     env: JEnv.current()!
+    /// ```
+    ///  - name: The name of the method to call.
+    /// ```swift
+    ///     name: "getSomeObject"
+    /// ```
+    ///  - args: An array of objects conforming to `JSignatureItemable` or `.signed()`, representing the method arguments.
+    /// ```swift
+    ///     args: ["hi".wrap()!.signedAsString(), someObject.signed(as: "com/some/Object"), 0]
+    /// ```
+    ///  - returningClass: The expected class of the return value.
+    /// ```swift
+    ///     returningClass: JClass.load("java/lang/String")!
+    /// ```
+    ///  - returning: The JNI signature item representing the return type.
+    /// ```swift
+    ///     returning: .object("com/some/Object")
+    /// ```
+    ///  - Returns: The `JObject` result of the method call with applied returning class.
+    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable], returningClass: JClass) -> JObject? {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: returning))
+            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: .object(returningClass.name)))
         else { return nil }
-        return env.callObjectMethod(object: object, methodId: methodId, clazz: returningClass, args: args.map({ $0.signatureItemWithValue.value }))
+        return env.callObjectMethod(object: object, methodId: methodId, args: args.map({ $0.signatureItemWithValue.value }), returningClass: returningClass)
         #else
         return nil
         #endif
     }
 
     /// Call an instance method on this object.
-    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable..., returningClass: JClass, returning: JSignatureItem) -> JObject? {
-        callObjectMethod(env, name: name, args: args, returningClass: returningClass, returning: returning)
+    ///
+    /// - Parameters:
+    ///  - env: The JNI environment to use. If `nil`, the current environment will be used.
+    /// ```swift
+    ///     env: JEnv.current()!
+    /// ```
+    ///  - name: The name of the method to call.
+    /// ```swift
+    ///     name: "getSomeObject"
+    /// ```
+    ///  - args: An array of objects conforming to `JSignatureItemable` or `.signed()`, representing the method arguments.
+    /// ```swift
+    ///     args: "hi".wrap()!.signedAsString(), someObject.signed(as: "com/some/Object"), 0
+    /// ```
+    ///  - returningClass: The expected class of the return value.
+    /// ```swift
+    ///     returningClass: JClass.load("java/lang/String")!
+    /// ```
+    ///  - returning: The JNI signature item representing the return type.
+    /// ```swift
+    ///     returning: .object("com/some/Object")
+    /// ```
+    ///  - Returns: The `JObject` result of the method call with applied returning class.
+    public func callObjectMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable..., returningClass: JClass) -> JObject? {
+        callObjectMethod(env, name: name, args: args, returningClass: returningClass)
     }
 
     /// Call an instance method returning `jboolean`
@@ -139,7 +208,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jbyte`
     public func callByteMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable]) -> Int8? {
         #if os(Android)
         guard
@@ -152,7 +221,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jbyte`
     public func callByteMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) -> Int8? {
         callByteMethod(env, name: name, args: args)
     }
@@ -170,7 +239,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jchar`
     public func callCharMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable]) -> UInt16? {
         #if os(Android)
         guard
@@ -183,7 +252,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jchar`
     public func callCharMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) -> UInt16? {
         callCharMethod(env, name: name, args: args)
     }
@@ -201,7 +270,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jdouble`
     public func callDoubleMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable]) -> Double? {
         #if os(Android)
         guard
@@ -214,7 +283,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jdouble`
     public func callDoubleMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) -> Double? {
         callDoubleMethod(env, name: name, args: args)
     }
@@ -232,7 +301,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jfloat`
     public func callFloatMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable]) -> Float? {
         #if os(Android)
         guard
@@ -245,7 +314,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jfloat`
     public func callFloatMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) -> Float? {
         callFloatMethod(env, name: name, args: args)
     }
@@ -263,7 +332,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jint`
     public func callIntMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable]) -> Int32? {
         #if os(Android)
         guard
@@ -276,7 +345,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `jint`
     public func callIntMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) -> Int32? {
         callIntMethod(env, name: name, args: args)
     }
@@ -294,7 +363,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `long`
     public func callLongMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable]) -> Int64? {
         #if os(Android)
         guard
@@ -307,7 +376,7 @@ extension JObjectable {
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `long`
     public func callLongMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) -> Int64? {
         callLongMethod(env, name: name, args: args)
     }
@@ -320,25 +389,21 @@ extension JObjectable {
             let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.1 }), returning: .void))
         else { return }
         env.callVoidMethod(object: object, methodId: methodId, args: args.map({ $0.0 }))
-        #else
-        return
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `void`
     public func callVoidMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable]) {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
             let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: .void))
         else { return }
-        return env.callVoidMethod(object: object, methodId: methodId, args: args.map({ $0.signatureItemWithValue.value }))
-        #else
-        return
+        env.callVoidMethod(object: object, methodId: methodId, args: args.map({ $0.signatureItemWithValue.value }))
         #endif
     }
 
-    /// Call an instance method on this object.
+    /// Call an instance method returning `void`
     public func callVoidMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) {
         callVoidMethod(env, name: name, args: args)
     }
@@ -346,34 +411,34 @@ extension JObjectable {
     // MARK: - Non-Virtual Instance Methods
 
     /// Call a non-virtual instance method on this object.
-    public func callNonvirtualObjectMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)], returning: JSignatureItem) -> JObject? {
+    public func callNonvirtualObjectMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)], returningClass: JClass) -> JObject? {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.1 }), returning: returning))
+            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.1 }), returning: .object(returningClass.name)))
         else { return nil }
-        return env.callNonvirtualObjectMethod(object: object, clazz: clazz, methodId: methodId, args: args.map({ $0.0 }))
+        return env.callNonvirtualObjectMethod(object: object, clazz: clazz, methodId: methodId, args: args.map({ $0.0 }), returningClass: returningClass)
         #else
         return nil
         #endif
     }
 
     /// Call an instance method on this object.
-    public func callNonvirtualObjectMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable], returning: JSignatureItem = .void) -> JObject? {
+    public func callNonvirtualObjectMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable], returningClass: JClass) -> JObject? {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
-            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: returning))
+            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: .object(returningClass.name)))
         else { return nil }
-        return env.callNonvirtualObjectMethod(object: object, clazz: clazz, methodId: methodId, args: args.map({ $0.signatureItemWithValue.value }))
+        return env.callNonvirtualObjectMethod(object: object, clazz: clazz, methodId: methodId, args: args.map({ $0.signatureItemWithValue.value }), returningClass: returningClass)
         #else
         return nil
         #endif
     }
 
     /// Call an instance method on this object.
-    public func callNonvirtualObjectMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable..., returning: JSignatureItem = .void) -> JObject? {
-        callNonvirtualObjectMethod(env, name: name, args: args, returning: returning)
+    public func callNonvirtualObjectMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable..., returningClass: JClass) -> JObject? {
+        callNonvirtualObjectMethod(env, name: name, args: args, returningClass: returningClass)
     }
 
     /// Call a non-virtual instance method returning `jboolean`
@@ -627,13 +692,13 @@ extension JObjectable {
     // MARK: - Fields
 
     /// Get an `object` field from a Java instance.
-    public func objectField(_ env: JEnv? = nil, name: String, _ signature: JSignatureItem) -> JObject? {
+    public func objectField(_ env: JEnv? = nil, name: String, returningClass: JClass) -> JObject? {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
-            let fieldId = clazz.fieldId(name: name, signature: signature)
+            let fieldId = clazz.fieldId(name: name, signature: .object(returningClass.name))
         else { return nil }
-        return env.getObjectField(object, fieldId)
+        return env.getObjectField(object, fieldId, returningClass: returningClass)
         #else
         return nil
         #endif

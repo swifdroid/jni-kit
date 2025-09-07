@@ -89,7 +89,7 @@ public class JClass: @unchecked Sendable {
     ///   - name: JNI class name using slashes (`/`) (e.g., `"java/lang/String"`).
     ///   - classLoader: optional object confirming to JClassLoader, but necessary for non-system classes
     /// - Returns: A cached `JClass`, or `nil` if the class could not be loaded.
-    public static func load(_ name: JClassName, _ classLoader: JClassLoader? = nil) -> JClass? {
+    public static func load(_ name: JClassName, _ classLoader: JClassLoader? = nil, asArray: Bool = false) -> JClass? {
         #if os(Android)
         #if JNILOGS
         let logKey = "\"\(name.path)\""

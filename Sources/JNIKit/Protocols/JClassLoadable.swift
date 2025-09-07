@@ -55,7 +55,7 @@ extension JClassLoadable {
                 // logger?.info("getClassLoader 1 exit")
                 return nil
             }
-            guard let clazz = env.findClass("java/lang/ClassLoader") else {
+            guard let retuingClazz = env.findClass("java/lang/ClassLoader") else {
                 // logger?.info("getClassLoader 2 exit")
                 return nil
             }
@@ -67,7 +67,7 @@ extension JClassLoadable {
                 // logger?.info("getClassLoader 3 exit")
                 return nil
             }
-        guard let obj = env.callObjectMethod(object: .init(ref, self.clazz), methodId: methodId, clazz: clazz, args: [])
+        guard let obj = env.callObjectMethod(object: .init(ref, self.clazz), methodId: methodId, returningClass: retuingClazz)
         else {
             // logger?.info("getClassLoader 4 exit")
             return nil

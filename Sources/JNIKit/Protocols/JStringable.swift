@@ -63,8 +63,8 @@ extension JStringable {
         #endif
         guard
             let env = JEnv.current(),
-            let clazz = env.findClass("java/lang/String"),
-            let jstr = object.callObjectMethod(name: "toString", returningClass: clazz, returning: .object(clazz.name))
+            let returningClazz = env.findClass("java/lang/String"),
+            let jstr = object.callObjectMethod(name: "toString", returningClass: returningClazz)
         else { return fallbackResult }
         return JString(from: jstr.ref.ref)?.string() ?? fallbackResult
         #else

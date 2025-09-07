@@ -442,13 +442,13 @@ extension JEnv {
     public func callObjectMethod(
         object: JObject,
         methodId: JMethodId,
-        clazz: JClass,
-        args: [any JValuable]? = nil
+        args: [any JValuable]? = nil,
+        returningClass: JClass
     ) -> JObject? {
         guard
             let box = env.pointee!.pointee.CallObjectMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
         else { return nil }
-        return JObject(box, clazz)
+        return JObject(box, returningClass)
     }
 
     /// Call a Java method returning an `jobject`.
@@ -548,12 +548,13 @@ extension JEnv {
         object: JObject,
         clazz: JClass,
         methodId: JMethodId,
-        args: [any JValuable]? = nil
+        args: [any JValuable]? = nil,
+        returningClass: JClass
     ) -> JObject? {
         guard
             let box = env.pointee!.pointee.CallNonvirtualObjectMethodA!(env, object.ref.ref, clazz.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
         else { return nil }
-        return JObject(box, clazz)
+        return JObject(box, returningClass)
     }
 
     /// Call a nonvirtual Java method returning `boolean`.
@@ -672,11 +673,17 @@ extension JEnv {
     // MARK: - Get Instance Field Values
 
     /// Get a reference to an object field from a Java instance.
-    public func getObjectField(_ object: JObject, _ fieldId: JFieldId) -> JObject? {
+    ///
+    /// - Parameters:
+    ///   - object: The Java object instance to query.
+    ///   - fieldId: The field ID previously resolved using `getFieldId`.
+    ///   - clazz: The expected class of the returned object.
+    /// - Returns: A wrapped `JObject` if the value is not null, or `nil`.
+    public func getObjectField(_ object: JObject, _ fieldId: JFieldId, returningClass: JClass) -> JObject? {
         guard
             let box = env.pointee!.pointee.GetObjectField!(env, object.ref.ref, fieldId.id)?.box(JEnv(env))
         else { return nil }
-        return JObject(box, object.clazz)
+        return JObject(box, returningClass)
     }
 
     /// Get a `boolean` field from a Java instance.
@@ -793,12 +800,13 @@ extension JEnv {
     public func callStaticObjectMethod(
         clazz: JClass,
         methodId: JMethodId,
-        args: [any JValuable]? = nil
+        args: [any JValuable]? = nil,
+        returningClass: JClass
     ) -> JObject? {
         guard
             let box = env.pointee!.pointee.CallStaticObjectMethodA!(env, clazz.ref, methodId.id, args?.map { $0.jValue })?.box(JEnv(env))
         else { return nil }
-        return JObject(box, clazz)
+        return JObject(box, returningClass)
     }
 
     /// Call a static method returning `boolean`.
@@ -910,10 +918,11 @@ extension JEnv {
     /// - Parameters:
     ///   - clazz: The Java class containing the static field.
     ///   - fieldId: The field ID previously resolved using `getStaticFieldId`.
+    ///   - clazz: The expected class of the returned object.
     /// - Returns: A wrapped `JObject` if the value is not null, or `nil`.
-    public func getStaticObjectField(_ clazz: JClass, _ fieldId: JFieldId) -> JObject? {
+    public func getStaticObjectField(_ staticClazz: JClass, _ fieldId: JFieldId, clazz: JClass) -> JObject? {
         guard
-            let box = env.pointee!.pointee.GetStaticObjectField!(env, clazz.ref, fieldId.id)?.box(JEnv(env))
+            let box = env.pointee!.pointee.GetStaticObjectField!(env, staticClazz.ref, fieldId.id)?.box(JEnv(env))
         else { return nil }
         return JObject(box, clazz)
     }

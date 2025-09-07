@@ -210,9 +210,9 @@ extension JString {
         guard
             let env = JEnv.current(),
             let methodId = clazz.methodId(env: env, name: name, signature: signature),
-            let stringClazz = JClass.load(.init(stringLiteral: signature.returning.className))
+            let returningClazz = JClass.load(.init(stringLiteral: signature.returning.className))
         else { return nil }
-        guard let object = env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, clazz: stringClazz, args: args) else { return nil }
+        guard let object = env.callObjectMethod(object: .init(ref, clazz), methodId: methodId, args: args, returningClass: returningClazz) else { return nil }
         return JString(from: object.ref.ref.assumingMemoryBound(to: jstring.self))
     }
 
