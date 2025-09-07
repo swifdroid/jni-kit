@@ -249,16 +249,16 @@ public class JClass: @unchecked Sendable {
     /// ```swift
     ///     returningClass: JClass.load("java/lang/String")!
     /// ```
-    ///  - returning: The JNI signature item representing the return type.
+    ///  - returningSignatureClass: An optional JNI class name for the return type, if it differs from the `returningClass` name.
     /// ```swift
-    ///     returning: .object("com/some/Object")
+    ///     returningSignatureClass: "com/some/OtherObject"
     /// ```
     ///  - Returns: The `JObject` result of the method call with applied returning class.
-    public func staticObjectMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)], returningClass: JClass) -> JObject? {
+    public func staticObjectMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)], returningClass: JClass, returningSignatureClass: JClassName? = nil) -> JObject? {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
-            let methodId = staticMethodId(name: name, signature: .init(args.map({ $0.1 }), returning: .object(returningClass.name)))
+            let methodId = staticMethodId(name: name, signature: .init(args.map({ $0.1 }), returning: .object(returningSignatureClass ?? returningClass.name)))
         else { return nil }
         return env.callStaticObjectMethod(clazz: self, methodId: methodId, args: args.map({ $0.0 }), returningClass: returningClass)
         #else
@@ -285,16 +285,16 @@ public class JClass: @unchecked Sendable {
     /// ```swift
     ///     returningClass: JClass.load("java/lang/String")!
     /// ```
-    ///  - returning: The JNI signature item representing the return type.
+    ///  - returningSignatureClass: An optional JNI class name for the return type, if it differs from the `returningClass` name.
     /// ```swift
-    ///     returning: .object("com/some/Object")
+    ///     returningSignatureClass: "com/some/OtherObject"
     /// ```
     ///  - Returns: The `JObject` result of the method call with applied returning class.
-    public func staticObjectMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable], returningClass: JClass) -> JObject? {
+    public func staticObjectMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable], returningClass: JClass, returningSignatureClass: JClassName? = nil) -> JObject? {
         #if os(Android)
         guard
             let env = env ?? JEnv.current(),
-            let methodId = staticMethodId(name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: .object(returningClass.name)))
+            let methodId = staticMethodId(name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: .object(returningSignatureClass ?? returningClass.name)))
         else { return nil }
         return env.callStaticObjectMethod(clazz: self, methodId: methodId, args: args.map({ $0.signatureItemWithValue.value }), returningClass: returningClass)
         #else
@@ -321,13 +321,13 @@ public class JClass: @unchecked Sendable {
     /// ```swift
     ///     returningClass: JClass.load("java/lang/String")!
     /// ```
-    ///  - returning: The JNI signature item representing the return type.
+    ///  - returningSignatureClass: An optional JNI class name for the return type, if it differs from the `returningClass` name.
     /// ```swift
-    ///     returning: .object("com/some/Object")
+    ///     returningSignatureClass: "com/some/OtherObject"
     /// ```
     ///  - Returns: The `JObject` result of the method call with applied returning class.
-    public func staticObjectMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable..., returningClass: JClass) -> JObject? {
-        staticObjectMethod(env, name: name, args: args, returningClass: returningClass)
+    public func staticObjectMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable..., returningClass: JClass, returningSignatureClass: JClassName? = nil) -> JObject? {
+        staticObjectMethod(env, name: name, args: args, returningClass: returningClass, returningSignatureClass: returningSignatureClass)
     }
 
     /// Call a static class method which returns `jboolean`.
