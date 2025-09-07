@@ -27,21 +27,27 @@ open class JClassName: @unchecked Sendable, ExpressibleByStringLiteral {
     /// Initialize from a root name (e.g. `"java"`, `"android"`)
     required public init(stringLiteral: String) {
         self.parent = nil
-        self.name = stringLiteral.components(separatedBy: "/").last ?? stringLiteral
-        self.isInnerClass = false
+        self.name = (stringLiteral.components(separatedBy: "/").last ?? stringLiteral).replacing(";", with: "")
+        self.isInnerClass = stringLiteral.contains("$")
         self.path = stringLiteral
-        self.fullName = stringLiteral.components(separatedBy: "/").joined(separator: ".")
+        let isArray = stringLiteral.hasPrefix("[L") && stringLiteral.hasSuffix(";")
+        self.fullName = stringLiteral.components(separatedBy: "/").joined(separator: ".").replacing("[L", with: "").replacing(";", with: isArray ? "[]" : "")
     }
 
     /// Initialize from a parent and class segment, specifying whether it's an inner class.
-    public init(parent: JClassName, name: String, isInnerClass: Bool = false) {
+    public init(parent: JClassName, name: String, isInnerClass: Bool = false, asArray: Bool = false) {
         self.parent = parent
         self.name = name.components(separatedBy: "/").last ?? name
         self.isInnerClass = isInnerClass
         let separator = isInnerClass ? "$" : "/"
         let path = parent.path + separator + name
-        self.path = path
+        self.path = asArray ? "[L\(path);" : path
         self.fullName = path.components(separatedBy: "/").joined(separator: ".")
+    }
+
+    /// Create a new `JClassName` representing this class as an array type.
+    public func asArray() -> JClassName {
+        JClassName(stringLiteral: "[L\(path);")
     }
 }
 
