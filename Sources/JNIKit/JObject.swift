@@ -43,4 +43,16 @@ public final class JObject: Sendable, JObjectable {
         self.ref = ref
         self.clazz = clazz
     }
+
+    /// Private initializer to create a proxy object with a different class. Useful for casting.
+    private init(original object: JObject, _ clazz: JClass) {
+        self.ref = object.ref
+        self.clazz = clazz
+    }
+
+    /// Returns same object reference but with the different class.
+    public func cast(to className: JClassName) -> JObject? {
+        guard let clazz = JClass.load(className) else { return nil }
+        return JObject(original: self, clazz)
+    }
 }

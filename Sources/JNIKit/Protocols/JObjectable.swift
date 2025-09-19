@@ -47,6 +47,13 @@ extension JObjectable {
 }
 
 extension JObjectable {
+    /// Returns same object reference but with the different class.
+    public func cast(to className: JClassName) -> JObject? {
+        object.cast(to: className)
+    }
+}
+
+extension JObjectable {
     // MARK: - Instance Methods
 
     /// Get the class loader that loaded this object's class.
