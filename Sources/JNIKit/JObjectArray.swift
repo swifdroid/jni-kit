@@ -70,16 +70,18 @@ public struct JObjectArray: Sendable, JObjectable {
         guard let jObjectArray = JObjectArray(jArray, clazz) else { return }
         env.setObjectArrayElement(jObjectArray, index: Int32(index), value: value)
     }
-
+    #endif
+    
     /// Convert to `[JObject]`
     public func toArray() -> [JObject] {
         var result: [JObject] = []
+        #if os(Android)
         for i in 0 ..< length {
             if let item = `get`(at: i) {
                 result.append(item)
             }
         }
+        #endif
         return result
     }
-    #endif
 }
