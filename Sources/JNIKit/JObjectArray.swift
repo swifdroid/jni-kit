@@ -21,6 +21,15 @@ public struct JObjectArray: Sendable, JObjectable {
         self.length = length
     }
 
+    public init (_ env: JEnv, _ object: JObject) {
+        self.object = object
+        #if os(Android)
+        self.length = Int(env.getArrayLength(object.ref.ref))
+        #else
+        self.length = 0
+        #endif
+    }
+
     #if os(Android)
     /// Create a new array of Java objects with given size and element class.
     public init?(length: Int, clazz: JClass) {
