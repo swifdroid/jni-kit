@@ -257,3 +257,29 @@ extension Optional where Wrapped == JString {
         signed(as: "java/lang/CharSequence")
     }
 }
+extension String {
+    public func signedAsString() -> JSignatureItemWithValue {
+        wrap().signed(as: "java/lang/String")
+    }
+
+    public func signedAsCharSequence() -> JSignatureItemWithValue {
+        wrap().signed(as: "java/lang/CharSequence")
+    }
+}
+extension Optional where Wrapped == String {
+    public func signedAsString() -> JSignatureItemWithValue {
+        if let value = self {
+            return value.wrap().signedAsString()
+        } else {
+            return .objectNil("java/lang/String")
+        }
+    }
+
+    public func signedAsCharSequence() -> JSignatureItemWithValue {
+        if let value = self {
+            return value.wrap().signedAsCharSequence()
+        } else {
+            return .objectNil("java/lang/CharSequence")
+        }
+    }
+}
