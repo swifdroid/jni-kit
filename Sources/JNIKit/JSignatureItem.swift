@@ -181,106 +181,50 @@ public enum JSignatureItemWithValue: JSignatureItemable {
 public protocol JSignatureItemable {
     var signatureItemWithValue: JSignatureItemWithValue { get }
 }
-extension Optional: JSignatureItemable {
-    public var signatureItemWithValue: JSignatureItemWithValue { 
-        fatalError("Optional<\(Wrapped.self)> is not supported")
+extension Optional: JSignatureItemable where Wrapped: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        switch self {
+        case .some(let value):
+            return value.signatureItemWithValue
+        case .none:
+            switch Wrapped.self {
+            case is Int8.Type: return .byteNil
+            case is Int16.Type: return .shortNil
+            case is Int32.Type: return .intNil
+            case is Int64.Type: return .longNil
+            case is Bool.Type: return .booleanNil
+            case is Float.Type: return .floatNil
+            case is Double.Type: return .doubleNil
+            case is UInt16.Type: return .charNil
+            case is JObject.Type: fatalError("Unsigned Optional<JObject> is not supported, use Optional<JObject>.signed(as: JClassName) instead")
+            default: fatalError("Optional<\(Wrapped.self)> is not supported")
+            }
+        }
     }
 }
 extension Int8: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .byte(self) }
 }
-extension Optional where Wrapped == Int8 {
-    public var signatureItemWithValue: JSignatureItemWithValue { 
-        if let value = self {
-            return .byte(value)
-        } else {
-            return .byteNil
-        }
-    }
-}
 extension Int16: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .short(self) }
-}
-extension Optional where Wrapped == Int16 {
-    public var signatureItemWithValue: JSignatureItemWithValue { 
-        if let value = self {
-            return .short(value)
-        } else {
-            return .shortNil
-        }
-    }
 }
 extension Int32: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .int(self) }
 }
-extension Optional where Wrapped == Int32 {
-    public var signatureItemWithValue: JSignatureItemWithValue { 
-        if let value = self {
-            return .int(value)
-        } else {
-            return .intNil
-        }
-    }
-}
 extension Int64: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .long(self) }
-}
-extension Optional where Wrapped == Int64 {
-    public var signatureItemWithValue: JSignatureItemWithValue { 
-        if let value = self {
-            return .long(value)
-        } else {
-            return .longNil
-        }
-    }
 }
 extension Bool: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .boolean(self) }
 }
-extension Optional where Wrapped == Bool {
-    public var signatureItemWithValue: JSignatureItemWithValue { 
-        if let value = self {
-            return .boolean(value)
-        } else {
-            return .booleanNil
-        }
-    }
-}
 extension Float: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .float(self) }
-}
-extension Optional where Wrapped == Float {
-    public var signatureItemWithValue: JSignatureItemWithValue { 
-        if let value = self {
-            return .float(value)
-        } else {
-            return .floatNil
-        }
-    }
 }
 extension Double: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .double(self) }
 }
-extension Optional where Wrapped == Double {
-    public var signatureItemWithValue: JSignatureItemWithValue { 
-        if let value = self {
-            return .double(value)
-        } else {
-            return .doubleNil
-        }
-    }
-}
 extension UInt16: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .char(self) }
-}
-extension Optional where Wrapped == UInt16 {
-    public var signatureItemWithValue: JSignatureItemWithValue { 
-        if let value = self {
-            return .char(value)
-        } else {
-            return .charNil
-        }
-    }
 }
 extension JObject {
     public func signed(as className: JClassName? = nil) -> JSignatureItemWithValue {
