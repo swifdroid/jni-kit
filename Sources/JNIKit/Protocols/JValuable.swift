@@ -94,10 +94,20 @@ extension JString: JValuable {
 }
 #endif
 
-public final class JDouble: Sendable, JObjectable, JSignatureItemable {
+public final class JDouble: Sendable, JObjectable, JSignatureItemable, ExpressibleByFloatLiteral {
     public static let className: JClassName = "java/lang/Double"
     
     public let object: JObject
+
+    public init (floatLiteral value: Double) {
+        #if os(Android)
+        let clazz = JClass.load(Self.className)!
+        let global = clazz.newObject(args: value)!
+        self.object = JObject(global, clazz)
+        #else
+        self.object = JObject(JObjectBox(), JClass(Self.className)) // Dummy
+        #endif
+    }
 
     public init? (_ value: Double) {
         #if os(Android)
