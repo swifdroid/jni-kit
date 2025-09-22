@@ -95,13 +95,15 @@ extension JString: JValuable {
 #endif
 
 public final class JDouble: Sendable, JObjectable, JSignatureItemable {
+    public static let className: JClassName = "java/lang/Double"
+    
     public let object: JObject
 
     public init? (_ value: Double) {
         #if os(Android)
         guard
             let env = JEnv.current(),
-            let clazz = JClass.load("java/lang/Double"),
+            let clazz = JClass.load(Self.className),
             let global = clazz.newObject(env, args: value)
         else { return nil }
         self.object = JObject(global, clazz)

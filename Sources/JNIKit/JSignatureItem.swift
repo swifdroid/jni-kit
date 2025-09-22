@@ -164,6 +164,7 @@ extension Optional: JSignatureItemable where Wrapped: JSignatureItemable {
             return value.signatureItemWithValue
         case .none:
             switch Wrapped.self {
+            case is JDouble.Type: return .objectNil(JDouble.className)
             case is JObject.Type: fatalError("Unsigned Optional<JObject> is not supported, use Optional<JObject>.signed(as: JClassName) instead")
             default: fatalError("Optional<\(Wrapped.self)> is not supported")
             }
