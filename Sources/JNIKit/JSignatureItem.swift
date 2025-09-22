@@ -107,22 +107,14 @@ public enum JSignatureItemWithValue: JSignatureItemable {
 
     /// JNI primitives
     case boolean(Bool)
-    case booleanNil
     case byte(Int8)
-    case byteNil
     case char(UInt16)
-    case charNil
     case short(Int16)
-    case shortNil
     case int(Int32)
-    case intNil
     case long(Int64)
-    case longNil
     case float(Float)
-    case floatNil
     case double(Double)
-    case doubleNil
-
+    
     // MARK: Object
 
     case object(JObject, JClassName)
@@ -134,21 +126,13 @@ public enum JSignatureItemWithValue: JSignatureItemable {
     public var value: any JValuable {
         switch self {
             case .boolean(let value): return value
-            case .booleanNil: return JNull()
             case .byte(let value): return value
-            case .byteNil: return JNull()
             case .char(let value): return value
-            case .charNil: return JNull()
             case .short(let value): return value
-            case .shortNil: return JNull()
             case .int(let value): return value
-            case .intNil: return JNull()
             case .long(let value): return value
-            case .longNil: return JNull()
             case .float(let value): return value
-            case .floatNil: return JNull()
             case .double(let value): return value
-            case .doubleNil: return JNull()
             case .object(let value, _): return value
             case .objectNil(_): return JNull()
         }
@@ -158,21 +142,13 @@ public enum JSignatureItemWithValue: JSignatureItemable {
     public var signatureItem: JSignatureItem {
         switch self {
             case .boolean: return .boolean
-            case .booleanNil: return .boolean
             case .byte: return .byte
-            case .byteNil: return .byte
             case .char: return .char
-            case .charNil: return .char
             case .short: return .short
-            case .shortNil: return .short
             case .int: return .int
-            case .intNil: return .int
             case .long: return .long
-            case .longNil: return .long
             case .float: return .float
-            case .floatNil: return .float
             case .double: return .double
-            case .doubleNil: return .double
             case .object(_, let className): return .object(className)
             case .objectNil(let className): return .object(className)
         }
@@ -188,14 +164,6 @@ extension Optional: JSignatureItemable where Wrapped: JSignatureItemable {
             return value.signatureItemWithValue
         case .none:
             switch Wrapped.self {
-            case is Int8.Type: return .byteNil
-            case is Int16.Type: return .shortNil
-            case is Int32.Type: return .intNil
-            case is Int64.Type: return .longNil
-            case is Bool.Type: return .booleanNil
-            case is Float.Type: return .floatNil
-            case is Double.Type: return .doubleNil
-            case is UInt16.Type: return .charNil
             case is JObject.Type: fatalError("Unsigned Optional<JObject> is not supported, use Optional<JObject>.signed(as: JClassName) instead")
             default: fatalError("Optional<\(Wrapped.self)> is not supported")
             }
