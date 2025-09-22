@@ -9,7 +9,7 @@
 Add it to the `Package.swift` file of your project:
 ```swift
 // package dependencies
-.package(url: "https://github.com/swifdroid/jni-kit.git", from: "2.9.0")
+.package(url: "https://github.com/swifdroid/jni-kit.git", from: "2.10.0")
 
 // target dependencies
 .product(name: "JNIKit", package: "jni-kit")
@@ -295,7 +295,7 @@ The way with `clazz`:
 let object = clazz.newObject(
     123,
     1.23,
-    "Hello".wrap()!.signedAsString()
+    "Hello" // or "Hello".wrap().signedAsString()
 )
 ```
 > [!NOTE]
@@ -384,6 +384,7 @@ The way with `object`:
 object.callVoidMethod(
     name: "setSomeObject",
     args: someObject.signed(as: "com/mylib/mypackage/SomeObject")
+    // or just someObject if you sure that automatic class is correct
 )
 ```
 It is even shorter than the getter.
@@ -393,9 +394,10 @@ The way with `object`:
 ```swift
 object.callVoidMethod(
     name: "setString",
-    args: "Hello".wrap()!.signedAsString()
+    args: "Hello" // or "Hello".wrap().signedAsString()
+    // or "Hello".signedAsCharSequence()
 )
-// also could be .signedAsCharSequence()
+// String is always signed as java/lang/String by default
 ```
 
 ### How to get a field value
@@ -569,6 +571,37 @@ For fields only returning type matters:
 .object(JString.className) // for String
 .object(JString.charSequenseClassName) // for String
 ```
+
+## Signing objects
+
+When passing a `JObject` as a method argument, you have two options for specifying its type signature
+
+**Rely on automatic signature inference**, which uses the `JClass` associated with the `JObject`
+
+Example with a generic `JObject`:
+```swift
+let object: JObject
+object.callVoidMethod(name: "setView", args: object)
+```
+Example with a `JString`:
+```swift
+let string = "Hello"
+object.callVoidMethod(name: "setView", args: string) // signed as java/lang/String by default
+```
+
+**Manually sign the object with a specific class** using the `signed(as:)` method
+
+Example with a generic `JObject`:
+```swift
+let object: JObject
+object.callVoidMethod(name: "setView", args: object.signed(as: "com/my/lib/SomeObject"))
+```
+Example with a `JString` (signed as a `CharSequence`):
+```swift
+let string = "Hello"
+object.callVoidMethod(name: "setView", args: string.signedAsCharSequence())
+```
+
 ## Wrapping Java/Kotlin class
 
 A common use case is to wrap an existing Java/Kotlin class into a convenient Swift class.
@@ -725,10 +758,7 @@ For any `JObject`, you can pass Swift `nil`, which will be converted to JNI `NUL
 let object1: JObject
 let object2: JObject? // this could be nil
 let object3: JObject
-object.callVoidMethod(name: "setView", args: object1.signed(), object2.signed(), object3.signed())
-// Note: Use `object2.signed()`,
-         not `object2?.signed()`,
-         because `signed()` is extended to `Optional`
+object.callVoidMethod(name: "setView", args: object1, object2, object3)
 ```
 
 ## Primitive type objects
