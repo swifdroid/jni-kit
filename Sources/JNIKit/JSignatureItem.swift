@@ -160,6 +160,9 @@ public protocol JSignatureItemable {
 extension JObject: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .object(self, className) }
 }
+extension JString: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { self.signedAsString() }
+}
 extension Optional: JSignatureItemable where Wrapped: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue {
         switch self {
