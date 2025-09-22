@@ -181,6 +181,11 @@ public enum JSignatureItemWithValue: JSignatureItemable {
 public protocol JSignatureItemable {
     var signatureItemWithValue: JSignatureItemWithValue { get }
 }
+extension Optional: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { 
+        fatalError("Optional<\(Wrapped.self)> is not supported")
+    }
+}
 extension Int8: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .byte(self) }
 }
