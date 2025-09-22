@@ -114,10 +114,11 @@ public enum JSignatureItemWithValue: JSignatureItemable {
     case long(Int64)
     case float(Float)
     case double(Double)
-
+    
     // MARK: Object
 
     case object(JObject, JClassName)
+    case objectNil(JClassName)
 
     // MARK: Signature Item
     
@@ -133,6 +134,7 @@ public enum JSignatureItemWithValue: JSignatureItemable {
             case .float(let value): return value
             case .double(let value): return value
             case .object(let value, _): return value
+            case .objectNil(_): return JNull()
         }
     }
     #endif
@@ -148,11 +150,33 @@ public enum JSignatureItemWithValue: JSignatureItemable {
             case .float: return .float
             case .double: return .double
             case .object(_, let className): return .object(className)
+            case .objectNil(let className): return .object(className)
         }
     }
 }
 public protocol JSignatureItemable {
     var signatureItemWithValue: JSignatureItemWithValue { get }
+}
+extension Optional: JSignatureItemable where Wrapped: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        switch self {
+        case .some(let value):
+            return value.signatureItemWithValue
+        case .none:
+            switch Wrapped.self {
+            case is JInt8.Type: return .objectNil(JInt8.className)
+            case is JInt16.Type: return .objectNil(JInt16.className)
+            case is JInt32.Type: return .objectNil(JInt32.className)
+            case is JInt64.Type: return .objectNil(JInt64.className)
+            case is JUInt16.Type: return .objectNil(JUInt16.className)
+            case is JBool.Type: return .objectNil(JBool.className)
+            case is JFloat.Type: return .objectNil(JFloat.className)
+            case is JDouble.Type: return .objectNil(JDouble.className)
+            case is JObject.Type: fatalError("Unsigned Optional<JObject> is not supported, use Optional<JObject>.signed(as: JClassName) instead")
+            default: fatalError("Optional<\(Wrapped.self)> is not supported")
+            }
+        }
+    }
 }
 extension Int8: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { .byte(self) }
@@ -183,12 +207,39 @@ extension JObject {
         .object(self, className ?? self.className)
     }
 }
+extension Optional where Wrapped == JObject {
+    public func signed(as className: JClassName) -> JSignatureItemWithValue { 
+        if let value = self {
+            return .object(value, className)
+        } else {
+            return .objectNil(className)
+        }
+    }
+}
 extension JObjectable {
     public func signed(as className: JClassName? = nil) -> JSignatureItemWithValue {
         .object(self.object, className ?? self.className)
     }
 }
+extension Optional where Wrapped: JObjectable {
+    public func signed(as className: JClassName) -> JSignatureItemWithValue { 
+        if let value = self {
+            return .object(value.object, className)
+        } else {
+            return .objectNil(className)
+        }
+    }
+}
 extension JString {
+    public func signedAsString() -> JSignatureItemWithValue {
+        signed(as: "java/lang/String")
+    }
+
+    public func signedAsCharSequence() -> JSignatureItemWithValue {
+        signed(as: "java/lang/CharSequence")
+    }
+}
+extension Optional where Wrapped == JString {
     public func signedAsString() -> JSignatureItemWithValue {
         signed(as: "java/lang/String")
     }

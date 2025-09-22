@@ -21,6 +21,15 @@ public struct JObjectArray: Sendable, JObjectable {
         self.length = length
     }
 
+    public init (_ env: JEnv, _ object: JObject) {
+        self.object = object
+        #if os(Android)
+        self.length = Int(env.getArrayLength(object.ref.ref))
+        #else
+        self.length = 0
+        #endif
+    }
+
     #if os(Android)
     /// Create a new array of Java objects with given size and element class.
     public init?(length: Int, clazz: JClass) {
@@ -61,16 +70,18 @@ public struct JObjectArray: Sendable, JObjectable {
         guard let jObjectArray = JObjectArray(jArray, clazz) else { return }
         env.setObjectArrayElement(jObjectArray, index: Int32(index), value: value)
     }
-
+    #endif
+    
     /// Convert to `[JObject]`
     public func toArray() -> [JObject] {
         var result: [JObject] = []
+        #if os(Android)
         for i in 0 ..< length {
             if let item = `get`(at: i) {
                 result.append(item)
             }
         }
+        #endif
         return result
     }
-    #endif
 }

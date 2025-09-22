@@ -20,7 +20,18 @@ public protocol JValuable {
     #endif
 }
 
+/// Represents a Java null reference
+public struct JNull {
+    public init() {}
+}
+
 #if os(Android)
+extension JNull: JValuable {
+    public var jValue: jvalue {
+        return jvalue(l: nil)
+    }
+}
+
 extension Int: JValuable {
     /// Converts `Int` to JNI `jint`
     public var jValue: jvalue { .init(i: jint(self)) }
@@ -82,3 +93,204 @@ extension JString: JValuable {
     public var jValue: jvalue { .init(l: ref.ref) }
 }
 #endif
+
+// MARK: - Java Objects for primitive types
+
+public typealias JByte = JInt8
+public final class JInt8: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+    public static let className: JClassName = "java/lang/Byte"
+
+    public let object: JObject
+
+    public init (integerLiteral value: Int8) {
+        #if os(Android)
+        let clazz = JClass.load(Self.className)!
+        let global = clazz.newObject(args: value)!
+        self.object = JObject(global, clazz)
+        #else
+        self.object = JObject(JObjectBox(), JClass(Self.className)) // Dummy
+        #endif
+    }
+
+    public convenience init (_ value: Int8) {
+        self.init(integerLiteral: value)
+    }
+
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        .object(object, className)
+    }
+}
+
+public typealias JShort = JInt16
+public final class JInt16: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+    public static let className: JClassName = "java/lang/Short"
+
+    public let object: JObject
+
+    public init (integerLiteral value: Int16) {
+        #if os(Android)
+        let clazz = JClass.load(Self.className)!
+        let global = clazz.newObject(args: value)!
+        self.object = JObject(global, clazz)
+        #else
+        self.object = JObject(JObjectBox(), JClass(Self.className)) // Dummy
+        #endif
+    }
+
+    public convenience init (_ value: Int16) {
+        self.init(integerLiteral: value)
+    }
+
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        .object(object, className)
+    }
+}
+
+public typealias JInt = JInt32
+public typealias JInteger = JInt32
+public final class JInt32: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+    public static let className: JClassName = "java/lang/Integer"
+
+    public let object: JObject
+
+    public init (integerLiteral value: Int32) {
+        #if os(Android)
+        let clazz = JClass.load(Self.className)!
+        let global = clazz.newObject(args: value)!
+        self.object = JObject(global, clazz)
+        #else
+        self.object = JObject(JObjectBox(), JClass(Self.className)) // Dummy
+        #endif
+    }
+
+    public convenience init (_ value: Int32) {
+        self.init(integerLiteral: value)
+    }
+
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        .object(object, className)
+    }
+}
+
+public typealias JLong = JInt64
+public final class JInt64: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+    public static let className: JClassName = "java/lang/Long"
+
+    public let object: JObject
+
+    public init (integerLiteral value: Int64) {
+        #if os(Android)
+        let clazz = JClass.load(Self.className)!
+        let global = clazz.newObject(args: value)!
+        self.object = JObject(global, clazz)
+        #else
+        self.object = JObject(JObjectBox(), JClass(Self.className)) // Dummy
+        #endif
+    }
+
+    public convenience init (_ value: Int64) {
+        self.init(integerLiteral: value)
+    }
+
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        .object(object, className)
+    }
+}
+
+public final class JBool: Sendable, JObjectable, JSignatureItemable, ExpressibleByBooleanLiteral {
+    public static let className: JClassName = "java/lang/Boolean"
+
+    public let object: JObject
+
+    public init (booleanLiteral value: Bool) {
+        #if os(Android)
+        let clazz = JClass.load(Self.className)!
+        let global = clazz.newObject(args: value)!
+        self.object = JObject(global, clazz)
+        #else
+        self.object = JObject(JObjectBox(), JClass(Self.className)) // Dummy
+        #endif
+    }
+
+    public convenience init (_ value: Bool) {
+        self.init(booleanLiteral: value)
+    }
+
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        .object(object, className)
+    }
+}
+
+public final class JFloat: Sendable, JObjectable, JSignatureItemable, ExpressibleByFloatLiteral {
+    public static let className: JClassName = "java/lang/Float"
+
+    public let object: JObject
+
+    public init (floatLiteral value: Float) {
+        #if os(Android)
+        let clazz = JClass.load(Self.className)!
+        let global = clazz.newObject(args: value)!
+        self.object = JObject(global, clazz)
+        #else
+        self.object = JObject(JObjectBox(), JClass(Self.className)) // Dummy
+        #endif
+    }
+
+    public convenience init (_ value: Float) {
+        self.init(floatLiteral: value)
+    }
+
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        .object(object, className)
+    }
+}
+
+public final class JDouble: Sendable, JObjectable, JSignatureItemable, ExpressibleByFloatLiteral {
+    public static let className: JClassName = "java/lang/Double"
+    
+    public let object: JObject
+
+    public init (floatLiteral value: Double) {
+        #if os(Android)
+        let clazz = JClass.load(Self.className)!
+        let global = clazz.newObject(args: value)!
+        self.object = JObject(global, clazz)
+        #else
+        self.object = JObject(JObjectBox(), JClass(Self.className)) // Dummy
+        #endif
+    }
+
+    public convenience init (_ value: Double) {
+        self.init(floatLiteral: value)
+    }
+
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        .object(object, className)
+    }
+}
+
+public typealias JChar = JUInt16
+public typealias JCharacter = JUInt16
+public final class JUInt16: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+    public static let className: JClassName = "java/lang/Character"
+    
+    public let object: JObject
+
+    public init (integerLiteral value: UInt16) {
+        #if os(Android)
+        let clazz = JClass.load(Self.className)!
+        let global = clazz.newObject(args: value)!
+        self.object = JObject(global, clazz)
+        #else
+        self.object = JObject(JObjectBox(), JClass(Self.className)) // Dummy
+        #endif
+    }
+
+    public convenience init (_ value: UInt16) {
+        self.init(integerLiteral: value)
+    }
+
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        .object(object, className)
+    }
+}
