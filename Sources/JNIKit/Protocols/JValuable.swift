@@ -20,7 +20,18 @@ public protocol JValuable {
     #endif
 }
 
+/// Represents a Java null reference
+public struct JNull {
+    public init() {}
+}
+
 #if os(Android)
+extension JNull: JValuable {
+    public var jValue: jvalue {
+        return jvalue(l: nil)
+    }
+}
+
 extension Int: JValuable {
     /// Converts `Int` to JNI `jint`
     public var jValue: jvalue { .init(i: jint(self)) }
