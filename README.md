@@ -697,6 +697,87 @@ public final class JDate: JObjectable, Sendable {
 ```
 </details>
 
+## Casting
+
+There are two situations where you need to cast an object from one class to another.
+
+1. **When you want to treat an existing object as an instance of another class** (usually a parent) to call a method or access a field.
+
+This is done using the `cast(to:)` method of `JObject`. It creates a proxy `JObject` of the target class but retains the same underlying JNI reference:
+```swift
+let editText: EditText
+let textView = editText.cast(to: TextView.className)
+```
+
+2. **When you need to pass an object to a method that expects a different class** (also usually a parent).
+
+This is done using the `signed(as:)` method of `JObject`:
+```swift
+let customView: CustomView
+object.callVoidMethod(name: "setView", args: customView.signed(as: View.className))
+```
+
+## Optionals and NULL
+
+You may have Java/Kotlin methods that accept nullable arguments. 
+For any `JObject`, you can pass Swift `nil`, which will be converted to JNI `NULL`:
+```swift
+let object1: JObject
+let object2: JObject? // this could be nil
+let object3: JObject
+object.callVoidMethod(name: "setView", args: object1.signed(), object2.signed(), object3.signed())
+// Note: Use `object2.signed()`,
+         not `object2?.signed()`,
+         because `signed()` is extended to `Optional`
+```
+
+## Primitive type objects
+
+Pure primitive types can be passed as method arguments directly:
+```swift
+let intValue: Int32 = 9.41
+let floatValue: Float = 9.41
+let doubleValue: Double = 9.41
+object.callVoidMethod(name: "setValues", args: intValue, floatValue, doubleValue)
+```
+These values cannot be `nil` and are always represented in the JNI signature as primitives.
+
+However, if the Java/Kotlin side expects full object types like `java.lang.Integer` or `java.lang.Long`, you need to use their Swift wrapper equivalents. 
+Refer to the table below:
+| Swift Type | Swift Wrapper               | Java Type           |
+|------------|-----------------------------|---------------------|
+| Int8       | JInt8 (JByte)               | java/lang/Byte      |
+| Int16      | JInt16 (JShort)             | java/lang/Short     |
+| Int32      | JInt32 (JInt, JInteger)     | java/lang/Integer   |
+| Int64      | JInt64 (JLong)              | java/lang/Long      |
+| Bool       | JBool                       | java/lang/Boolean   |
+| Float      | JFloat                      | java/lang/Float     |
+| Double     | JDouble                     | java/lang/Double    |
+| UInt16     | JUInt16 (JChar, JCharacter) | java/lang/Character |
+
+**Usage Example:**
+```swift
+let nilDoubleObject: JDouble? = nil
+let doubleObject: JDouble? = 9.41
+let double: Double = 9.41
+object.callVoidMethod(name: "sendDouble", args: nilDoubleObject) // Object Double is NULL
+object.callVoidMethod(name: "sendDouble", args: doubleObject) // Object Double is NOT NULL: 9.41
+object.callVoidMethod(name: "sendDouble", args: double) // Primitive Double: 9.41
+```
+**Corresponding Kotlin Code**:
+```kotlin
+fun sendDouble(value: Double) {
+    Log.d("CHECK", "Primitive Double: $value")
+}
+fun sendDouble(value: Double?) {
+    if (value != null) {
+        Log.d("CHECK", "Object Double is NOT NULL: $value")
+    } else {
+        Log.d("CHECK", "Object Double is NULL")
+    }
+}
+```
+
 ## License
 
 **MIT License**
