@@ -93,3 +93,20 @@ extension JString: JValuable {
     public var jValue: jvalue { .init(l: ref.ref) }
 }
 #endif
+
+public final class JDouble: Sendable, JObjectable {
+    public let object: JObject
+
+    public init? (_ value: Double) {
+        #if os(Android)
+        guard
+            let env = JEnv.current(),
+            let clazz = JClass.load("java/lang/Double"),
+            let global = clazz.newObject(env, args: value)
+        else { return nil }
+        self.object = JObject(global, clazz)
+        #else
+        return nil
+        #endif
+    }
+}
