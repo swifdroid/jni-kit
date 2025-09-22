@@ -163,6 +163,9 @@ extension JObject: JSignatureItemable {
 extension JString: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue { self.signedAsString() }
 }
+extension String: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { self.wrap().signedAsString() }
+}
 extension Optional: JSignatureItemable where Wrapped: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue {
         switch self {
