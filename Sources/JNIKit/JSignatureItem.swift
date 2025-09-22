@@ -157,6 +157,9 @@ public enum JSignatureItemWithValue: JSignatureItemable {
 public protocol JSignatureItemable {
     var signatureItemWithValue: JSignatureItemWithValue { get }
 }
+extension JObject: JSignatureItemable {
+    public var signatureItemWithValue: JSignatureItemWithValue { .object(self, className) }
+}
 extension Optional: JSignatureItemable where Wrapped: JSignatureItemable {
     public var signatureItemWithValue: JSignatureItemWithValue {
         switch self {
