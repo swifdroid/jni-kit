@@ -94,7 +94,7 @@ extension JString: JValuable {
 }
 #endif
 
-public final class JDouble: Sendable, JObjectable {
+public final class JDouble: Sendable, JObjectable, JSignatureItemable {
     public let object: JObject
 
     public init? (_ value: Double) {
@@ -108,5 +108,9 @@ public final class JDouble: Sendable, JObjectable {
         #else
         return nil
         #endif
+    }
+
+    public var signatureItemWithValue: JSignatureItemWithValue {
+        .object(object, className)
     }
 }
