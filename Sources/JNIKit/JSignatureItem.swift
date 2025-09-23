@@ -42,10 +42,19 @@ public struct JSignatureItem: Sendable {
     ///   - typeCode: The JNI type prefix, such as `.object`, `.int`, or `.booleans`.
     ///   - name: A `JClassName` used for object types (e.g., `java/lang/String`). Ignored for primitives.
     public init(_ typeCode: TypeCode, _ name: JClassName? = nil) {
-        let needsSemicolon = typeCode == .object || typeCode == .objects
-        self.typeCode = typeCode
-        self.className = (name?.path ?? "") + (needsSemicolon ? ";" : "")
-        self.signature = typeCode.rawValue + self.className
+        if let name {
+            let hasArrayPrefix = name.path.hasPrefix("[L")
+            self.typeCode = hasArrayPrefix ? .objects : .object
+            self.className = name.path + (name.path.hasSuffix(";") ? "" : ";")
+            self.signature = hasArrayPrefix ? self.className : self.typeCode.rawValue + self.className
+            #if JNILOGS
+            Logger.debug("JSignatureItem name.path: \(name.path) hasPrefix: \(name.path.hasPrefix("[L")) signature: \(self.signature)")
+            #endif
+        } else {
+            self.typeCode = typeCode
+            self.className = ""
+            self.signature = typeCode.rawValue
+        }
     }
 
     // MARK: - Primitive Types
