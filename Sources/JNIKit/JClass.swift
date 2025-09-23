@@ -653,7 +653,7 @@ public class JClass: @unchecked Sendable {
     public func staticObjectField(_ env: JEnv? = nil, name: String, returningClass: JClass) -> JObject? {
         #if os(Android)
         #if JNILOGS
-        let logKey = "\"\(name)\(signature.path)\""
+        let logKey = "\"\(name)\""
         Logger.trace("JClass.objectField 1, getting \(logKey)")
         #endif
         guard

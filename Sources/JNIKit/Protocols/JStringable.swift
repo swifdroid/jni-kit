@@ -8,6 +8,11 @@
 #if os(Android)
 import Android
 #endif
+#if JNILOGS
+#if canImport(Logging)
+import Logging
+#endif
+#endif
 
 /// A protocol for Java objects that can provide a Swift-readable string via Java's `toString()` method.
 ///

@@ -5,6 +5,12 @@
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
+#if JNILOGS
+#if canImport(Logging)
+import Logging
+#endif
+#endif
+
 /// Represents a single type fragment within a JNI method or field signature,
 /// such as `"I"`, `"Ljava/lang/String;"`, or `"[D"`.
 ///

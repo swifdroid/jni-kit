@@ -215,7 +215,7 @@ public final class JNICache: @unchecked Sendable {
     public func getStaticMethodId(env: JEnv? = .current(), clazz: JClass, methodName: String, signature: JMethodSignature) -> JMethodId? {
         #if os(Android)
         #if JNILOGS
-        let logKey = "\"\(className.fullName).\(methodName)\(signature.signature)\""
+        let logKey = "\"\(clazz.name.fullName).\(methodName)\(signature.signature)\""
         Logger.trace("JNICache.getStaticMethodId 1, getting \(logKey) from cache")
         #endif
         methodMutex.lock()
@@ -267,7 +267,7 @@ public final class JNICache: @unchecked Sendable {
     public func getFieldId(env: JEnv? = .current(), clazz: JClass, fieldName: String, signature: JSignatureItem) -> JFieldId? {
         #if os(Android)
         #if JNILOGS
-        let logKey = "\"\(className.fullName) \(fieldName)\(signature.signature)\""
+        let logKey = "\"\(clazz.name.fullName) \(fieldName)\(signature.signature)\""
         Logger.trace("JNICache.getFieldId 1, getting \(logKey) from cache")
         #endif
         fieldMutex.lock()
@@ -319,7 +319,7 @@ public final class JNICache: @unchecked Sendable {
     public func getStaticFieldId(env: JEnv? = .current(), clazz: JClass, fieldName: String, signature: JSignatureItem) -> JFieldId? {
         #if os(Android)
         #if JNILOGS
-        let logKey = "\"\(className.fullName) \(fieldName)\(signature.signature)\""
+        let logKey = "\"\(clazz.name.fullName) \(fieldName)\(signature.signature)\""
         Logger.trace("JNICache.getStaticFieldId 1, getting \(logKey) from cache")
         #endif
         fieldMutex.lock()
