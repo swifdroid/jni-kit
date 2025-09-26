@@ -23,12 +23,12 @@ public struct JThrowable: Sendable, JObjectable {
     /// The globally retained reference to the `Throwable` object.
     ///
     /// This is a `jobject` pointing to a `java.lang.Throwable` or subclass.
-    public let ref: JObjectBox
+    public var ref: JObjectBox { object.ref}
     
     /// The class wrapper representing `java.lang.Throwable`.
     ///
     /// This may be useful for introspection or re-use in `JNICache`.
-    public let clazz: JClass
+    public var clazz: JClass { object.clazz }
 
     /// Object wrapper
     public let object: JObject
