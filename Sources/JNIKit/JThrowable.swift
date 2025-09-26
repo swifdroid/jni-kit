@@ -8,6 +8,11 @@
 #if os(Android)
 import Android
 #endif
+#if JNILOGS
+#if canImport(Logging)
+import Logging
+#endif
+#endif
 
 /// A Swift wrapper around a Java `Throwable` (`java.lang.Throwable`) object.
 ///
@@ -43,13 +48,10 @@ public struct JThrowable: Sendable, JObjectable {
     ///   - throwable: The local `jobject` to wrap
     ///   - clazz: The resolved `JClass` for `java.lang.Throwable`
     public init?(_ throwable: JObjectBox, _ clazz: JClass) {
-        guard
-            let env = JEnv.current(),
-            let global = env.newGlobalRef(JObject(throwable, clazz))
-        else { return nil }
-        self.ref = global.ref
-        self.clazz = clazz
-        self.object = JObject(global.ref, clazz)
+        #if JNILOGS
+        Logger.info("JThrowable.init globalRef: \(throwable.ref)")
+        #endif
+        self.object = JObject(throwable, clazz)
     }
 
     // MARK: - Factory
