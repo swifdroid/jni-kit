@@ -80,6 +80,17 @@ public final class JObject: Sendable, JObjectable {
         #endif
     }
 
+    deinit {
+        if !isProxy {
+            #if JNILOGS
+            Logger.critical("🧹🧹🧹 JObject deleted ref: \(ref.ref) for \(clazz.name.fullName) note: \(debuggingNote)")
+            #endif
+            #if os(Android)
+            JEnv.current()?.deleteGlobalRef(self)
+            #endif
+        }
+    }
+
     /// Returns same object reference but with the different class.
     public func cast(to className: JClassName) -> JObject? {
         guard let clazz = JClass.load(className) else { return nil }
