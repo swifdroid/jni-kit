@@ -464,11 +464,11 @@ extension JEnv {
 
     /// Call a Java method returning an `jobject`.
     public func callObjectMethodPure(
-        object: JObject,
+        ref: jobject,
         methodId: JMethodId,
         args: [any JValuable]? = nil
     ) -> jobject? {
-        env.pointee!.pointee.CallObjectMethodA!(env, object.ref.ref, methodId.id, args?.map { $0.jValue })
+        env.pointee!.pointee.CallObjectMethodA!(env, ref, methodId.id, args?.map { $0.jValue })
     }
 
     /// Call a Java method returning `boolean`.
