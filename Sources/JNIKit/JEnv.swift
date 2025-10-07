@@ -8,6 +8,11 @@
 #if os(Android)
 import Android
 #endif
+#if JNILOGS
+#if canImport(Logging)
+import Logging
+#endif
+#endif
 
 /// A thread-safe, ergonomic Swift wrapper around `JNIEnv*` for use with JNI in Swift 6.1+.
 ///
@@ -311,11 +316,17 @@ extension JEnv {
 
     /// Deletes a global reference previously promoted.
     public func deleteGlobalRef(_ globalRef: JObject) {
+        #if JNILOGS
+        Logger.critical("⚠️ JEnv.deleteGlobalRef 1 \(globalRef.ref.ref)")
+        #endif
         env.pointee!.pointee.DeleteGlobalRef!(env, globalRef.ref.ref)
     }
 
     /// Deletes a global reference previously promoted.
     public func deleteGlobalRef(_ globalRef: jobject) {
+        #if JNILOGS
+        Logger.critical("⚠️ JEnv.deleteGlobalRef  \(globalRef)")
+        #endif
         env.pointee!.pointee.DeleteGlobalRef!(env, globalRef)
     }
 
