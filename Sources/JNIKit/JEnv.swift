@@ -1192,6 +1192,16 @@ extension JEnv {
         env.pointee!.pointee.SetObjectArrayElement!(env, array.ref.ref, index, value?.ref.ref)
     }
 
+    /// Set an element in a Java object array.
+    ///
+    /// - Parameters:
+    ///   - arrayObject: The target object array.
+    ///   - index: Index of the element to set.
+    ///   - value: The value to insert (may be `nil`).
+    public func setObjectArrayElement(_ arrayObject: JObject, index: jint, value: JObject?) {
+        env.pointee!.pointee.SetObjectArrayElement!(env, arrayObject.ref.ref, index, value?.ref.ref)
+    }
+
     // MARK: - Primitive Arrays
 
     /// Create a new Java array of `boolean` (jboolean).
