@@ -73,7 +73,7 @@ extension JClassLoader {
         Logger.info("JClassLoader.loadClass 4")
         #endif
         guard
-            let local = env.callObjectMethodPure(object: .init(ref, clazz), methodId: methodId, args: [className])
+            let local = env.callObjectMethodPure(ref: ref.ref, methodId: methodId, args: [className])
         else {
             #if JNILOGS
             Logger.info("JClassLoader.findClass 4 exit")
@@ -83,10 +83,11 @@ extension JClassLoader {
         defer {
             env.deleteLocalRef(local)
         }
+        let globalRef = env.newGlobalRefPure(local)
         #if JNILOGS
-        Logger.info("JClassLoader.loadClass 5")
+        Logger.info("JClassLoader.loadClass 5 globalRef: \(globalRef)")
         #endif
-        return JClass(env.newGlobalRefPure(local), name)
+        return JClass(globalRef, name)
         #else
         return nil
         #endif
