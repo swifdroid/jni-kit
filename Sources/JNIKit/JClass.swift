@@ -69,7 +69,7 @@ public class JClass: @unchecked Sendable {
 
     deinit {
         #if JNILOGS
-        Logger.critical("🧹🧹🧹 deleted \(isGlobalRef ? "global" : "local") ref: \(ref)")
+        Logger.critical("🧹🧹🧹 JClass deleted \(isGlobalRef ? "global" : "local") ref: \(ref)")
         #endif
         #if os(Android)
         if isGlobalRef {
