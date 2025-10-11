@@ -67,7 +67,7 @@ extension JClassLoadable {
                 // logger?.info("getClassLoader 3 exit")
                 return nil
             }
-        guard let obj = env.callObjectMethod(object: .init(ref, self.clazz), methodId: methodId, returningClass: retuingClazz)
+        guard let obj = env.callObjectMethod(object: .init(ref, self.clazz, proxy: true), methodId: methodId, returningClass: retuingClazz)
         else {
             // logger?.info("getClassLoader 4 exit")
             return nil
