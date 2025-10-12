@@ -28,6 +28,16 @@ public final class JObjectBox: @unchecked Sendable {
             #endif
             return nil
         }
+        #if JNILOGS
+        Logger.info("JObjectBox.init 1 globalRef: \(globalRef)")
+        #endif
+        self.ref = globalRef
+    }
+
+    public init(globalRef: jobject) {
+        #if JNILOGS
+        Logger.info("JObjectBox.init 2 globalRef: \(globalRef)")
+        #endif
         self.ref = globalRef
     }
 
@@ -55,9 +65,12 @@ extension JObjectBox {
     ///
     /// This method calls `GetObjectClass` and then uses reflection to invoke `getName()`,
     /// obtaining the full class name of the object.
+    /// 
+    /// Parameters:
+    ///   - debuggingNote: An optional debugging note to include in log messages, useful to trace early deinitialization.
     ///
     /// - Returns: A `JObject` with resolved `JClass`, or `nil` if reflection fails.
-    public func object() -> JObject? {
+    public func object(debuggingNote: String? = nil) -> JObject? {
         #if os(Android)
         #if JNILOGS
         Logger.trace("JObjectBox.object 1")
@@ -189,16 +202,18 @@ extension JObjectBox {
         #if JNILOGS
         Logger.trace("JObjectBox.object 12")
         #endif
-        guard let refBox = self.ref.box(env) else {
-            #if JNILOGS
-            Logger.trace("JObjectBox.object 12.1 exit: 💣 Unable to wrap jobject into JObjectBox")
-            #endif
-            return nil
-        }
         #if JNILOGS
-        Logger.trace("JObjectBox.object 13, wrapped jobject into JObjectBox \"\(className.fullName)\"")
+        Logger.trace("JObjectBox.object 13, wrapped jobject(\(self.ref)) into JObjectBox \"\(className.fullName)\"")
         #endif
-        return JObject(refBox, .init(globalObjectClass, className))
+        let clazz = JClass(globalObjectClass, className)
+        #if JNILOGS
+        Logger.trace("JObjectBox.object 14, created clazz \"\(clazz.name.fullName)\"")
+        #endif
+        let object = JObject(self, clazz, debuggingNote: debuggingNote)
+        #if JNILOGS
+        Logger.trace("JObjectBox.object 15, created object \"\(object.ref.ref)\" debuggingNote: \(debuggingNote ?? "")")
+        #endif
+        return object
         #else
         return nil
         #endif
