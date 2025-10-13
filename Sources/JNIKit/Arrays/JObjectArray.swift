@@ -30,9 +30,9 @@ public struct JObjectArray: Sendable, JObjectable {
         #endif
     }
 
-    #if os(Android)
     /// Create a new array of Java objects with given size and element class.
-    public init?(length: Int, clazz: JClass) {
+    public init? (length: Int, clazz: JClass) {
+        #if os(Android)
         guard
             let env = JEnv.current(),
             let array = env.newObjectArray(length: Int32(length), clazz: clazz),
@@ -40,8 +40,30 @@ public struct JObjectArray: Sendable, JObjectable {
         else { return nil }
         self.object = JObject(global.ref, clazz)
         self.length = length
+        #else
+        return nil
+        #endif
     }
 
+    /// Create a new array of Java objects with given elements and element class.
+    public init? (_ objects: [JObject], clazz: JClass) {
+        #if os(Android)
+        guard
+            let env = JEnv.current(),
+            let array = env.newObjectArray(length: Int32(objects.count), clazz: clazz),
+            let global = env.newGlobalRef(JObject(array.ref, clazz))
+        else { return nil }
+        self.object = JObject(global.ref, clazz)
+        self.length = objects.count
+        for (index, object) in objects.enumerated() {
+            self.set(object, at: index)
+        }
+        #else
+        return nil
+        #endif
+    }
+
+    #if os(Android)
     /// Create a wrapper from an existing `jobjectArray`.
     public init?(_ array: jobjectArray, _ clazz: JClass) {
         guard
@@ -49,7 +71,7 @@ public struct JObjectArray: Sendable, JObjectable {
             let box = array.box(env),
             let global = env.newGlobalRef(JObject(box, clazz))
         else { return nil }
-        self.object = JObject(global.ref, clazz)
+        self.object = global
         self.length = Int(env.getArrayLength(global.ref.ref))
     }
 
@@ -59,16 +81,13 @@ public struct JObjectArray: Sendable, JObjectable {
             let env = JEnv.current(),
             let obj = env.getObjectArrayElement(self, index: Int32(index))
         else { return nil }
-        return JObject(obj.ref, clazz)
+        return obj
     }
 
     /// Set an object at a given index.
     public func set(_ value: JObject, at index: Int) {
         guard let env = JEnv.current() else { return }
-        let jArray = value.ref.ref.assumingMemoryBound(to: jobjectArray.self)
-        let clazz = JClass(value.clazz.ref, value.className)
-        guard let jObjectArray = JObjectArray(jArray, clazz) else { return }
-        env.setObjectArrayElement(jObjectArray, index: Int32(index), value: value)
+        env.setObjectArrayElement(self, index: Int32(index), value: value)
     }
     #endif
     
@@ -83,5 +102,18 @@ public struct JObjectArray: Sendable, JObjectable {
         }
         #endif
         return result
+    }
+}
+
+extension Array where Element: JObjectable {
+    /// Convert to `JObjectArray` with a given `JClass`.
+    public func javaArray(of clazz: JClass) -> JObjectArray? {
+        JObjectArray(self.map { $0.object }, clazz: clazz)
+    }
+
+    /// Convert to `JObjectArray` with a given class name.
+    public func javaArray(of className: JClassName) -> JObjectArray? {
+        guard let clazz = JClass.load(className) else { return nil }
+        return JObjectArray(self.map { $0.object }, clazz: clazz)
     }
 }
