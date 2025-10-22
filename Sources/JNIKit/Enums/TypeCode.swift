@@ -22,4 +22,15 @@ public enum TypeCode: String, Sendable {
     case floats = "[F"
     case doubles = "[D"
     case objects = "[L"
+
+    /// 2D Arrays of primitives
+    case booleans2D = "[[Z"
+    case bytes2D = "[[B"
+    case chars2D = "[[C"
+    case shorts2D = "[[S"
+    case ints2D = "[[I"
+    case longs2D = "[[J"
+    case floats2D = "[[F"
+    case doubles2D = "[[D"
+    case objects2D = "[[L"
 }
