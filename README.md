@@ -116,15 +116,19 @@ But I also highly recommend caching the class loader instance by taking it from 
 ```swift
 // Access current environment
 let localEnv = JEnv(envPointer)
+
 // Convert caller's local ref into global ref
 let callerBox = callerRef.box(localEnv)
+
 // Defer block to clean up local references
 defer {
     // Releases local ref to caller object
     localEnv.deleteLocalRef(callerRef)
 }
+
 // Initialize `JObject` from boxed global reference to the caller object
 guard let callerObject = callerBox?.object() else { return }
+
 // Cache the class loader from the caller object
 // It is important for loading non-system classes later
 // e.g. your own Java/Kotlin classes
@@ -235,9 +239,18 @@ All its methods are ergonomically wrapped for easy use with Swift types and conv
 
 ### How to create a new object
 
-#### Construct with no arguments
+JNIKit provides the `JObject` class, which holds a reference to a Java object.
 
-The way with `env`:
+#### Construct JObject with no arguments
+
+Convenient way with `clazz`:
+```swift
+guard
+    let clazz = JClass.load("com/mylib/mypackage/MyClass"),
+    let object = clazz.newObject()
+else { return }
+```
+More explicit way with `env`:
 ```swift
 guard
     let env = JEnv.current(),
@@ -253,21 +266,23 @@ guard
     )
 else { return }
 ```
-The way with `clazz`:
-```swift
-guard
-    let clazz = JClass.load("com/mylib/mypackage/MyClass"),
-    let object = clazz.newObject()
-else { return }
-```
 
-#### Construct with arguments
+#### Construct JObject with arguments
 
 Arguments have to be listed in both `methodId` and `newObject` in case of creating with `env`.
 
 Let's assume a class constructor expects `jint`, `jfloat`, and `jobject` (which is `java/lang/String`).
 
-The way with `env`:
+Convenient way with `clazz`:
+```swift
+let object = clazz.newObject(
+    123,
+    1.23,
+    "Hello" // or "Hello".wrap().signedAsString()
+)
+```
+
+Explicit way with `env`:
 ```swift
 let methodId = clazz.methodId(
     env: env,
@@ -290,25 +305,13 @@ let object = env.newObject(
 )
 ```
 
-The way with `clazz`:
-```swift
-let object = clazz.newObject(
-    123,
-    1.23,
-    "Hello" // or "Hello".wrap().signedAsString()
-)
-```
+The constructed object is now a `JObject` that holds a global reference to the instance and a global reference to its class. Keep this object for as long as you need it.
+
 > [!NOTE]
-> The way with `clazz` is always shorter than with `env`.
+> **When `JObject` is deinitialized, its underlying `jobject` reference is released automatically.**
 
-The constructed object is now a `JObject` instance which contains a global reference to the instance and a global reference to its class object. Save it for later usage.
-
-Delete global reference for this object when you no longer need it
-```swift
-env.deleteGlobalRef(object)
-```
-
-While you hold an instance object you can call its methods and get/set its field values.
+> [!WARNING]
+> Do not delete the underlying `jobject` reference manually, and do not use `jobject` from `JObject` anywhere outside.
 
 ### How to call an instance method
 
