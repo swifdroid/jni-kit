@@ -242,7 +242,7 @@ extension Java2DArrayable {
     
     /// Converts Java 2D array to Swift 2D array.
     /// 
-    /// ⚠️ Be carefuls with large arrays, this may consume a lot of memory.
+    /// ⚠️ Be careful with large arrays, this may consume a lot of memory.
     public func toArray() -> [[ElementType]] {
         var result: [[ElementType]] = []
         #if os(Android)
