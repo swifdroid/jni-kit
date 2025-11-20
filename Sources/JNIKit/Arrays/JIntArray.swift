@@ -22,6 +22,8 @@ public typealias JIntArray = JInt32Array
 public final class JInt32Array: Java1DArrayable {
     public typealias ElementType = Int32
 
+    public static let className: JClassName = "[I"
+
     public let object: JObject
     public let length: Int
 

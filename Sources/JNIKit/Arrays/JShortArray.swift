@@ -17,6 +17,8 @@ public typealias JShortArray = JInt16Array
 public final class JInt16Array: Java1DArrayable {
     public typealias ElementType = Int16
 
+    public static let className: JClassName = "[S"
+
     public let object: JObject
     public let length: Int
 

@@ -15,6 +15,8 @@ import Android
 public final class JFloatArray: Java1DArrayable {
     public typealias ElementType = Float
 
+    public static let className: JClassName = "[F"
+
     public let object: JObject
     public let length: Int
 

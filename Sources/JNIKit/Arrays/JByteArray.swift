@@ -17,6 +17,8 @@ public typealias JByteArray = JInt8Array
 public final class JInt8Array: Java1DArrayable {
     public typealias ElementType = Int8
 
+    public static let className: JClassName = "[B"
+
     public let object: JObject
     public let length: Int
 

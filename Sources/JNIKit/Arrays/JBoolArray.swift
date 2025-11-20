@@ -14,6 +14,8 @@ import Android
 /// Retains a global reference and provides access to individual `jboolean`s.
 public final class JBoolArray: Java1DArrayable {
     public typealias ElementType = Bool
+
+    public static let className: JClassName = "[Z"
     
     public let object: JObject
     public let length: Int

@@ -17,6 +17,8 @@ public typealias JCharArray = JUInt16Array
 public final class JUInt16Array: Java1DArrayable {
     public typealias ElementType = UInt16
 
+    public static let className: JClassName = "[C"
+
     public let object: JObject
     public let length: Int
 

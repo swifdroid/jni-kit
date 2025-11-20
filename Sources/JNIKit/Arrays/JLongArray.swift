@@ -17,6 +17,8 @@ public typealias JLongArray = JInt64Array
 public final class JInt64Array: Java1DArrayable {
     public typealias ElementType = Int64
 
+    public static let className: JClassName = "[J"
+
     public let object: JObject
     public let length: Int
 

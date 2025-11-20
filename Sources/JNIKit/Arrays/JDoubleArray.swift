@@ -15,6 +15,8 @@ import Android
 public final class JDoubleArray: Java1DArrayable {
     public typealias ElementType = Double
 
+    public static let className: JClassName = "[D"
+
     public let object: JObject
     public let length: Int
 
