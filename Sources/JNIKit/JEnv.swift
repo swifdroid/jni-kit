@@ -1146,12 +1146,8 @@ extension JEnv {
     ///   - array: The object array.
     ///   - index: The index of the element to retrieve.
     /// - Returns: A `JObject` wrapper for the element at that index.
-    public func getObjectArrayElement(_ array: JObjectArray, index: jint) -> JObject? {
-        let arrayRef = array.ref.ref.assumingMemoryBound(to: jobjectArray.self).pointee
-        guard
-            let box = env.pointee!.pointee.GetObjectArrayElement!(env, arrayRef, index)?.box(JEnv(env))
-        else { return nil }
-        return JObject(box, array.clazz)
+    public func getObjectArrayElement(_ array: JObjectArray, index: jint, returningClass: JClass? = nil) -> JObject? {
+        getObjectArrayElement(array.object, index: index, returningClass: returningClass)
     }
 
     /// Get an element from a Java object array.
