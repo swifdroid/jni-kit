@@ -81,7 +81,7 @@ extension JClassLoader {
             return nil
         }
         defer {
-            env.deleteLocalRef(local)
+            env.deleteLocalRefPure(local)
         }
         let globalRef = env.newGlobalRefPure(local)
         #if JNILOGS

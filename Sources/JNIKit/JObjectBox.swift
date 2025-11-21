@@ -21,7 +21,7 @@ public final class JObjectBox: @unchecked Sendable {
     /// - Parameter object: A valid JNI object pointer.
     public init?(_ localObject: jobject, env: JEnv) {
         guard
-            let globalRef = env.newGlobalRef(localObject)
+            let globalRef = env.newGlobalRefPure(localObject)
         else {
             #if JNILOGS
             Logger.critical("💣 JObjectBox: newGlobalRef returned nil")
@@ -92,7 +92,7 @@ extension JObjectBox {
             #endif
             return nil
         }
-        defer { env.deleteLocalRef(localObjectClass) }
+        defer { env.deleteLocalRefPure(localObjectClass) }
         #if JNILOGS
         Logger.trace("JObjectBox.object 3")
         #endif
@@ -132,7 +132,7 @@ extension JObjectBox {
             #endif
             return nil
         }
-        defer { env.deleteLocalRef(classObject) }
+        defer { env.deleteLocalRefPure(classObject) }
         #if JNILOGS
         Logger.trace("JObjectBox.object 6")
         #endif
@@ -143,7 +143,7 @@ extension JObjectBox {
             #endif
             return nil
         }
-        defer { env.deleteLocalRef(classClass) }
+        defer { env.deleteLocalRefPure(classClass) }
         #if JNILOGS
         Logger.trace("JObjectBox.object 7")
         #endif
@@ -184,7 +184,7 @@ extension JObjectBox {
             #endif
             return nil
         }
-        defer { env.deleteLocalRef(localNameObj) }
+        defer { env.deleteLocalRefPure(localNameObj) }
         #if JNILOGS
         Logger.trace("JObjectBox.object 10")
         #endif

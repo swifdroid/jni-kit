@@ -309,11 +309,6 @@ extension JEnv {
         env.pointee!.pointee.NewGlobalRef!(env, ref)
     }
 
-    /// Promotes a local reference to a global one (GC-safe).
-    public func newGlobalRef(_ ref: jobject) -> jobject? {
-        env.pointee!.pointee.NewGlobalRef!(env, ref)
-    }
-
     /// Deletes a global reference previously promoted.
     public func deleteGlobalRef(_ globalRef: JObject) {
         #if JNILOGS
@@ -323,7 +318,7 @@ extension JEnv {
     }
 
     /// Deletes a global reference previously promoted.
-    public func deleteGlobalRef(_ globalRef: jobject) {
+    public func deleteGlobalRefPure(_ globalRef: jobject) {
         #if JNILOGS
         Logger.critical("⚠️ JEnv.deleteGlobalRef  \(globalRef)")
         #endif
@@ -331,12 +326,7 @@ extension JEnv {
     }
 
     /// Deletes a local reference to allow early GC.
-    public func deleteLocalRef(_ localRef: JObject) {
-        env.pointee!.pointee.DeleteLocalRef!(env, localRef.ref.ref)
-    }
-
-    /// Deletes a local reference to allow early GC.
-    public func deleteLocalRef(_ localRef: jobject) {
+    public func deleteLocalRefPure(_ localRef: jobject) {
         env.pointee!.pointee.DeleteLocalRef!(env, localRef)
     }
 
@@ -346,11 +336,11 @@ extension JEnv {
     }
 
     /// Creates a new local reference to the given object.
-    public func newLocalRef(_ obj: JObject) -> JObject? {
+    public func newLocalRefPure(_ obj: jobject) -> jobject? {
         guard
-            let box = env.pointee!.pointee.NewLocalRef!(env, obj.ref.ref)?.box(JEnv(env))
+            let localRef = env.pointee!.pointee.NewLocalRef!(env, obj)
         else { return nil }
-        return JObject(box, obj.clazz)
+        return localRef
     }
 
     /// Ensures there's room for `capacity` more local references in the current frame.

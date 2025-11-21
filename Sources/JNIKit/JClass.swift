@@ -73,9 +73,9 @@ public class JClass: @unchecked Sendable {
         #endif
         #if os(Android)
         if isGlobalRef {
-            JEnv.current()?.deleteGlobalRef(ref)
+            JEnv.current()?.deleteGlobalRefPure(ref)
         } else {
-            JEnv.current()?.deleteLocalRef(ref)
+            JEnv.current()?.deleteLocalRefPure(ref)
         }
         #endif
     }
