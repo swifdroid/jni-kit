@@ -53,7 +53,7 @@ public final class JObject: Sendable, JObjectable {
         self.isProxy = proxy
         self.debuggingNote = debuggingNote ?? "file: \(file) function: \(function) line: \(line)"
         #if JNILOGS
-        Logger.info("🗃️🗃️🗃️ JObject init 2 non-proxy ref: \(ref.ref) for \(clazz.name.fullName) note: \(debuggingNote)")
+        Logger.info("🗃️🗃️🗃️ JObject init 2 \(proxy ? "" : "non-")proxy ref: \(ref.ref) for \(clazz.name.fullName) note: \(debuggingNote)")
         #endif
     }
 
