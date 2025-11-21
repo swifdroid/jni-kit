@@ -80,4 +80,43 @@ public struct JThrowable: Sendable, JObjectable {
         _ = env.throwObject(ref.ref)
     }
     #endif
+
+    // MARK: - Methods
+
+    /// Appends the specified exception to the exceptions
+    /// that were suppressed in order to deliver this exception.
+    // TODO: implement addSuppressed(exception: JThrowable)
+
+    /// Fills in the execution stack trace.
+    // TODO: implement fillInStackTrace() -> JThrowable?
+
+    /// Returns the cause of this throwable or null if the cause is nonexistent or unknown.
+    // TODO: implement getCause() -> JThrowable?
+
+    /// Creates a localized description of this throwable.
+    // TODO: implement getLocalizedMessage() -> String
+
+    /// Returns the detail message string of this throwable.
+    // TODO: implement getMessage() -> String
+
+    /// Provides programmatic access to the stack trace information printed by printStackTrace().
+    // TODO: implement getStackTrace() -> [StackTraceElement]
+
+    /// Returns an array containing all of the exceptions that were suppressed, typically by the try-with-resources statement, in order to deliver this exception.
+    // TODO: implement getSuppressed() -> [JThrowable]
+    
+    /// Initializes the cause of this throwable to the specified value.
+    // TODO: implement initCause(cause: JThrowable) -> JThrowable
+
+    /// Prints this throwable and its backtrace to the standard error stream.
+    // TODO: implement printStackTrace()
+
+    /// Prints this throwable and its backtrace to the specified print writer.
+    // TODO: implement printStackTrace(s: PrintWriter)
+
+    /// Prints this throwable and its backtrace to the specified print stream.
+    // TODO: implement printStackTrace(s: PrintStream)
+
+    /// Sets the stack trace elements that will be returned by getStackTrace() and printed by printStackTrace() and related methods.
+    // TODO: implement setStackTrace(stackTrace: [StackTraceElement])
 }
