@@ -24,6 +24,8 @@ import Logging
 /// - Wrapping a thrown Java exception from `ExceptionOccurred()`
 /// - Passing Java exceptions back to Swift for logging or message extraction
 /// - Re-throwing Java exceptions from Swift via `Throw()` or `ThrowNew()`
+/// 
+/// [Learn more](https://developer.android.com/reference/java/lang/Throwable)
 public struct JThrowable: Sendable, JObjectable {
     /// The globally retained reference to the `Throwable` object.
     ///
