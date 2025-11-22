@@ -61,6 +61,40 @@ extension jobject {
 #endif
 
 extension JObjectBox {
+    /// Convert the boxed `jobject` into a fully typed `JObject` by specifying the expected class.
+    ///
+    /// This method loads the specified `JClass` and wraps the `jobject` into a `JObject` of that type.
+    ///
+    /// Parameters:
+    ///   - className: The expected class name of the object.
+    ///   - debuggingNote: An optional debugging note to include in log messages, useful to trace early deinitialization.
+    /// - Returns: A `JObject` of the specified type, or `nil` if the class could not be loaded.
+    public func object(as className: JClassName, debuggingNote: String? = nil) -> JObject? {
+        #if os(Android)
+        #if JNILOGS
+        Logger.trace("JObjectBox.object with className \"\(className.fullName)\" 1")
+        #endif
+        guard
+            let clazz = JClass.load(className)
+        else {
+            #if JNILOGS
+            Logger.critical("JObjectBox.object with className \"\(className.fullName)\" 1.1 exit: 💣 Unable to load class")
+            #endif
+            return nil
+        }
+        #if JNILOGS
+        Logger.trace("JObjectBox.object with className \"\(className.fullName)\" 2, loaded clazz \"\(clazz.name.fullName)\"")
+        #endif
+        let object = JObject(self, clazz, debuggingNote: debuggingNote)
+        #if JNILOGS
+        Logger.trace("JObjectBox.object with className \"\(className.fullName)\" 3, created object \"\(object.ref.ref)\" debuggingNote: \(debuggingNote ?? "")")
+        #endif
+        return object
+        #else
+        return nil
+        #endif
+    }
+
     /// Convert the boxed `jobject` into a fully typed `JObject` by inspecting its runtime class.
     ///
     /// This method calls `GetObjectClass` and then uses reflection to invoke `getName()`,
