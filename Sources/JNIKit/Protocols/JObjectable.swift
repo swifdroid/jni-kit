@@ -233,6 +233,37 @@ extension JObjectable {
         callByteMethod(env, name: name, args: args)
     }
 
+    /// Call an instance method returning `jbyte`
+    public func callShortMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)]) -> Int16? {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.1 }), returning: .short))
+        else { return nil }
+        return env.callShortMethod(object: object, methodId: methodId, args: args.map({ $0.0 }))
+        #else
+        return nil
+        #endif
+    }
+
+    /// Call an instance method returning `jshort`
+    public func callShortMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable]) -> Int16? {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: .short))
+        else { return nil }
+        return env.callShortMethod(object: object, methodId: methodId, args: args.map({ $0.signatureItemWithValue.value }))
+        #else
+        return nil
+        #endif
+    }
+
+    /// Call an instance method returning `jbyte`
+    public func callShortMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) -> Int16? {
+        callShortMethod(env, name: name, args: args)
+    }
+
     /// Call an instance method returning `jchar`
     public func callCharMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)]) -> UInt16? {
         #if os(Android)
@@ -577,6 +608,37 @@ extension JObjectable {
     /// Call an instance method on this object.
     public func callNonvirtualByteMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) -> Int8? {
         callNonvirtualByteMethod(env, name: name, args: args)
+    }
+
+    /// Call a non-virtual instance method returning `jshort`
+    public func callNonvirtualShortMethod(_ env: JEnv? = nil, name: String, args: [(any JValuable, JSignatureItem)]) -> Int16? {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.1 }), returning: .short))
+        else { return nil }
+        return env.callNonvirtualShortMethod(object: object, clazz: clazz, methodId: methodId, args: args.map({ $0.0 }))
+        #else
+        return nil
+        #endif
+    }
+
+    /// Call an instance method on this object.
+    public func callNonvirtualShortMethod(_ env: JEnv? = nil, name: String, args: [JSignatureItemable]) -> Int16? {
+        #if os(Android)
+        guard
+            let env = env ?? JEnv.current(),
+            let methodId = clazz.methodId(env: env, name: name, signature: .init(args.map({ $0.signatureItemWithValue.signatureItem }), returning: .short))
+        else { return nil }
+        return env.callNonvirtualShortMethod(object: object, clazz: clazz, methodId: methodId, args: args.map({ $0.signatureItemWithValue.value }))
+        #else
+        return nil
+        #endif
+    }
+
+    /// Call an instance method on this object.
+    public func callNonvirtualShortMethod(_ env: JEnv? = nil, name: String, args: JSignatureItemable...) -> Int16? {
+        callNonvirtualShortMethod(env, name: name, args: args)
     }
 
     /// Call a non-virtual instance method returning `jchar`
