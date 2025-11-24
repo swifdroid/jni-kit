@@ -8,6 +8,11 @@
 #if os(Android)
 import Android
 #endif
+#if JNILOGS
+#if canImport(Logging)
+import Logging
+#endif
+#endif
 
 /// A protocol for Java objects that expose the `getClass()` method to retrieve their runtime type.
 ///
@@ -36,7 +41,7 @@ public protocol JClassLoadable: AnyObject, Sendable {
     /// - Returns: A `JObject` representing a Java `Class` instance, or `nil` if lookup or call fails.
     func getClassLoader() -> JClassLoader?
 }
-import Logging
+
 extension JClassLoadable {
     /// Default implementation of `getClass()` using JNI.
     ///
@@ -52,11 +57,15 @@ extension JClassLoadable {
         #if os(Android)
         guard
             let env = JEnv.current() else {
-                // logger?.info("getClassLoader 1 exit")
+                #if JNILOGS
+                Logger.info("getClassLoader 1 exit")
+                #endif
                 return nil
             }
             guard let retuingClazz = env.findClass("java/lang/ClassLoader") else {
-                // logger?.info("getClassLoader 2 exit")
+                #if JNILOGS
+                Logger.info("getClassLoader 2 exit")
+                #endif
                 return nil
             }
             guard let methodId = self.clazz.methodId(
@@ -64,12 +73,16 @@ extension JClassLoadable {
                 name: "getClassLoader",
                 signature: .returning("java/lang/ClassLoader")
             ) else {
-                // logger?.info("getClassLoader 3 exit")
+                #if JNILOGS
+                Logger.info("getClassLoader 3 exit")
+                #endif
                 return nil
             }
         guard let obj = env.callObjectMethod(object: .init(ref, self.clazz, proxy: true), methodId: methodId, returningClass: retuingClazz)
         else {
-            // logger?.info("getClassLoader 4 exit")
+            #if JNILOGS
+            Logger.info("getClassLoader 4 exit")
+            #endif
             return nil
         }
         cachedClassLoader = JClassLoader(obj)
