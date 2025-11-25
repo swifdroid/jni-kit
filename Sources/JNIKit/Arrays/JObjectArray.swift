@@ -16,13 +16,18 @@ public struct JObjectArray: Sendable, JObjectable {
     public let object: JObject
     public let length: Int
 
+    /// Array to retain JObjects created in Swift
+    private let objectItems: [JObject]
+
     public init (_ object: JObject, length: Int) {
         self.object = object
+        self.objectItems = []
         self.length = length
     }
 
     public init (_ env: JEnv, _ object: JObject) {
         self.object = object
+        self.objectItems = []
         #if os(Android)
         self.length = Int(env.getArrayLength(object.ref.ref))
         #else
@@ -39,6 +44,7 @@ public struct JObjectArray: Sendable, JObjectable {
             let global = env.newGlobalRef(JObject(array.ref, clazz))
         else { return nil }
         self.object = JObject(global.ref, clazz)
+        self.objectItems = []
         self.length = length
         #else
         return nil
@@ -50,10 +56,10 @@ public struct JObjectArray: Sendable, JObjectable {
         #if os(Android)
         guard
             let env = JEnv.current(),
-            let array = env.newObjectArray(length: Int32(objects.count), clazz: clazz),
-            let global = env.newGlobalRef(JObject(array.ref, clazz))
+            let array = env.newObjectArray(length: Int32(objects.count), clazz: clazz)
         else { return nil }
-        self.object = JObject(global.ref, clazz)
+        self.object = array.object
+        self.objectItems = objects
         self.length = objects.count
         for (index, object) in objects.enumerated() {
             self.set(object, at: index)
@@ -72,6 +78,7 @@ public struct JObjectArray: Sendable, JObjectable {
             let global = env.newGlobalRef(JObject(box, clazz))
         else { return nil }
         self.object = global
+        self.objectItems = []
         self.length = Int(env.getArrayLength(global.ref.ref))
     }
 
