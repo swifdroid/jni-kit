@@ -96,11 +96,48 @@ extension JString: JValuable {
 
 // MARK: - Java Objects for primitive types
 
+public protocol JPrimitiveNumerable: JObjectable {}
+extension JPrimitiveNumerable {
+    /// Returns the value as a byte after a narrowing primitive conversion.
+    public func byteValue() -> Int8? {
+        callByteMethod(name: "byteValue")
+    }
+
+    /// Returns the value as a short after a narrowing primitive conversion.
+    public func shortValue() -> Int16? {
+        callShortMethod(name: "shortValue")
+    }
+
+    /// Returns the value as an int after a narrowing primitive conversion.
+    public func intValue() -> Int32? {
+        callIntMethod(name: "intValue")
+    }
+
+    /// Returns the value as a long after a widening primitive conversion.
+    public func longValue() -> Int64? {
+        callLongMethod(name: "longValue")
+    }
+
+    /// Returns the value as a double after a widening primitive conversion.
+    public func doubleValue() -> Double? {
+        callDoubleMethod(name: "doubleValue")
+    }
+
+    /// Returns the value as a float after a widening primitive conversion.
+    public func floatValue() -> Float? {
+        callFloatMethod(name: "floatValue")
+    }
+}
+
 public typealias JByte = JInt8
-public final class JInt8: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+public final class JInt8: Sendable, JPrimitiveNumerable, JSignatureItemable, ExpressibleByIntegerLiteral {
     public static let className: JClassName = "java/lang/Byte"
 
     public let object: JObject
+
+    public init (_ object: JObject) {
+        self.object = object
+    }
 
     public init (integerLiteral value: Int8) {
         #if os(Android)
@@ -122,10 +159,14 @@ public final class JInt8: Sendable, JObjectable, JSignatureItemable, Expressible
 }
 
 public typealias JShort = JInt16
-public final class JInt16: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+public final class JInt16: Sendable, JPrimitiveNumerable, JSignatureItemable, ExpressibleByIntegerLiteral {
     public static let className: JClassName = "java/lang/Short"
 
     public let object: JObject
+
+    public init (_ object: JObject) {
+        self.object = object
+    }
 
     public init (integerLiteral value: Int16) {
         #if os(Android)
@@ -148,10 +189,14 @@ public final class JInt16: Sendable, JObjectable, JSignatureItemable, Expressibl
 
 public typealias JInt = JInt32
 public typealias JInteger = JInt32
-public final class JInt32: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+public final class JInt32: Sendable, JPrimitiveNumerable, JSignatureItemable, ExpressibleByIntegerLiteral {
     public static let className: JClassName = "java/lang/Integer"
 
     public let object: JObject
+
+    public init (_ object: JObject) {
+        self.object = object
+    }
 
     public init (integerLiteral value: Int32) {
         #if os(Android)
@@ -173,10 +218,14 @@ public final class JInt32: Sendable, JObjectable, JSignatureItemable, Expressibl
 }
 
 public typealias JLong = JInt64
-public final class JInt64: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+public final class JInt64: Sendable, JPrimitiveNumerable, JSignatureItemable, ExpressibleByIntegerLiteral {
     public static let className: JClassName = "java/lang/Long"
 
     public let object: JObject
+
+    public init (_ object: JObject) {
+        self.object = object
+    }
 
     public init (integerLiteral value: Int64) {
         #if os(Android)
@@ -197,10 +246,14 @@ public final class JInt64: Sendable, JObjectable, JSignatureItemable, Expressibl
     }
 }
 
-public final class JBool: Sendable, JObjectable, JSignatureItemable, ExpressibleByBooleanLiteral {
+public final class JBool: Sendable, JPrimitiveNumerable, JSignatureItemable, ExpressibleByBooleanLiteral {
     public static let className: JClassName = "java/lang/Boolean"
 
     public let object: JObject
+
+    public init (_ object: JObject) {
+        self.object = object
+    }
 
     public init (booleanLiteral value: Bool) {
         #if os(Android)
@@ -221,10 +274,14 @@ public final class JBool: Sendable, JObjectable, JSignatureItemable, Expressible
     }
 }
 
-public final class JFloat: Sendable, JObjectable, JSignatureItemable, ExpressibleByFloatLiteral {
+public final class JFloat: Sendable, JPrimitiveNumerable, JSignatureItemable, ExpressibleByFloatLiteral {
     public static let className: JClassName = "java/lang/Float"
 
     public let object: JObject
+
+    public init (_ object: JObject) {
+        self.object = object
+    }
 
     public init (floatLiteral value: Float) {
         #if os(Android)
@@ -245,10 +302,14 @@ public final class JFloat: Sendable, JObjectable, JSignatureItemable, Expressibl
     }
 }
 
-public final class JDouble: Sendable, JObjectable, JSignatureItemable, ExpressibleByFloatLiteral {
+public final class JDouble: Sendable, JPrimitiveNumerable, JSignatureItemable, ExpressibleByFloatLiteral {
     public static let className: JClassName = "java/lang/Double"
     
     public let object: JObject
+
+    public init (_ object: JObject) {
+        self.object = object
+    }
 
     public init (floatLiteral value: Double) {
         #if os(Android)
@@ -271,10 +332,14 @@ public final class JDouble: Sendable, JObjectable, JSignatureItemable, Expressib
 
 public typealias JChar = JUInt16
 public typealias JCharacter = JUInt16
-public final class JUInt16: Sendable, JObjectable, JSignatureItemable, ExpressibleByIntegerLiteral {
+public final class JUInt16: Sendable, JPrimitiveNumerable, JSignatureItemable, ExpressibleByIntegerLiteral {
     public static let className: JClassName = "java/lang/Character"
     
     public let object: JObject
+
+    public init (_ object: JObject) {
+        self.object = object
+    }
 
     public init (integerLiteral value: UInt16) {
         #if os(Android)
