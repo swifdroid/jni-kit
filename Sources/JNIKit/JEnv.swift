@@ -57,6 +57,8 @@ public struct JEnv: @unchecked Sendable {
         guard let env else { return nil }
         self.env = env
     }
+    #else
+    init () {}
     #endif
 }
 
@@ -81,7 +83,11 @@ extension JEnv {
     ///
     /// - Returns: A `JEnv` instance for the current thread, or `nil` if the JVM is not yet available.
     public static func current() -> JEnv? {
-        JNIKit.shared.vm.attachCurrentThread()
+        #if os(Android)
+        return JNIKit.shared.vm.attachCurrentThread()
+        #else
+        return JEnv()
+        #endif
     }
 }
 
