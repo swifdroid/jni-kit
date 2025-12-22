@@ -241,26 +241,62 @@ extension JEnv {
         }
     }
 
-    /// Checks whether a Java exception has been thrown in the current thread.
+    /// Retrieves the current exception object (if any) in the JVM.
     ///
-    /// - Returns: A throwable object if an exception is pending, or `nil`.
+    /// Should be called after detecting an exception to get the throwable.
+    /// This is clearing the exception from the JVM, si it should be called after `describeException`.
+    /// No need to call `clearException` after this method.
+    /// 
+    /// - Returns: A `JThrowable` representing the exception, or `nil` if none.
     public func exceptionOccurred() -> JThrowable? {
         guard
-            let throwable = env.pointee!.pointee.ExceptionOccurred!(env),
+            let throwable = env.pointee!.pointee.ExceptionOccurred!(env)
+        else { return nil }
+        clearException()
+        guard
             let box = throwable.box(JEnv(env)),
             let clazz = JClass.load("java/lang/Throwable")
         else { return nil }
         return JThrowable(box, clazz)
     }
 
-    /// Describes the current exception (if any) to stderr (for debugging).
+    /// Checks whether a Java exception has occurred in the current thread.
+    ///
+    /// Should be called after JNI calls to determine if an exception was thrown.
+    /// 
+    /// - Returns: `true` if an exception is pending, otherwise `false`.
+    public func checkException() -> Bool {
+        env.pointee!.pointee.ExceptionCheck!(env) == UInt8(JNI_TRUE)
+    }
+
+    /// Clears any pending Java exception in the current thread.
+    ///
+    /// Should be called after handling an exception to reset the state.
+    @available(*, deprecated, renamed: "clearException")
+    public func exceptionClear() {
+        env.pointee!.pointee.ExceptionClear!(env)
+    }
+
+    /// Clears any pending Java exception in the current thread.
+    ///
+    /// Should be called after handling an exception to reset the state.
+    public func clearException() {
+        env.pointee!.pointee.ExceptionClear!(env)
+    }
+
+    /// Describes the current exception (if any) to stderr for debugging purposes.
+    ///
+    /// Should be called when an exception is detected to log its details.
+    @available(*, deprecated, renamed: "describeException")
     public func exceptionDescribe() {
         env.pointee!.pointee.ExceptionDescribe!(env)
     }
 
-    /// Clears the current exception from the JVM (if one is pending).
-    public func exceptionClear() {
-        env.pointee!.pointee.ExceptionClear!(env)
+    /// Describes the current exception (if any) to stderr for debugging purposes.
+    ///
+    /// Should be called when an exception is detected to log its details.
+    public func describeException() {
+        env.pointee!.pointee.ExceptionDescribe!(env)
     }
 
     /// Triggers a fatal error in the JVM with a custom message. This terminates the VM.
