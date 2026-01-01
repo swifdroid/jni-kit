@@ -12,7 +12,9 @@ import Android
 import Glibc
 #endif
 #endif
+#if canImport(Logging)
 import Logging
+#endif
 
 /// A globally accessible singleton that manages the Java Virtual Machine (JVM) and provides thread-safe
 /// access to JNI operations in a Swift application.
@@ -54,6 +56,7 @@ public final class JNIKit: @unchecked Sendable {
     /// Mutex used to ensure thread-safe access to `vm` during initialization.
     private var jvmMutex = pthread_mutex_t()
 
+    #if canImport(Logging)
     /// Mutex used to protect access to the logger's log level.
     private var logLevelMutex = pthread_mutex_t()
 
@@ -66,18 +69,23 @@ public final class JNIKit: @unchecked Sendable {
 
     /// Accessor to the global logger for static contexts.
     public static var logger: Logger { shared.logger }
+    #endif
 
     // MARK: - Lifecycle
 
     /// Private initializer to enforce singleton usage.
     private init() {
         jvmMutex.activate(recursive: true)
+        #if canImport(Logging)
         logLevelMutex.activate(recursive: true)
+        #endif
     }
 
     deinit {
         jvmMutex.destroy()
+        #if canImport(Logging)
         logLevelMutex.destroy()
+        #endif
     }
 
     // MARK: - Initialization
@@ -96,10 +104,13 @@ public final class JNIKit: @unchecked Sendable {
         guard !isInitialized else { return }
         self.vm = vm
         #if JNILOGS
+        #if canImport(Logging)
         setLogLevel(.trace)
+        #endif
         #endif
     }
 
+    #if canImport(Logging)
     // MARK: - Logging Control
 
     /// Sets the current log level for the `logger` instance.
@@ -121,6 +132,7 @@ public final class JNIKit: @unchecked Sendable {
     public static func setLogLevel(_ level: Logger.Level) {
         shared.setLogLevel(level)
     }
+    #endif
 
     // MARK: - Thread Attachment
 
