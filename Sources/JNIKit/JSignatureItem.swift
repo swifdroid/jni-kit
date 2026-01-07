@@ -458,6 +458,7 @@ public protocol ToJavaArrayIterable {
     func makeIterator() -> AnyIterator<Element>
     var count: Int { get }
 }
+#if compiler(>=6.2)
 extension InlineArray: ToJavaArrayIterable {
     public var array: [Element]? { nil }
     public func makeIterator() -> AnyIterator<Element> {
@@ -469,6 +470,7 @@ extension InlineArray: ToJavaArrayIterable {
         }
     }
 }
+#endif
 extension Array: ToJavaArrayIterable {
     public var array: [Element]? { self }
     public func makeIterator() -> AnyIterator<Element> {
@@ -480,6 +482,7 @@ extension Array: ToJavaArrayIterable {
         }
     }
 }
+#if compiler(>=6.2)
 extension InlineArray: JSignatureItemable where Element: PrimitiveJavaType {
     public var signatureItemWithValue: JSignatureItemWithValue {
         switch Element.typeCode {
@@ -503,6 +506,7 @@ extension InlineArray: JSignatureItemable where Element: PrimitiveJavaType {
         }
     }
 }
+#endif
 extension Array: JSignatureItemable where Element: PrimitiveJavaType {
     public var signatureItemWithValue: JSignatureItemWithValue {
         switch Element.typeCode {
