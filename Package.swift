@@ -1,9 +1,10 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.0
 import PackageDescription
 import Foundation
 
 let package = Package(
     name: "JNIKit",
+    platforms: [.macOS(.v10_14), .iOS(.v12), .tvOS(.v12), .watchOS(.v5)],
     products: [
         .library(name: "JNIKit", targets: ["JNIKit"]),
     ],

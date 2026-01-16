@@ -12,6 +12,9 @@ import Android
 import Glibc
 #endif
 #endif
+#if canImport(Darwin)
+import Darwin
+#endif
 
 extension String {
     public var cString: RetainedCString {

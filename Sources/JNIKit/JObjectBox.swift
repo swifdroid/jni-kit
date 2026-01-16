@@ -6,7 +6,11 @@ import Android
 import Logging
 #endif
 #endif
+#if canImport(FoundationEssentials)
 import FoundationEssentials
+#else
+import Foundation
+#endif
 
 /// A lightweight wrapper for a raw `jobject`, allowing type-safe conversions and introspection.
 ///

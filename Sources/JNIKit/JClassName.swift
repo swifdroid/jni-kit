@@ -5,6 +5,12 @@
 //  Created by Mihael Isaev on 13.01.2022.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 /// A model for constructing Java class names in JNI-compatible format.
 ///
 /// Supports slash-separated (`/`) names for packages and dollar-separated (`$`) inner classes.
@@ -27,11 +33,19 @@ open class JClassName: @unchecked Sendable, ExpressibleByStringLiteral {
     /// Initialize from a root name (e.g. `"java"`, `"android"`)
     required public init(stringLiteral: String) {
         self.parent = nil
+        #if canImport(FoundationEssentials)
         self.name = (stringLiteral.components(separatedBy: "/").last ?? stringLiteral).replacing(";", with: "")
+        #else
+        self.name = (stringLiteral.components(separatedBy: "/").last ?? stringLiteral).replacingOccurrences(of: ";", with: "")
+        #endif
         self.isInnerClass = stringLiteral.contains("$")
         self.path = stringLiteral
         let isArray = stringLiteral.hasPrefix("[L") && stringLiteral.hasSuffix(";")
+        #if canImport(FoundationEssentials)
         self.fullName = stringLiteral.components(separatedBy: "/").joined(separator: ".").replacing("[L", with: "").replacing(";", with: isArray ? "[]" : "")
+        #else
+        self.fullName = stringLiteral.components(separatedBy: "/").joined(separator: ".").replacingOccurrences(of: "[L", with: "").replacingOccurrences(of: ";", with: isArray ? "[]" : "")
+        #endif
     }
 
     /// Initialize from a parent and class segment, specifying whether it's an inner class.

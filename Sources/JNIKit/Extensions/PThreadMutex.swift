@@ -5,6 +5,9 @@ import Android
 import Glibc
 #endif
 #endif
+#if canImport(Darwin)
+import Darwin
+#endif
 
 /// Extensions for `pthread_mutex_t` to provide a more Swift-friendly API for initialization,
 /// locking, unlocking, and cleanup.
