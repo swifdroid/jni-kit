@@ -85,7 +85,7 @@ extension JClassLoader {
         }
         let globalRef = env.newGlobalRefPure(local)
         #if JNILOGS
-        Logger.info("JClassLoader.loadClass 5 globalRef: \(globalRef)")
+        Logger.info("JClassLoader.loadClass 5 globalRef: \(globalRef, default: "nil")")
         #endif
         return JClass(globalRef, name)
         #else
