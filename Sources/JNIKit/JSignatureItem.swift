@@ -459,6 +459,7 @@ public protocol ToJavaArrayIterable {
     var count: Int { get }
 }
 #if compiler(>=6.2)
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 extension InlineArray: ToJavaArrayIterable {
     public var array: [Element]? { nil }
     public func makeIterator() -> AnyIterator<Element> {
@@ -483,6 +484,7 @@ extension Array: ToJavaArrayIterable {
     }
 }
 #if compiler(>=6.2)
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 extension InlineArray: JSignatureItemable where Element: PrimitiveJavaType {
     public var signatureItemWithValue: JSignatureItemWithValue {
         switch Element.typeCode {
